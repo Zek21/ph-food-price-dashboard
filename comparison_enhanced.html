@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philippines Food Price — Enhanced Multi-Model Forecast Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117; --card:#1a1d27; --border:#2a2d3a;
+  --text:#e4e6eb; --text2:#8b8fa3;
+  --accent:#6366f1; --green:#22c55e; --cyan:#22d3ee;
+  --orange:#f59e0b; --pink:#ec4899; --red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+/* ── Header with Enhanced Controls ── */
+.header{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);padding:2.5rem 2rem 2rem;border-bottom:1px solid var(--border);position:relative}
+.header h1{font-size:1.8rem;font-weight:700;background:linear-gradient(90deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:var(--text2);font-size:.9rem;margin-top:.3rem;max-width:900px}
+.header .pill-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+.pill{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:999px;padding:.2rem .8rem;font-size:.75rem;color:var(--text2)}
+
+/* ── NEW: Global Action Bar ── */
+.action-bar{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);padding:0.8rem 1rem;display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.btn{background:var(--accent);color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:500}
+.btn:hover{background:#5558e3;transform:translateY(-1px);box-shadow:0 4px 8px rgba(99,102,241,0.3)}
+.btn-secondary{background:rgba(99,102,241,0.2);color:var(--accent)}
+.btn-secondary:hover{background:rgba(99,102,241,0.3)}
+.btn-small{padding:0.35rem 0.8rem;font-size:0.8rem}
+.search-box{background:var(--bg);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:6px;color:var(--text);font-size:0.85rem;min-width:200px}
+.search-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(99,102,241,0.2)}
+
+/* ── Layout ── */
+.container{max-width:1400px;margin:0 auto;padding:1.5rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+
+/* ── Score Banner with Hover Effects ── */
+.score-banner{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.5rem}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all .3s}
+.score-card:hover{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,0.4);border-color:var(--accent)}
+.score-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.3)}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.score-card .label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.score-card .value{font-size:1.8rem;font-weight:700;margin:.2rem 0;transition:transform .3s}
+.score-card:hover .value{transform:scale(1.1)}
+.score-card .sub{font-size:.75rem;color:var(--text2)}
+.score-card .rank-badge{font-size:.7rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;margin-top:.3rem;display:inline-block}
+.rank-1{background:rgba(34,197,94,.2);color:var(--green)}
+.rank-2{background:rgba(34,211,238,.2);color:var(--cyan)}
+.rank-3{background:rgba(99,102,241,.2);color:var(--accent)}
+.rank-4{background:rgba(236,72,153,.2);color:var(--pink)}
+.rank-5{background:rgba(245,158,11,.2);color:var(--orange)}
+
+/* ── Cards with Export Buttons ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;animation:fadeIn 0.4s ease-out}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem}
+.card h2{font-size:1.1rem;font-weight:600;margin-bottom:.2rem}
+.card .chart-num{color:var(--accent);font-weight:700;margin-right:.4rem}
+.card .desc{font-size:.84rem;color:var(--text2);line-height:1.7;border-left:3px solid var(--accent);padding-left:1rem;margin:0.7rem 0 1.1rem}
+.export-group{display:flex;gap:0.4rem}
+.icon-btn{background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:var(--accent);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.3rem}
+.icon-btn:hover{background:rgba(99,102,241,0.25);transform:translateY(-1px)}
+
+/* ── Controls ── */
+.controls{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.controls label{font-size:.8rem;color:var(--text2)}
+select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.45rem 1rem;font-size:.84rem;cursor:pointer;transition:all .2s}
+select:hover{border-color:var(--accent)}
+select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(99,102,241,.2)}
+
+/* ── Legend ── */
+.legend-row{display:flex;gap:1.4rem;flex-wrap:wrap;font-size:.8rem;margin-bottom:.7rem}
+.legend-item{display:flex;align-items:center;gap:.35rem;cursor:pointer;transition:opacity .2s}
+.legend-item:hover{opacity:0.7}
+.legend-line{width:22px;height:3px;border-radius:2px}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* ── Info Box with Animation ── */
+.info-box{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;animation:slideUp 0.5s ease-out}
+.info-box h3{font-size:1rem;color:var(--accent);margin-bottom:.8rem}
+.info-box p{font-size:.85rem;color:var(--text2);margin-bottom:.6rem;line-height:1.7}
+.info-box .hl{color:var(--text);font-weight:600}
+.info-box ul{padding-left:1.2rem;margin:.5rem 0}
+.info-box li{font-size:.85rem;color:var(--text2);margin-bottom:.3rem;line-height:1.6}
+.info-box li strong{color:var(--text)}
+
+/* ── Model Tiles with Hover ── */
+.model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin-bottom:1.5rem}
+.model-tile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:all .3s;cursor:pointer}
+.model-tile:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,0.3)}
+.model-tile.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(34,197,94,0.3)}
+.model-tile .m-name{font-weight:700;font-size:.95rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.model-tile .m-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.model-tile .m-body{font-size:.8rem;color:var(--text2);line-height:1.65}
+.model-tile .m-metrics{display:flex;gap:1rem;margin-top:.8rem;flex-wrap:wrap}
+.model-tile .m-metric{font-size:.75rem}
+.model-tile .m-metric span{font-weight:700;color:var(--text)}
+.model-tile .m-variants{margin-top:.7rem;font-size:.75rem;color:var(--text2)}
+.model-tile .m-variants strong{color:var(--green)}
+
+/* ── Tables ── */
+.table-wrap{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:.82rem}
+table.dt th{text-align:left;padding:.55rem .8rem;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.05em;cursor:pointer;white-space:nowrap;transition:color .2s}
+table.dt th:hover{color:var(--accent)}
+table.dt td{padding:.45rem .8rem;border-bottom:1px solid var(--border);transition:background .2s}
+table.dt tr:hover td{background:rgba(99,102,241,.05)}
+.badge{display:inline-block;padding:.1rem .5rem;border-radius:999px;font-size:.72rem;font-weight:600}
+.bg-a{background:rgba(34,197,94,.15);color:var(--green)}
+.bg-b{background:rgba(34,211,238,.15);color:var(--cyan)}
+.bg-c{background:rgba(245,158,11,.15);color:var(--orange)}
+.bg-d{background:rgba(239,68,68,.15);color:var(--red)}
+.sort-asc::after{content:' ▲';font-size:.65rem}
+.sort-desc::after{content:' ▼';font-size:.65rem}
+
+/* ── Chart Wrapper with Zoom Instructions ── */
+.chart-wrap{position:relative;height:350px;margin-top:1rem}
+.chart-wrap-tall{position:relative;height:450px;margin-top:1rem}
+.zoom-hint{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:#888;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.7rem;pointer-events:none;opacity:0;transition:opacity .3s}
+.chart-wrap:hover .zoom-hint,.chart-wrap-tall:hover .zoom-hint{opacity:1}
+
+/* ── Animations ── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Loading Overlay ── */
+#global-loader{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:10000;flex-direction:column;gap:1rem}
+.spinner{width:50px;height:50px;border:4px solid #333;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+
+/* ── Tooltip Enhancement ── */
+#chartjs-tooltip{position:absolute;background:rgba(0,0,0,0.95);color:#fff;padding:12px;border-radius:8px;font-size:13px;pointer-events:none;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.4);max-width:300px;line-height:1.6;border:1px solid rgba(99,102,241,0.3)}
+
+/* ── Keyboard Shortcuts Help ── */
+.shortcuts-hint{position:fixed;bottom:1rem;right:1rem;background:var(--card);border:1px solid var(--border);padding:0.8rem 1rem;border-radius:8px;font-size:0.75rem;color:var(--text2);opacity:0.7;transition:opacity .3s}
+.shortcuts-hint:hover{opacity:1}
+.shortcuts-hint kbd{background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px;font-family:monospace;color:var(--accent)}
+
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="global-loader">
+  <div class="spinner"></div>
+  <div style="color:#fff;font-size:14px">Loading dashboard...</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>🇵🇭 Philippines Food Price — Enhanced Multi-Model Forecast Dashboard</h1>
+  <p>
+    Interactive ML comparison with 5 models, real-time filtering, zoom/pan charts, and data export.
+    WFP VAM data • Gradient Boosting • Extra Trees • Random Forest • KNN • Ridge Regression
+  </p>
+  <div class="pill-row">
+    <span class="pill" id="pillTrain">🗓 Train: 2000–2023</span>
+    <span class="pill" id="pillVal">✅ Validation: 2024–2026</span>
+    <span class="pill" id="pillForecast">🔮 Forecast: 2026–2027</span>
+    <span class="pill" id="pillCommodities">🛒 73 commodities</span>
+    <span class="pill" id="pillRegions">🗺 17 regions</span>
+  </div>
+</div>
+
+<!-- NEW: Global Action Bar -->
+<div class="action-bar">
+  <button class="btn btn-small" onclick="dashboardEnhancements.exportToJSON(window.D, 'model-comparison-' + new Date().toISOString().slice(0,10))">
+    📥 Export All Data (JSON)
+  </button>
+  <button class="btn btn-secondary btn-small" onclick="dashboardEnhancements.resetAllFilters()">
+    🔄 Reset Filters
+  </button>
+  <button class="btn btn-secondary btn-small" onclick="dashboardEnhancements.clearState()">
+    🗑️ Clear State
+  </button>
+  <input type="text" class="search-box" placeholder="🔍 Search commodities..." id="globalSearch" data-search="commTable">
+  <div style="margin-left:auto;color:var(--text2);font-size:0.75rem">
+    <kbd>Ctrl+E</kbd> Export | <kbd>Ctrl+R</kbd> Reset | <kbd>Esc</kbd> Clear
+  </div>
+</div>
+
+<div class="container">
+
+<!-- Score Banner -->
+<div class="score-banner" id="scoreBanner"></div>
+
+<!-- Model Performance Overview -->
+<div class="info-box">
+  <h3>📊 Multi-Model Methodology & Selection Criteria</h3>
+  <p>For each commodity, we train <span class="hl">5 model families</span> with <span class="hl">5 hyperparameter variants each</span> (25 total configs per commodity). The best-performing variant per family is selected based on <strong>validation MAPE</strong> (2024–Jan 2026 holdout set). This approach ensures optimal model selection while preventing overfitting.</p>
+  <ul>
+    <li><strong>Validation Strategy:</strong> Hold-out 2024+ data for unbiased evaluation</li>
+    <li><strong>Selection Metric:</strong> Mean Absolute Percentage Error (MAPE) — lower is better</li>
+    <li><strong>Confidence Grading:</strong> A ≤5% | B ≤10% | C ≤20% | D >20%</li>
+    <li><strong>Forecast Horizon:</strong> Through December 2027 with iterative lag updates</li>
+  </ul>
+</div>
+
+<!-- Model Description Grid -->
+<div class="model-grid" id="modelGrid"></div>
+
+<!-- Chart 1: Price Trend with Export -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2><span class="chart-num">📈 Chart 1</span> Historical vs Predicted Price Trends</h2>
+      <p class="desc">White line = actual WFP prices; colored dashed lines = model predictions.</p>
+    </div>
+    <div class="export-group">
+      <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('trendChart', 'price-trend')">💾 PNG</button>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Commodity:</label><select id="trendComm"></select>
+    <label>Price Type:</label>
+    <select id="trendPT">
+      <option value="Retail">Retail</option>
+      <option value="Wholesale">Wholesale</option>
+      <option value="Farm Gate">Farm Gate</option>
+    </select>
+    <label>Model:</label><select id="trendModel"><option value="all">All Models</option></select>
+  </div>
+  <div id="trendLegend" class="legend-row"></div>
+  <div class="chart-wrap">
+    <canvas id="trendChart"></canvas>
+    <div class="zoom-hint">🔍 Scroll to zoom • Drag to pan • Double-click to reset</div>
+  </div>
+</div>
+
+<!-- Chart 2 & 3: Error Distribution + Performance Radar -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2><span class="chart-num">📊 Chart 2</span> Prediction Error Distribution</h2>
+        <p class="desc">Histogram of validation errors (% deviation from actual).</p>
+      </div>
+      <div class="export-group">
+        <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('histChart', 'error-distribution')">💾 PNG</button>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Model:</label><select id="histModel"></select>
+    </div>
+    <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2><span class="chart-num">🎯 Chart 3</span> Model Performance Radar</h2>
+        <p class="desc">Multi-dimensional comparison across 5 metrics.</p>
+      </div>
+      <div class="export-group">
+        <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('radarChart', 'performance-radar')">💾 PNG</button>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Scope:</label>
+      <select id="radarScope">
+        <option value="_all">All Commodities</option>
+      </select>
+    </div>
+    <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Chart 4: Forecast -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2><span class="chart-num">🔮 Chart 4</span> Forward Price Forecast (Feb 2026–Dec 2027)</h2>
+      <p class="desc">Future price predictions from all models.</p>
+    </div>
+    <div class="export-group">
+      <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('forecastChart', 'forecast')">💾 PNG</button>
+      <button class="icon-btn" onclick="exportForecastData()">📊 CSV</button>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Commodity:</label><select id="fcComm"></select>
+    <label>Model:</label><select id="fcModel"><option value="all">All Models</option></select>
+  </div>
+  <div id="fcLegend" class="legend-row"></div>
+  <div class="chart-wrap-tall">
+    <canvas id="forecastChart"></canvas>
+    <div class="zoom-hint">🔍 Zoom enabled • Double-click to reset view</div>
+  </div>
+</div>
+
+<!-- Chart 5: Commodity Accuracy Table -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2><span class="chart-num">📋 Chart 5</span> Per-Commodity Accuracy Table</h2>
+      <p class="desc">Validation metrics per commodity. Click column headers to sort.</p>
+    </div>
+    <div class="export-group">
+      <button class="icon-btn" onclick="exportTableData()">📊 CSV</button>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Model:</label><select id="tableModel"></select>
+  </div>
+  <div class="table-wrap">
+    <table class="dt" id="commTable">
+      <thead><tr>
+        <th data-col="commodity">Commodity</th>
+        <th data-col="mape">MAPE</th>
+        <th data-col="mae">MAE (PHP)</th>
+        <th data-col="n_val">Val Records</th>
+        <th data-col="grade">Grade</th>
+        <th data-col="variant">Best Variant</th>
+      </tr></thead>
+      <tbody id="commTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Charts 6 & 7: Grade Distribution + MAPE Bar -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2><span class="chart-num">🍩 Chart 6</span> Accuracy Grade Distribution</h2>
+        <p class="desc">Breakdown of commodities by forecast quality.</p>
+      </div>
+      <div class="export-group">
+        <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('donutChart', 'grade-distribution')">💾 PNG</button>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Model:</label><select id="donutModel"></select>
+    </div>
+    <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2><span class="chart-num">📊 Chart 7</span> MAPE by Commodity (Sorted)</h2>
+        <p class="desc">Horizontal bar chart showing MAPE for each commodity.</p>
+      </div>
+      <div class="export-group">
+        <button class="icon-btn" onclick="dashboardEnhancements.exportChartData('barChart', 'mape-by-commodity')">💾 PNG</button>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Model:</label><select id="barModel"></select>
+    </div>
+    <div style="position:relative;min-height:360px"><canvas id="barChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Variant Search Grid -->
+<div class="card">
+  <h2><span class="chart-num">🔬 Chart 8</span> Hyperparameter Variant Search Results</h2>
+  <p class="desc">Parameter grids tested per model family. Best variant per commodity selected on validation MAPE.</p>
+  <div id="variantSearchGrid" style="margin-top:1rem"></div>
+</div>
+
+</div>
+
+<!-- Keyboard Shortcuts Help -->
+<div class="shortcuts-hint">
+  <div><kbd>Ctrl+E</kbd> Export data</div>
+  <div><kbd>Ctrl+R</kbd> Reset filters</div>
+  <div><kbd>Esc</kbd> Clear selection</div>
+</div>
+
+<body>
+
+<div class="header">
+  <h1>🇵🇭 Philippines Food Price — Multi-Model Forecast Dashboard</h1>
+  <p>
+    Five ML models (each tuned across 5 hyperparameter variants) trained on WFP historical price data
+    (2000–2023), validated against 2024–Jan 2026 actuals, and forecasted through Dec 2027.
+    The best-performing variant of each model is used for all charts below.
+  </p>
+  <div class="pill-row">
+    <span class="pill">📦 Data: WFP Humanitarian Data Exchange</span>
+    <span class="pill" id="pillTrain">🗓 Train: 2000–2023</span>
+    <span class="pill" id="pillVal">✅ Validation: 2024–Jan 2026</span>
+    <span class="pill" id="pillForecast">🔮 Forecast: Feb 2026–Dec 2027</span>
+    <span class="pill" id="pillCommodities">🛒 73 commodities</span>
+    <span class="pill" id="pillRegions">🗺 17 regions</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── Methodology Info Box ── -->
+  <div class="info-box">
+    <h3>📐 Methodology: Hyperparameter Search &amp; Model Selection</h3>
+    <p>
+      For each of the 5 model types, <span class="hl">5 hyperparameter variants</span> were trained on
+      data up to 2023, then evaluated on held-out 2024–Jan 2026 actual prices. The variant with the
+      lowest validation MAPE per commodity was retained. This ensures each model family is represented
+      by its absolute best configuration rather than an arbitrary default.
+    </p>
+    <ul>
+      <li><strong>Features used:</strong> Year number, sine/cosine month encoding (seasonality),
+          lagged prices (1, 3, 6, 12 months), rolling means (3, 6, 12 months), first and
+          12-month price differences, region and price-type label encoding.</li>
+      <li><strong>Validation metric:</strong> Mean Absolute Percentage Error (MAPE) on held-out 2024+ data.</li>
+      <li><strong>Forecast method:</strong> Recursive/autoregressive — each predicted month becomes
+          a feature (lag/MA) for the next month, allowing the model to forecast into 2027.</li>
+      <li><strong>Scale:</strong> Ridge &amp; KNN receive StandardScaler-normalised features;
+          tree-based models use raw values.</li>
+    </ul>
+  </div>
+
+  <!-- ── Score Banner (per model) ── -->
+  <div class="score-banner" id="scoreBanner"></div>
+
+  <!-- ── Model Description Tiles ── -->
+  <div class="model-grid" id="modelGrid"></div>
+
+  <!-- ── Chart 1: Price Trend ── -->
+  <div class="card">
+    <h2><span class="chart-num">1.</span> Historical Price Trend + Model Predictions</h2>
+    <p class="desc">
+      <strong>What this shows:</strong> Actual monthly prices from WFP field surveys (white line) alongside
+      each model's predictions during the validation period (2024–Jan 2026, coloured dashed lines). Prices
+      are averaged across all markets in the selected region group. Use the dropdowns to explore any
+      commodity, price type, and whether to show all models or just one. A model that closely follows the
+      white line during validation is generalising well to unseen data. Gaps between a model line and the
+      actual line reveal systematic over- or under-prediction bias for that commodity.
+    </p>
+    <div class="controls">
+      <div>
+        <label>Commodity</label><br>
+        <select id="trendComm"></select>
+      </div>
+      <div>
+        <label>Price Type</label><br>
+        <select id="trendPT"><option value="Retail">Retail</option><option value="Wholesale">Wholesale</option><option value="Farm Gate">Farm Gate</option></select>
+      </div>
+      <div>
+        <label>Model overlay</label><br>
+        <select id="trendModel"><option value="all">All models</option></select>
+      </div>
+    </div>
+    <div id="trendLegend" class="legend-row"></div>
+    <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <!-- ── Chart 2: Error Distribution ── -->
+  <div class="grid-2">
+    <div class="card" style="margin-bottom:0">
+      <h2><span class="chart-num">2.</span> Prediction Error Distribution</h2>
+      <p class="desc">
+        <strong>What this shows:</strong> A histogram of percentage prediction errors
+        <em>(predicted − actual) / actual × 100</em> for the selected model across all
+        validation-period data points. Bars to the <em>right of zero</em> mean the model
+        over-predicted (higher than actual); bars to the <em>left</em> mean it under-predicted.
+        A tight, symmetric distribution centred near 0% is ideal — it means the model is both
+        accurate and unbiased. A skewed distribution reveals a systematic bias that may be
+        correctable with post-processing.
+      </p>
+      <div class="controls">
+        <div>
+          <label>Model</label><br>
+          <select id="histModel"></select>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+    </div>
+
+    <!-- ── Chart 3: Model Performance Radar ── -->
+    <div class="card" style="margin-bottom:0">
+      <h2><span class="chart-num">3.</span> Model Performance Comparison (Radar)</h2>
+      <p class="desc">
+        <strong>What this shows:</strong> Each axis represents a different accuracy dimension.
+        A model whose polygon fills more of the chart is better overall. Axes are
+        <em>inverted</em> so that smaller MAPE / MAE appears on the outside (better).
+        R² is plotted directly (higher = better). This makes it easy to spot if a model
+        is strong on one metric but weak on another — for example, low MAPE but high bias.
+        Use the commodity dropdown to see how the ranking changes for a specific food item.
+      </p>
+      <div class="controls">
+        <div>
+          <label>Scope</label><br>
+          <select id="radarScope"><option value="overall">Overall (all commodities)</option></select>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+  </div>
+  <div style="margin-bottom:1.5rem"></div>
+
+  <!-- ── Chart 4: Forecast ── -->
+  <div class="card">
+    <h2><span class="chart-num">4.</span> Future Price Forecast (Feb 2026 – Dec 2027)</h2>
+    <p class="desc">
+      <strong>What this shows:</strong> Projected prices generated by each model from Feb 2026
+      through Dec 2027 using a recursive (autoregressive) forecasting strategy — each monthly
+      prediction is fed back as a lagged feature for the next month. The white line shows the
+      most recent actual prices for context. Solid coloured lines show each model's forecast;
+      select a single model to focus. The spread between model lines represents <em>forecast
+      uncertainty</em> — where models agree, confidence is higher. Diverging lines in late 2027
+      indicate growing uncertainty as the models extrapolate further from their training data.
+      Commodities with strong seasonal cycles (e.g. vegetables) will show repeating wave patterns.
+    </p>
+    <div class="controls">
+      <div>
+        <label>Commodity</label><br>
+        <select id="fcComm"></select>
+      </div>
+      <div>
+        <label>Price Type (actuals)</label><br>
+        <select id="fcPT"><option value="Retail">Retail</option><option value="Wholesale">Wholesale</option><option value="Farm Gate">Farm Gate</option></select>
+      </div>
+      <div>
+        <label>Model</label><br>
+        <select id="fcModel"><option value="all">All models</option></select>
+      </div>
+    </div>
+    <div id="fcLegend" class="legend-row"></div>
+    <div class="chart-wrap-tall"><canvas id="forecastChart"></canvas></div>
+  </div>
+
+  <!-- ── Chart 5: Commodity Accuracy Table ── -->
+  <div class="card">
+    <h2><span class="chart-num">5.</span> Per-Commodity Model Accuracy Table</h2>
+    <p class="desc">
+      <strong>What this shows:</strong> Validation-period MAPE (%) and MAE (PHP) for every
+      commodity, split across all five models. Grade badges summarise each cell:
+      <span class="badge bg-a">A ≤5%</span> excellent,
+      <span class="badge bg-b">B 5–10%</span> good,
+      <span class="badge bg-c">C 10–20%</span> fair,
+      <span class="badge bg-d">D >20%</span> poor.
+      Click any column header to sort. Use the filter tabs to focus on a specific grade tier or
+      model. The "n" column shows how many validation data points were used for that commodity —
+      smaller samples can inflate MAPE even for a good model. A commodity with grade D across
+      all models may have structural price shocks (policy interventions, supply disruptions)
+      that are difficult to forecast from historical patterns alone.
+    </p>
+    <div class="controls">
+      <div>
+        <label>Show MAPE for model</label><br>
+        <select id="tableModel"></select>
+      </div>
+      <div>
+        <label>Filter by grade</label><br>
+        <select id="tableGrade">
+          <option value="all">All grades</option>
+          <option value="A">Grade A (≤5%)</option>
+          <option value="B">Grade B (5–10%)</option>
+          <option value="C">Grade C (10–20%)</option>
+          <option value="D">Grade D (&gt;20%)</option>
+        </select>
+      </div>
+      <div>
+        <label>Search</label><br>
+        <input id="tableSearch" type="text" placeholder="Filter commodity…"
+          style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.45rem 1rem;font-size:.84rem;width:200px">
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="dt" id="commTable">
+        <thead><tr id="commTableHead"></tr></thead>
+        <tbody id="commTableBody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:.78rem;color:var(--text2);margin-top:.8rem" id="tableCount"></p>
+  </div>
+
+  <!-- ── Chart 6: Grade Distribution Donut ── -->
+  <div class="grid-2">
+    <div class="card" style="margin-bottom:0">
+      <h2><span class="chart-num">6.</span> Accuracy Grade Distribution</h2>
+      <p class="desc">
+        <strong>What this shows:</strong> The proportion of commodities that fall into each
+        accuracy grade for the selected model. A larger green A-slice means more commodities
+        are predicted within 5% of actual prices. Use the dropdown to compare how grade
+        distributions shift across models — tree-based models typically have more A-grade
+        commodities than linear models on this non-linear dataset. The grade counts next to
+        each label also serve as a quick quality scorecard.
+      </p>
+      <div class="controls">
+        <div>
+          <label>Model</label><br>
+          <select id="donutModel"></select>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+    </div>
+
+    <!-- ── Chart 7: MAPE Bar Chart ── -->
+    <div class="card" style="margin-bottom:0">
+      <h2><span class="chart-num">7.</span> MAPE by Commodity — Ranked</h2>
+      <p class="desc">
+        <strong>What this shows:</strong> Bar chart of MAPE values for each commodity, sorted
+        from lowest to highest error. Green bars are A-grade, yellow B, orange C, red D.
+        Use the model dropdown to see how each model's accuracy profile differs across
+        commodities. Models that perform well on some commodities (e.g. rice — stable, well-surveyed)
+        may struggle with others (e.g. fresh vegetables — high volatility, sparse data).
+        The vertical dashed lines mark the grade thresholds at 5%, 10% and 20%.
+      </p>
+      <div class="controls">
+        <div>
+          <label>Model</label><br>
+          <select id="barModel"></select>
+        </div>
+      </div>
+      <div style="height:360px;overflow-y:auto">
+        <div style="position:relative;min-height:360px"><canvas id="barChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:1.5rem"></div>
+
+  <!-- ── Hyperparameter Search Summary ── -->
+  <div class="card">
+    <h2><span class="chart-num">8.</span> Hyperparameter Search — 5 Variants per Model</h2>
+    <p class="desc">
+      <strong>What this shows:</strong> For each model family, five different hyperparameter
+      configurations were trained on the 2000–2023 dataset and evaluated on the 2024–Jan 2026
+      validation period. The configuration with the lowest validation MAPE was selected as the
+      "best" and is used for all predictions shown in this dashboard. The ★ row highlights the
+      winning configuration. Testing multiple variants guards against sub-optimal defaults
+      and ensures each model is represented at near its full potential capability.
+    </p>
+    <div class="vsearch-grid" id="vsearchGrid"></div>
+  </div>
+
+</div>
+
+<button class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+"use strict";
+var D = null;
+
+// ─── Utilities ────────────────────────────────────────────────────────────
+function grade(mape){return mape<=5?"A":mape<=10?"B":mape<=20?"C":"D"}
+function gradeBadge(mape){var g=grade(mape);return '<span class="badge bg-'+g.toLowerCase()+'">'+g+' '+mape.toFixed(1)+'%</span>'}
+function fmtPHP(v){return v==null?"—":"PHP "+v.toFixed(2)}
+function rankClass(i){return["rank-1","rank-2","rank-3","rank-4","rank-5"][i]||"rank-5"}
+
+// ─── Load data ────────────────────────────────────────────────────────────
+function loadData(){
+  fetch("model_comparison.json")
+    .then(function(r){return r.json()})
+    .then(function(data){
+      D = data;
+      init();
+    })
+    .catch(function(e){
+      var msg=String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      document.body.innerHTML="<div style='padding:3rem;color:#ef4444;font-size:1.1rem'>"+
+        "Failed to load model_comparison.json &mdash; make sure you are serving via HTTP, not file://.<br>"+
+        "Run: <code>python -m http.server 8080</code> then open http://localhost:8080/comparison.html<br>"+
+        "Error: "+msg+"</div>";
+    });
+}
+
+function init(){
+  // Update header pills
+  if(D.meta){
+    var m=D.meta;
+    if(m.trainPeriod) document.getElementById("pillTrain").textContent="🗓 Train: "+m.trainPeriod;
+    if(m.valPeriod)   document.getElementById("pillVal").textContent="✅ Validation: "+m.valPeriod;
+    if(m.forecastPeriod) document.getElementById("pillForecast").textContent="🔮 Forecast: "+m.forecastPeriod;
+    if(m.commodities) document.getElementById("pillCommodities").textContent="🛒 "+m.commodities.length+" commodities";
+    if(m.regions)     document.getElementById("pillRegions").textContent="🗺 "+m.regions.length+" regions";
+  }
+
+  buildScoreBanner();
+  buildModelGrid();
+  buildDropdowns();
+  initTrendChart();
+  initHistChart();
+  initRadarChart();
+  initForecastChart();
+  buildCommTable();
+  initDonutChart();
+  initBarChart();
+  buildVsearchGrid();
+}
+
+// ─── Score Banner ─────────────────────────────────────────────────────────
+function buildScoreBanner(){
+  var banner=document.getElementById("scoreBanner");
+  var models=D.models;
+  // Sort by MAPE ascending
+  var sorted=models.slice().sort(function(a,b){return D.overall[a].mape-D.overall[b].mape});
+  sorted.forEach(function(m,rank){
+    var o=D.overall[m];
+    var card=document.createElement("div");
+    card.className="score-card";
+    card.style.borderTopColor=D.modelColors[m];
+    card.innerHTML=
+      '<div class="label">'+m+'</div>'+
+      '<div class="value" style="color:'+D.modelColors[m]+'">'+o.mape+'%</div>'+
+      '<div class="sub">MAPE &nbsp;|&nbsp; MAE PHP '+o.mae+'</div>'+
+      '<div class="sub">Bias '+( o.bias>=0?"+":"")+o.bias+'% &nbsp;|&nbsp; R² '+o.r2+'</div>'+
+      '<span class="rank-badge '+rankClass(rank)+'">#'+(rank+1)+' best</span>';
+    card.style.cursor="default";
+    banner.appendChild(card);
+  });
+}
+
+// ─── Model Description Grid ───────────────────────────────────────────────
+function buildModelGrid(){
+  var grid=document.getElementById("modelGrid");
+  var sorted=D.models.slice().sort(function(a,b){return D.overall[a].mape-D.overall[b].mape});
+  sorted.forEach(function(m,rank){
+    var o=D.overall[m];
+    var vs=D.variantSearch&&D.variantSearch[m];
+    var tile=document.createElement("div");
+    tile.className="model-tile";
+    var bestIdx=vs?vs.best_variant:0;
+    var bestParams=vs?JSON.stringify(vs.parameter_grid[bestIdx]).replace(/"/g,"").replace(/\{|\}/g,""):"";
+    tile.innerHTML=
+      '<div class="m-name"><span class="m-color" style="background:'+D.modelColors[m]+'"></span>'+m+
+        ' <span class="rank-badge '+rankClass(rank)+'" style="margin-left:auto">#'+(rank+1)+'</span></div>'+
+      '<div class="m-body">'+D.modelDescriptions[m]+'</div>'+
+      '<div class="m-metrics">'+
+        '<div class="m-metric">MAPE <span>'+o.mape+'%</span></div>'+
+        '<div class="m-metric">MAE <span>PHP '+o.mae+'</span></div>'+
+        '<div class="m-metric">Bias <span>'+(o.bias>=0?"+":"")+o.bias+'%</span></div>'+
+        '<div class="m-metric">R² <span>'+o.r2+'</span></div>'+
+      '</div>'+
+      (vs?'<div class="m-variants">Best config (#'+(bestIdx+1)+'): <strong>'+bestParams+'</strong></div>':'')+
+      '<div class="m-variants" style="margin-top:.3rem">Variants tested: <strong>'+
+        (vs?vs.parameter_grid.length:5)+'</strong> · Selection: MAPE on 2024+ data</div>';
+    grid.appendChild(tile);
+  });
+}
+
+// ─── Populate All Dropdowns ───────────────────────────────────────────────
+function buildDropdowns(){
+  var comms=D.meta.commodities||[];
+  var models=D.models||[];
+
+  // Trend chart
+  var tComm=document.getElementById("trendComm");
+  comms.forEach(function(c){
+    var o=document.createElement("option");o.value=c;o.textContent=c;
+    if(c==="Rice (regular, milled)")o.selected=true;
+    tComm.appendChild(o);
+  });
+  var tMod=document.getElementById("trendModel");
+  models.forEach(function(m){
+    var o=document.createElement("option");o.value=m;o.textContent=m;tMod.appendChild(o);
+  });
+
+  // Histogram
+  var hMod=document.getElementById("histModel");
+  models.forEach(function(m){
+    var o=document.createElement("option");o.value=m;o.textContent=m;hMod.appendChild(o);
+  });
+
+  // Radar scope
+  var rScope=document.getElementById("radarScope");
+  comms.forEach(function(c){
+    var o=document.createElement("option");o.value=c;o.textContent=c;rScope.appendChild(o);
+  });
+
+  // Forecast
+  var fcComm=document.getElementById("fcComm");
+  var fcHasData=[];
+  comms.forEach(function(c){
+    if(D.forecasts["Gradient Boosting"]&&D.forecasts["Gradient Boosting"][c])fcHasData.push(c);
+  });
+  fcHasData.forEach(function(c){
+    var o=document.createElement("option");o.value=c;o.textContent=c;
+    if(c==="Rice (regular, milled)")o.selected=true;
+    fcComm.appendChild(o);
+  });
+  var fcMod=document.getElementById("fcModel");
+  models.forEach(function(m){
+    var o=document.createElement("option");o.value=m;o.textContent=m;fcMod.appendChild(o);
+  });
+
+  // Table / donut / bar
+  [document.getElementById("tableModel"),
+   document.getElementById("donutModel"),
+   document.getElementById("barModel")].forEach(function(sel){
+    models.forEach(function(m){
+      var o=document.createElement("option");o.value=m;o.textContent=m;sel.appendChild(o);
+    });
+  });
+}
+
+// ─── Helper: trend data for a series key ─────────────────────────────────
+function getTrendData(key){
+  return D.trends[key]||{};
+}
+
+// ─── Chart 1: Price Trend ─────────────────────────────────────────────────
+var trendChartInst=null;
+function initTrendChart(){
+  var ctx=document.getElementById("trendChart").getContext("2d");
+
+  function update(){
+    var comm=document.getElementById("trendComm").value;
+    var pt=document.getElementById("trendPT").value;
+    var modelSel=document.getElementById("trendModel").value;
+    var key=comm+"|"+pt;
+    var series=getTrendData(key);
+    var dates=Object.keys(series).sort();
+
+    // Build datasets
+    var actualPts=[],modelPts={};
+    D.models.forEach(function(m){modelPts[m]=[]});
+
+    dates.forEach(function(dk){
+      var e=series[dk];
+      var x=dk+"-15";
+      if(e.actual!=null)actualPts.push({x:x,y:e.actual});
+      D.models.forEach(function(m){
+        if(e[m]!=null)modelPts[m].push({x:x,y:e[m]});
+      });
+    });
+
+    var datasets=[{
+      label:"Actual",data:actualPts,
+      borderColor:"#ffffff",backgroundColor:"rgba(255,255,255,.07)",
+      fill:false,tension:.3,pointRadius:2,borderWidth:2.5,order:0,
+    }];
+
+    D.models.forEach(function(m){
+      if(modelSel!=="all"&&modelSel!==m)return;
+      datasets.push({
+        label:m,data:modelPts[m],
+        borderColor:D.modelColors[m],backgroundColor:"transparent",
+        fill:false,tension:.3,pointRadius:2,borderWidth:1.8,
+        borderDash:[5,3],order:1,
+      });
+    });
+
+    // Legend
+    var leg=document.getElementById("trendLegend");
+    leg.innerHTML="";
+    [{label:"Actual",color:"#ffffff",dash:false}].concat(
+      D.models.filter(function(m){return modelSel==="all"||modelSel===m}).map(function(m){return{label:m,color:D.modelColors[m],dash:true}})
+    ).forEach(function(item){
+      leg.innerHTML+='<span class="legend-item"><span class="legend-line" style="background:'+item.color+';'+(item.dash?"border-top:2px dashed "+item.color+';background:transparent':'')+' width:22px;height:3px"></span> '+item.label+'</span>';
+    });
+
+    if(trendChartInst)trendChartInst.destroy();
+    trendChartInst=new Chart(ctx,{
+      type:"line",data:{datasets:datasets},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:"index",intersect:false},
+        scales:{
+          x:{type:"time",time:{unit:"month",tooltipFormat:"MMM yyyy"},
+            title:{display:true,text:"Month",color:"#8b8fa3"},
+            ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.04)"}},
+          y:{title:{display:true,text:"Avg Price (PHP)",color:"#8b8fa3"},
+            ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:false},
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            label:function(ctx){
+              var v=ctx.parsed.y;
+              return " "+ctx.dataset.label+": "+(v!=null?"PHP "+v.toFixed(2):"N/A");
+            },
+            title:function(items){return items[0].label}
+          }},
+        },
+      },
+    });
+  }
+
+  ["trendComm","trendPT","trendModel"].forEach(function(id){
+    document.getElementById(id).addEventListener("change",update);
+  });
+  update();
+}
+
+// ─── Chart 2: Error Histogram ─────────────────────────────────────────────
+var histInst=null;
+function initHistChart(){
+  var ctx=document.getElementById("histChart").getContext("2d");
+
+  function update(){
+    var modelSel=document.getElementById("histModel").value;
+    var errors=[];
+    // Gather pct errors from all trends, validation period
+    Object.values(D.trends).forEach(function(series){
+      Object.entries(series).forEach(function(kv){
+        var dk=kv[0],e=kv[1];
+        if(dk<"2024")return;
+        var actual=e.actual,pred=e[modelSel];
+        if(actual==null||pred==null||actual===0)return;
+        errors.push((pred-actual)/actual*100);
+      });
+    });
+    if(!errors.length)return;
+
+    // Histogram bins: -50 to +50 in steps of 2
+    var step=2,lo=-50,hi=50;
+    var bins=[];
+    for(var b=lo;b<hi;b+=step)bins.push(b);
+    var counts=bins.map(function(){return 0});
+    var outlierLo=0,outlierHi=0;
+    errors.forEach(function(e){
+      if(e<lo){outlierLo++;return}
+      if(e>=hi){outlierHi++;return}
+      var idx=Math.floor((e-lo)/step);
+      if(idx>=0&&idx<counts.length)counts[idx]++;
+    });
+
+    var labels=bins.map(function(b){return b.toFixed(0)+"%"});
+    var bgColors=bins.map(function(b){
+      var mid=b+step/2;
+      if(Math.abs(mid)<=5)return "rgba(34,197,94,.7)";
+      if(Math.abs(mid)<=15)return "rgba(245,158,11,.7)";
+      return "rgba(239,68,68,.7)";
+    });
+
+    if(histInst)histInst.destroy();
+    histInst=new Chart(ctx,{
+      type:"bar",
+      data:{labels:labels,datasets:[{data:counts,backgroundColor:bgColors,borderColor:"transparent",borderRadius:3}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            title:function(items){return "Error range: "+items[0].label+" to "+(parseFloat(items[0].label)+step)+"%"},
+            label:function(ctx){return " "+ctx.parsed.y+" data points"},
+          }},
+          annotation:{},
+        },
+        scales:{
+          x:{ticks:{color:"#8b8fa3",maxTicksLimit:15},grid:{color:"rgba(255,255,255,.04)"},
+             title:{display:true,text:"% Error (predicted − actual) / actual",color:"#8b8fa3"}},
+          y:{ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.06)"},
+             title:{display:true,text:"Count",color:"#8b8fa3"}},
+        },
+      },
+    });
+  }
+
+  document.getElementById("histModel").addEventListener("change",update);
+  update();
+}
+
+// ─── Chart 3: Radar ───────────────────────────────────────────────────────
+var radarInst=null;
+function initRadarChart(){
+  var ctx=document.getElementById("radarChart").getContext("2d");
+
+  function update(){
+    var scope=document.getElementById("radarScope").value;
+    var datasets=[];
+
+    D.models.forEach(function(m){
+      var o;
+      if(scope==="overall"){
+        o=D.overall[m];
+      } else {
+        var cc=D.commComparison[scope];
+        o=cc?cc[m]:null;
+      }
+      if(!o)return;
+
+      // Normalise: invert MAPE & MAE so larger=better; R² already 0-1
+      // Scale each to 0-100 range for radar readability
+      var maxMape=20,maxMae=50,maxBias=15;
+      var mapeScore  =Math.max(0,Math.min(100,(1-o.mape/maxMape)*100));
+      var maeScore   =Math.max(0,Math.min(100,(1-o.mae/maxMae)*100));
+      var r2Score    =Math.max(0,Math.min(100,o.r2*100));
+      var biasScore  =Math.max(0,Math.min(100,(1-Math.abs(o.bias)/maxBias)*100));
+      var precScore  =o.mape<=5?100:o.mape<=10?75:o.mape<=20?40:15;
+
+      datasets.push({
+        label:m,
+        data:[mapeScore,maeScore,r2Score,biasScore,precScore],
+        borderColor:D.modelColors[m],
+        backgroundColor:D.modelColors[m].replace(")",", .15)").replace("rgb","rgba"),
+        pointBackgroundColor:D.modelColors[m],
+        pointRadius:4,borderWidth:2,
+      });
+    });
+
+    if(radarInst)radarInst.destroy();
+    radarInst=new Chart(ctx,{
+      type:"radar",
+      data:{
+        labels:["MAPE\n(inverted)","MAE\n(inverted)","R²","Bias\n(inverted)","Grade\nScore"],
+        datasets:datasets,
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        scales:{r:{
+          min:0,max:100,
+          ticks:{display:false},
+          grid:{color:"rgba(255,255,255,.08)"},
+          pointLabels:{color:"#8b8fa3",font:{size:11}},
+          angleLines:{color:"rgba(255,255,255,.08)"},
+        }},
+        plugins:{
+          legend:{position:"bottom",labels:{color:"#e4e6eb",usePointStyle:true,pointStyle:"circle",padding:14,font:{size:11}}},
+          tooltip:{callbacks:{
+            label:function(ctx){return " "+ctx.dataset.label+": "+ctx.parsed.r.toFixed(1)+"/100"},
+          }},
+        },
+      },
+    });
+  }
+
+  document.getElementById("radarScope").addEventListener("change",update);
+  update();
+}
+
+// ─── Chart 4: Forecast ────────────────────────────────────────────────────
+var fcChartInst=null;
+function initForecastChart(){
+  var ctx=document.getElementById("forecastChart").getContext("2d");
+
+  function update(){
+    var comm=document.getElementById("fcComm").value;
+    var pt=document.getElementById("fcPT").value;
+    var modelSel=document.getElementById("fcModel").value;
+
+    // Recent actuals
+    var tKey=comm+"|"+pt;
+    var trend=D.trends[tKey]||{};
+    var actualPts=[];
+    Object.entries(trend).forEach(function(kv){
+      var dk=kv[0],e=kv[1];
+      if(dk>="2023"&&e.actual!=null)actualPts.push({x:dk+"-15",y:e.actual});
+    });
+    actualPts.sort(function(a,b){return a.x.localeCompare(b.x)});
+
+    var datasets=[{
+      label:"Actual (recent)",data:actualPts,
+      borderColor:"#ffffff",fill:false,tension:.3,
+      pointRadius:2,borderWidth:2.5,order:0,
+    }];
+
+    D.models.forEach(function(m){
+      if(modelSel!=="all"&&modelSel!==m)return;
+      var fc=D.forecasts[m]&&D.forecasts[m][comm];
+      if(!fc)return;
+      var pts=Object.entries(fc).map(function(kv){return{x:kv[0]+"-15",y:kv[1]}});
+      pts.sort(function(a,b){return a.x.localeCompare(b.x)});
+      // Bridge to last actual
+      if(actualPts.length&&pts.length)pts.unshift(actualPts[actualPts.length-1]);
+      datasets.push({
+        label:m+" forecast",data:pts,
+        borderColor:D.modelColors[m],
+        backgroundColor:D.modelColors[m].replace(")",", .08)").replace("rgb","rgba"),
+        fill:modelSel!=="all",tension:.3,pointRadius:1.5,borderWidth:1.8,
+        borderDash:[5,3],order:1,
+      });
+    });
+
+    // Legend
+    var leg=document.getElementById("fcLegend");
+    leg.innerHTML='<span class="legend-item"><span class="legend-line" style="background:#fff"></span> Actual</span>';
+    D.models.forEach(function(m){
+      if(modelSel!=="all"&&modelSel!==m)return;
+      leg.innerHTML+='<span class="legend-item"><span class="legend-line" style="background:'+D.modelColors[m]+'"></span> '+m+'</span>';
+    });
+
+    if(fcChartInst)fcChartInst.destroy();
+    fcChartInst=new Chart(ctx,{
+      type:"line",data:{datasets:datasets},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:"index",intersect:false},
+        scales:{
+          x:{type:"time",time:{unit:"month",tooltipFormat:"MMM yyyy"},
+            title:{display:true,text:"Month",color:"#8b8fa3"},
+            ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.04)"}},
+          y:{title:{display:true,text:"Avg Price (PHP)",color:"#8b8fa3"},
+            ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:false},
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            label:function(ctx){return " "+ctx.dataset.label+": "+(ctx.parsed.y!=null?"PHP "+ctx.parsed.y.toFixed(2):"N/A")},
+          }},
+        },
+      },
+    });
+  }
+
+  ["fcComm","fcPT","fcModel"].forEach(function(id){
+    document.getElementById(id).addEventListener("change",update);
+  });
+  update();
+}
+
+// ─── Chart 5: Commodity Accuracy Table ───────────────────────────────────
+var tableData=[];
+var sortCol="gb_mape";
+var sortAsc=true;
+
+function buildCommTable(){
+  // Build flat rows from commComparison
+  tableData=[];
+  Object.values(D.commComparison).forEach(function(entry){
+    var row={commodity:entry.commodity};
+    D.models.forEach(function(m){
+      var info=entry[m];
+      row[m+"_mape"]=info?info.mape:null;
+      row[m+"_mae"] =info?info.mae :null;
+      row[m+"_n"]   =info?info.n_val:null;
+    });
+    tableData.push(row);
+  });
+
+  // Build headers
+  var head=document.getElementById("commTableHead");
+  var cols=[{label:"Commodity",key:"commodity"}];
+  D.models.forEach(function(m){cols.push({label:m+" MAPE",key:m+"_mape"})});
+  cols.push({label:"n (val)",key:D.models[0]+"_n"});
+
+  cols.forEach(function(c){
+    var th=document.createElement("th");
+    th.textContent=c.label;
+    th.dataset.key=c.key;
+    th.addEventListener("click",function(){
+      if(sortCol===c.key)sortAsc=!sortAsc;
+      else{sortCol=c.key;sortAsc=true}
+      renderTable();
+    });
+    head.appendChild(th);
+  });
+
+  renderTable();
+
+  ["tableModel","tableGrade","tableSearch"].forEach(function(id){
+    document.getElementById(id).addEventListener(id==="tableSearch"?"input":"change",renderTable);
+  });
+}
+
+function renderTable(){
+  var modelSel=document.getElementById("tableModel").value;
+  var gradeSel=document.getElementById("tableGrade").value;
+  var searchVal=document.getElementById("tableSearch").value.toLowerCase();
+
+  var heads=document.querySelectorAll("#commTableHead th");
+  heads.forEach(function(th){
+    th.className=th.dataset.key===sortCol?(sortAsc?"sort-asc":"sort-desc"):"";
+  });
+
+  var filtered=tableData.filter(function(r){
+    if(searchVal&&r.commodity.toLowerCase().indexOf(searchVal)===-1)return false;
+    if(gradeSel!=="all"){
+      var mape=r[modelSel+"_mape"];
+      if(mape==null)return false;
+      if(grade(mape)!==gradeSel)return false;
+    }
+    return true;
+  });
+
+  filtered.sort(function(a,b){
+    var av=a[sortCol],bv=b[sortCol];
+    if(av==null)return 1;if(bv==null)return -1;
+    if(typeof av==="string")return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
+    return sortAsc?av-bv:bv-av;
+  });
+
+  var tbody=document.getElementById("commTableBody");
+  tbody.innerHTML="";
+  filtered.forEach(function(r){
+    var tr=document.createElement("tr");
+    var bestModel=null,bestMape=Infinity;
+    D.models.forEach(function(m){
+      var mv=r[m+"_mape"];
+      if(mv!=null&&mv<bestMape){bestMape=mv;bestModel=m}
+    });
+
+    var cells='<td>'+r.commodity+'</td>';
+    D.models.forEach(function(m){
+      var mape=r[m+"_mape"];
+      var isHighlight=m===modelSel;
+      var isBest=m===bestModel;
+      cells+='<td style="'+(isHighlight?"background:rgba(99,102,241,.08);":"")+'">'+(mape==null?"—":gradeBadge(mape)+(isBest?' <span style="color:var(--green);font-size:.7rem">★</span>':""))+'</td>';
+    });
+    var n=r[D.models[0]+"_n"];
+    cells+='<td>'+(n==null?"—":n)+'</td>';
+    tr.innerHTML=cells;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("tableCount").textContent="Showing "+filtered.length+" of "+tableData.length+" commodities";
+}
+
+// ─── Chart 6: Donut ───────────────────────────────────────────────────────
+var donutInst=null;
+function initDonutChart(){
+  var ctx=document.getElementById("donutChart").getContext("2d");
+
+  function update(){
+    var modelSel=document.getElementById("donutModel").value;
+    var grades={A:0,B:0,C:0,D:0};
+    Object.values(D.commComparison).forEach(function(entry){
+      var info=entry[modelSel];
+      if(!info)return;
+      grades[grade(info.mape)]++;
+    });
+    if(donutInst)donutInst.destroy();
+    donutInst=new Chart(ctx,{
+      type:"doughnut",
+      data:{
+        labels:["A ≤5% — "+grades.A+" commodities","B 5–10% — "+grades.B+" commodities","C 10–20% — "+grades.C+" commodities","D >20% — "+grades.D+" commodities"],
+        datasets:[{data:[grades.A,grades.B,grades.C,grades.D],
+          backgroundColor:["#22c55e","#22d3ee","#f59e0b","#ef4444"],
+          borderColor:"#1a1d27",borderWidth:3}],
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:"bottom",labels:{color:"#e4e6eb",padding:14,usePointStyle:true,pointStyle:"circle",font:{size:11}}},
+          tooltip:{callbacks:{label:function(ctx){return " "+ctx.label}}},
+        },
+      },
+    });
+  }
+  document.getElementById("donutModel").addEventListener("change",update);
+  update();
+}
+
+// ─── Chart 7: Horizontal Bar MAPE ────────────────────────────────────────
+var barInst=null;
+function initBarChart(){
+  var ctx=document.getElementById("barChart").getContext("2d");
+
+  function update(){
+    var modelSel=document.getElementById("barModel").value;
+    var rows=Object.values(D.commComparison).map(function(entry){
+      var info=entry[modelSel];
+      return{commodity:entry.commodity,mape:info?info.mape:null};
+    }).filter(function(r){return r.mape!=null});
+    rows.sort(function(a,b){return a.mape-b.mape});
+
+    var labels=rows.map(function(r){return r.commodity});
+    var data  =rows.map(function(r){return r.mape});
+    var colors=data.map(function(v){
+      if(v<=5)return "rgba(34,197,94,.7)";
+      if(v<=10)return "rgba(34,211,238,.7)";
+      if(v<=20)return "rgba(245,158,11,.7)";
+      return "rgba(239,68,68,.7)";
+    });
+
+    // Dynamic height
+    var h=Math.max(360,rows.length*22);
+    ctx.canvas.parentElement.style.minHeight=h+"px";
+    ctx.canvas.style.height=h+"px";
+
+    if(barInst)barInst.destroy();
+    barInst=new Chart(ctx,{
+      type:"bar",
+      data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderRadius:3,borderColor:"transparent"}]},
+      options:{
+        indexAxis:"y",
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            label:function(ctx){return " MAPE: "+ctx.parsed.x.toFixed(1)+"%"},
+          }},
+        },
+        scales:{
+          x:{ticks:{color:"#8b8fa3"},grid:{color:"rgba(255,255,255,.06)"},
+             title:{display:true,text:"MAPE (%)",color:"#8b8fa3"}},
+          y:{ticks:{color:"#8b8fa3",font:{size:11}},grid:{display:false}},
+        },
+      },
+    });
+  }
+  document.getElementById("barModel").addEventListener("change",update);
+  update();
+}
+
+// ─── Hyperparameter Search Grid ───────────────────────────────────────────
+function buildVsearchGrid(){
+  var grid=document.getElementById("vsearchGrid");
+  if(!D.variantSearch)return;
+  D.models.forEach(function(m){
+    var vs=D.variantSearch[m];
+    if(!vs)return;
+    var card=document.createElement("div");
+    card.className="vsearch-card";
+    var params=vs.parameter_grid[0]?Object.keys(vs.parameter_grid[0]):[];
+    var rows=vs.parameter_grid.map(function(cfg,i){
+      var isBest=i===vs.best_variant;
+      var tds=params.map(function(p){return'<td>'+cfg[p]+'</td>'}).join("");
+      var selClass=isBest?' class="best-row"':'';
+      return'<tr'+selClass+'><td>'+(i+1)+'</td>'+tds+'</tr>';
+    }).join("");
+    card.innerHTML=
+      '<h4><span style="width:10px;height:10px;border-radius:50%;background:'+D.modelColors[m]+';display:inline-block"></span> '+m+'</h4>'+
+      '<table>'+
+        '<thead><tr><th>#</th>'+params.map(function(p){return'<th>'+p+'</th>'}).join("")+'</tr></thead>'+
+        '<tbody>'+rows+'</tbody>'+
+      '</table>'+
+      '<p style="font-size:.75rem;color:var(--text2);margin-top:.6rem">★ = selected variant (best validation MAPE)</p>';
+    grid.appendChild(card);
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>
+
+<script>
+// ========================================================================
+// DASHBOARD ENHANCEMENTS - Injected Features
+// ========================================================================
+
+// Helper function: Export table data to CSV
+function exportTableData() {
+  var table = document.getElementById('commTable');
+  if (!table) return;
+  
+  var data = [];
+  var headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+  data.push(headers);
+  
+  var rows = table.querySelectorAll('tbody tr');
+  rows.forEach(function(row) {
+    if (row.style.display !== 'none') {
+      var rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+      data.push(rowData);
+    }
+  });
+  
+  var csv = data.map(row => row.map(cell => '"' + cell + '"').join(',')).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var link = document.createElement('a');
+  link.download = 'commodity-accuracy-' + new Date().toISOString().slice(0, 10) + '.csv';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+
+// Helper function: Export forecast data
+function exportForecastData() {
+  if (!window.D || !window.D.forecasts) return;
+  
+  var comm = document.getElementById('fcComm').value;
+  var model = document.getElementById('fcModel').value;
+  
+  var data = [];
+  var models = model === 'all' ? window.D.models : [model];
+  
+  models.forEach(function(m) {
+    var forecast = window.D.forecasts[m];
+    if (forecast && forecast[comm]) {
+      Object.keys(forecast[comm]).forEach(function(date) {
+        data.push({
+          date: date,
+          model: m,
+          commodity: comm,
+          price: forecast[comm][date]
+        });
+      });
+    }
+  });
+  
+  window.dashboardEnhancements.exportToCSV(data, 'forecast-' + comm.replace(/[^a-z0-9]/gi, '-') + '-' + new Date().toISOString().slice(0, 10));
+}
+
+// Initialize enhancements when Chart.js is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Enable zoom plugin for all charts
+  Chart.register(window['chartjs-plugin-zoom']);
+  
+  // Apply zoom/pan to all chart configurations
+  Chart.defaults.plugins.zoom = {
+    zoom: {
+      wheel: { enabled: true },
+      pinch: { enabled: true },
+      mode: 'xy',
+    },
+    pan: {
+      enabled: true,
+      mode: 'xy',
+    },
+    limits: {
+      x: {min: 'original', max: 'original'},
+      y: {min: 'original', max: 'original'},
+    }
+  };
+  
+  // Enhanced tooltip
+  Chart.defaults.plugins.tooltip = {
+    enabled: true,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    titleColor: '#6366f1',
+    bodyColor: '#e4e6eb',
+    borderColor: '#6366f1',
+    borderWidth: 1,
+    padding: 12,
+    displayColors: true,
+    callbacks: {
+      title: function(items) {
+        return items[0].label || '';
+      },
+      label: function(context) {
+        var label = context.dataset.label || '';
+        if (label) label += ': ';
+        if (context.parsed.y !== null) {
+          label += 'PHP ' + context.parsed.y.toFixed(2);
+        }
+        return label;
+      },
+      afterLabel: function(context) {
+        // Add extra context information
+        if (context.dataset.meta) {
+          return context.dataset.meta;
+        }
+        return '';
+      }
+    }
+  };
+  
+  // Apply animations to all charts
+  Chart.defaults.animation = {
+    duration: 750,
+    easing: 'easeInOutQuart'
+  };
+  
+  // Setup search functionality
+  var globalSearch = document.getElementById('globalSearch');
+  if (globalSearch) {
+    globalSearch.addEventListener('input', function(e) {
+      var query = e.target.value.toLowerCase();
+      var table = document.getElementById('commTable');
+      if (table) {
+        var rows = table.querySelectorAll('tbody tr');
+        rows.forEach(function(row) {
+          var text = row.textContent.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      }
+    });
+  }
+  
+  // Apply hover effects to model tiles
+  setTimeout(function() {
+    var tiles = document.querySelectorAll('.model-tile');
+    tiles.forEach(function(tile) {
+      tile.addEventListener('click', function() {
+        tiles.forEach(t => t.classList.remove('selected'));
+        tile.classList.add('selected');
+      });
+    });
+  }, 1000);
+  
+  // Apply hover effects to score cards
+  setTimeout(function() {
+    var cards = document.querySelectorAll('.score-card');
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        cards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active'));
+      });
+    });
+  }, 1000);
+  
+  console.log('✅ Dashboard enhancements loaded!');
+});
+
+</script>
+
+// ========================================================================
+// COMPREHENSIVE DASHBOARD ENHANCEMENTS
+// Features: Zoom/Pan, Export, Animations, State Persistence, Accessibility
+// ========================================================================
+
+// Global enhancement state
+var dashboardState = {
+  filters: {},
+  zoom: {},
+  selectedModel: null,
+  selectedCommodity: null
+};
+
+// ─── Feature 1: Chart Zoom & Pan Plugin ────────────────────────────────
+const zoomPlugin = {
+  id: 'customZoom',
+  defaults: {
+    zoom: { enabled: true, mode: 'xy' },
+    pan: { enabled: true, mode: 'xy' }
+  }
+};
+
+//  ─── Feature 2: Data Export Functionality ─────────────────────────────
+function exportChartData(chartId, filename) {
+  var canvas = document.getElementById(chartId);
+  if (!canvas) return;
+  
+  // Export as PNG
+  var link = document.createElement('a');
+  link.download = filename + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function exportToCSV(data, filename) {
+  var csv = '';
+  if (data.length > 0) {
+    // Headers
+    csv += Object.keys(data[0]).join(',') + '\n';
+    // Rows
+    data.forEach(function(row) {
+      csv += Object.values(row).map(function(v) {
+        return typeof v === 'string' ? '"' + v + '"' : v;
+      }).join(',') + '\n';
+    });
+  }
+  
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var link = document.createElement('a');
+  link.download = filename + '.csv';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+
+function exportToJSON(data, filename) {
+  var json = JSON.stringify(data, null, 2);
+  var blob = new Blob([json], { type: 'application/json' });
+  var link = document.createElement('a');
+  link.download = filename + '.json';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+
+// ─── Feature 3: Enhanced Tooltips ──────────────────────────────────────
+function createEnhancedTooltip(context) {
+  var tooltipEl = document.getElementById('chartjs-tooltip');
+  
+  if (!tooltipEl) {
+    tooltipEl = document.createElement('div');
+    tooltipEl.id = 'chartjs-tooltip';
+    tooltipEl.style.cssText = 'position:absolute;background:rgba(0,0,0,0.9);color:#fff;padding:12px;' +
+      'border-radius:8px;font-size:13px;pointer-events:none;z-index:1000;' +
+      'box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all 0.2s;max-width:300px';
+    document.body.appendChild(tooltipEl);
+  }
+  
+  return tooltipEl;
+}
+
+// ─── Feature 4: State Persistence (localStorage) ───────────────────────
+function saveState() {
+  try {
+    localStorage.setItem('dashboardState', JSON.stringify(dashboardState));
+  } catch (e) {
+    console.warn('Could not save state:', e);
+  }
+}
+
+function loadState() {
+  try {
+    var saved = localStorage.getItem('dashboardState');
+    if (saved) {
+      dashboardState = JSON.parse(saved);
+      return true;
+    }
+  } catch (e) {
+    console.warn('Could not load state:', e);
+  }
+  return false;
+}
+
+function clearState() {
+  localStorage.removeItem('dashboardState');
+  dashboardState = { filters: {}, zoom: {}, selectedModel: null, selectedCommodity: null };
+}
+
+// ─── Feature 5: Real-time Search & Filter ──────────────────────────────
+function initializeSearch() {
+  var searchInputs = document.querySelectorAll('[data-search]');
+  searchInputs.forEach(function(input) {
+    input.addEventListener('input', debounce(function(e) {
+      var target = e.target.dataset.search;
+      var query = e.target.value.toLowerCase();
+      filterTable(target, query);
+    }, 300));
+  });
+}
+
+function filterTable(tableId, query) {
+  var table = document.getElementById(tableId);
+  if (!table) return;
+  
+  var rows = table.querySelectorAll('tbody tr');
+  rows.forEach(function(row) {
+    var text = row.textContent.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      func.apply(context, args);
+    }, wait);
+  };
+}
+
+// ─── Feature 6: Keyboard Navigation ────────────────────────────────────
+function initKeyboardNav() {
+  document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + E: Export current view
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+      e.preventDefault();
+      exportCurrentView();
+    }
+    // Ctrl/Cmd + R: Reset filters
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+      e.preventDefault();
+      resetAllFilters();
+    }
+    // Esc: Clear selection
+    if (e.key === 'Escape') {
+      clearSelection();
+    }
+  });
+}
+
+function exportCurrentView() {
+  var timestamp = new Date().toISOString().slice(0, 10);
+  if (window.D && window.D.overall) {
+    exportToJSON(window.D, 'dashboard-export-' + timestamp);
+  }
+}
+
+function resetAllFilters() {
+  var selects = document.querySelectorAll('select');
+  selects.forEach(function(sel) {
+    if (sel.options.length > 0) sel.selectedIndex = 0;
+  });
+  clearState();
+  if (typeof init === 'function') {
+    // Trigger re-render if init function exists
+    console.log('Filters reset');
+  }
+}
+
+function clearSelection() {
+  dashboardState.selectedModel = null;
+  dashboardState.selectedCommodity = null;
+  saveState();
+}
+
+// ─── Feature 7: Loading States & Progress ──────────────────────────────
+function showLoading(message) {
+  var loader = document.getElementById('global-loader');
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = 'global-loader';
+    loader.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);' +
+      'display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1rem';
+    document.body.appendChild(loader);
+  }
+  loader.innerHTML = '<div style="width:50px;height:50px;border:4px solid #333;border-top-color:#6366f1;' +
+    'border-radius:50%;animation:spin 1s linear infinite"></div>' +
+    '<div style="color:#fff;font-size:14px">' + (message || 'Loading...') + '</div>';
+  loader.style.display = 'flex';
+}
+
+function hideLoading() {
+  var loader = document.getElementById('global-loader');
+  if (loader) loader.style.display = 'none';
+}
+
+// ─── Feature 8: Smooth Animations ──────────────────────────────────────
+function animateValue(element, start, end, duration) {
+  var range = end - start;
+  var current = start;
+  var increment = range / (duration / 16);
+  var timer = setInterval(function() {
+    current += increment;
+    if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+      element.textContent = end.toFixed(1);
+      clearInterval(timer);
+    } else {
+      element.textContent = current.toFixed(1);
+    }
+  }, 16);
+}
+
+// ─── Feature 9: Accessibility Enhancements ─────────────────────────────
+function enhanceAccessibility() {
+  // Add ARIA labels to charts
+  var canvases = document.querySelectorAll('canvas');
+  canvases.forEach(function(canvas, i) {
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Chart ' + (i + 1) + ': Data visualization');
+  });
+  
+  // Add keyboard focus indicators
+  var focusableElements = document.querySelectorAll('select, button, a, [tabindex]');
+  focusableElements.forEach(function(el) {
+    el.addEventListener('focus', function() {
+      el.style.outline = '2px solid #6366f1';
+      el.style.outlineOffset = '2px';
+    });
+    el.addEventListener('blur', function() {
+      el.style.outline = '';
+    });
+  });
+}
+
+// ─── Feature 10: Performance Monitoring ────────────────────────────────
+var perfMetrics = {
+  startTime: null,
+  loadTime: null,
+  renderTime: null
+};
+
+function startPerformanceTracking() {
+  perfMetrics.startTime = performance.now();
+}
+
+function recordLoadTime() {
+  if (perfMetrics.startTime) {
+    perfMetrics.loadTime = performance.now() - perfMetrics.startTime;
+    console.log('Data load time: ' + perfMetrics.loadTime.toFixed(2) + 'ms');
+  }
+}
+
+function recordRenderTime() {
+  if (perfMetrics.startTime) {
+    perfMetrics.renderTime = performance.now() - perfMetrics.startTime;
+    console.log('Total render time: ' + perfMetrics.renderTime.toFixed(2) + 'ms');
+  }
+}
+
+// ─── Feature 11: Cross-filter Interaction ──────────────────────────────
+function enableCrossFilter() {
+  // When clicking a chart point, filter all other visualizations
+  Chart.register({
+    id: 'crossFilter',
+    afterEvent(chart, args) {
+      if (args.event.type === 'click') {
+        var elements = chart.getElementsAtEventForMode(args.event, 'nearest', { intersect: true }, false);
+        if (elements.length > 0) {
+          var element = elements[0];
+          var datasetIndex = element.datasetIndex;
+          var index = element.index;
+          var label = chart.data.labels[index];
+          
+          // Store selection
+          dashboardState.selectedPoint = { label: label, chart: chart.canvas.id };
+          saveState();
+          
+          // Highlight across all charts
+          highlightAcrossCharts(label);
+        }
+      }
+    }
+  });
+}
+
+function highlightAcrossCharts(label) {
+  console.log('Highlighting:', label);
+  // This would filter other charts based on selection
+  // Implementation depends on specific chart instances
+}
+
+// ─── Initialize All Enhancements ───────────────────────────────────────
+function initDashboardEnhancements() {
+  console.log('Initializing dashboard enhancements...');
+  
+  startPerformanceTracking();
+  loadState();
+  initKeyboardNav();
+  enhanceAccessibility();
+  enableCrossFilter();
+  
+  // Add CSS animations
+  var style = document.createElement('style');
+  style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}' +
+    '.fade-in{animation:fadeIn 0.3s ease-in}' +
+    '@keyframes fadeIn{from{opacity:0}to{opacity:1}}' +
+    '.slide-up{animation:slideUp 0.4s ease-out}' +
+    '@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}';
+  document.head.appendChild(style);
+  
+  recordRenderTime();
+  console.log('Dashboard enhancements loaded!');
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDashboardEnhancements);
+} else {
+  initDashboardEnhancements();
+}
+
+// Export functions for global access
+window.dashboardEnhancements = {
+  exportChartData: exportChartData,
+  exportToCSV: exportToCSV,
+  exportToJSON: exportToJSON,
+  saveState: saveState,
+  loadState: loadState,
+  clearState: clearState,
+  resetAllFilters: resetAllFilters,
+  showLoading: showLoading,
+  hideLoading: hideLoading
+};
+</body></html>
