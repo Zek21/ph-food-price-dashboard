@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philippines Food Price — Forecast Dashboard (Gradient Boosting Model)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a;
+  --text: #e4e6eb; --text2: #8b8fa3;
+  --accent: #6366f1; --cyan: #22d3ee; --green: #22c55e;
+  --red: #ef4444; --orange: #f59e0b; --pink: #ec4899;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height:1.6;
+}
+.header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+  padding: 2.5rem 2rem 2rem; border-bottom: 1px solid var(--border);
+}
+.header h1 {
+  font-size: 1.8rem; font-weight: 700;
+  background: linear-gradient(90deg, #818cf8, #22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.header p { color: var(--text2); font-size: 0.9rem; margin-top: 0.3rem; max-width: 900px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+
+/* Score banner */
+.score-banner {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.score-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.2rem; text-align: center;
+  position: relative; overflow: hidden;
+}
+.score-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.score-card:nth-child(1)::before { background: var(--green); }
+.score-card:nth-child(2)::before { background: var(--cyan); }
+.score-card:nth-child(3)::before { background: var(--accent); }
+.score-card:nth-child(4)::before { background: var(--orange); }
+.score-card .label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+.score-card .value { font-size: 1.8rem; font-weight: 700; margin: 0.2rem 0; color: var(--green); }
+.score-card .sub { font-size: 0.75rem; color: var(--text2); }
+
+/* Cards */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.2rem; }
+.card .subtitle { font-size: 0.8rem; color: var(--text2); margin-bottom: 0.5rem; }
+.card .description {
+  font-size: 0.85rem; color: var(--text2); margin-bottom: 1.2rem;
+  line-height: 1.7; border-left: 3px solid var(--accent); padding-left: 1rem;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Controls */
+.controls { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+select {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+
+/* Legend */
+.legend-row { display: flex; gap: 1.5rem; margin-bottom: 0.7rem; font-size: 0.8rem; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.legend-dot { width: 12px; height: 4px; border-radius: 2px; }
+
+/* Info box */
+.info-box {
+  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25);
+  border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.info-box h3 { font-size: 1rem; color: var(--accent); margin-bottom: 0.8rem; }
+.info-box p { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.6rem; line-height: 1.7; }
+.info-box .highlight { color: var(--text); font-weight: 600; }
+.info-box ul { padding-left: 1.2rem; margin: 0.5rem 0; }
+.info-box li { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.3rem; }
+
+/* Old model warning box */
+.old-model-box {
+  background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.old-model-box h3 { font-size: 1rem; color: var(--red); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+.old-model-box p { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.6rem; line-height: 1.7; }
+
+/* Comparison table inside old model box */
+.mini-table { border-collapse: collapse; font-size: 0.82rem; margin: 1rem 0; width: 100%; max-width: 700px; }
+.mini-table th { text-align: left; padding: 0.5rem 1rem; background: rgba(255,255,255,0.03); color: var(--text2); font-weight: 600; border-bottom: 1px solid var(--border); }
+.mini-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+.mini-table .bad { color: var(--red); font-weight: 600; }
+.mini-table .good { color: var(--green); font-weight: 600; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table.main-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+table.main-table th {
+  text-align: left; padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--border);
+  color: var(--text2); font-weight: 600; text-transform: uppercase; font-size: 0.7rem;
+  letter-spacing: 0.05em; cursor: pointer;
+}
+table.main-table th:hover { color: var(--accent); }
+table.main-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
+table.main-table tr:hover td { background: rgba(99,102,241,0.05); }
+
+.badge {
+  display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 600;
+}
+.badge-good { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-bad { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-ok { background: rgba(245,158,11,0.15); color: var(--orange); }
+
+/* Tabs */
+.tab-group { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab-btn {
+  padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8rem;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); cursor: pointer;
+}
+.tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Philippines Food Price Forecast Dashboard</h1>
+  <p>Gradient Boosting model trained on WFP actual prices (2000 &ndash; Jan 2026), validated against 15,356 data points, now forecasting through Dec 2027. Built from 73 commodities across 17 Philippine regions.</p>
+</div>
+
+<div class="container">
+
+  <!-- ==================== MODEL PERFORMANCE CARDS ==================== -->
+  <div class="score-banner" id="scoreBanner"></div>
+
+  <!-- ==================== ABOUT THE NEW MODEL ==================== -->
+  <div class="info-box">
+    <h3>&#128202; About This Model &mdash; Gradient Boosting Regressor</h3>
+    <p>
+      This dashboard uses a <span class="highlight">Gradient Boosting regression model</span> trained on
+      <span class="highlight">143,000+ actual WFP (World Food Programme) price records</span> spanning 2000 to January 2026.
+      The model uses time-series features to capture commodity price dynamics:
+    </p>
+    <ul>
+      <li><strong>Lag features:</strong> Previous 1, 3, 6, and 12-month prices for the same commodity &amp; region</li>
+      <li><strong>Rolling statistics:</strong> 3-month and 6-month rolling averages and standard deviations</li>
+      <li><strong>Seasonality:</strong> Month-of-year encoding to capture seasonal fluctuations (e.g., harvest periods)</li>
+      <li><strong>Trend:</strong> Year feature to capture long-term inflation and price trends</li>
+      <li><strong>Categorical encoding:</strong> Region, commodity, and price type encoded as numeric features</li>
+    </ul>
+    <p>
+      The model was validated on <span class="highlight">15,356 actual data points from 2024 &ndash; Jan 2026</span>
+      that were held out from training. Forecasts extend through December 2027 using iterative prediction
+      (each month's prediction becomes input for the next month).
+    </p>
+  </div>
+
+  <!-- ==================== OLD MODEL EXPLANATION ==================== -->
+  <div class="old-model-box">
+    <h3>&#9888;&#65039; What Was the Old Model? (Removed)</h3>
+    <p>
+      The previous model was a <strong style="color:var(--text)">Random Forest regressor</strong> trained on the original
+      <span style="color:var(--orange)">Dataset WFP2.csv</span> (153K rows, 2000&ndash;2023). It generated 22.6 million predicted price records
+      stored in <span style="color:var(--orange)">merged_file_with_location_2.csv</span>. That model has been <strong style="color:var(--red)">removed</strong>
+      from this dashboard due to the following critical problems:
+    </p>
+    <p>
+      <strong style="color:var(--text)">1. No time-series awareness:</strong> The Random Forest used only raw categorical features (commodity name, region, year, month)
+      without lag prices, rolling averages, or trend indicators. It couldn't learn how prices evolve over time &mdash;
+      it essentially guessed based on historical averages, making it unable to follow real-world price momentum.
+    </p>
+    <p>
+      <strong style="color:var(--text)">2. Data duplication &amp; scale mixing:</strong> The prediction output contained multiple rows per
+      (commodity, region, month) at different aggregation levels (marked by different "Priceflag" values: actual vs. aggregate).
+      For example, Eggs in Region IV-A for January 2024 had 126 duplicate rows with prices ranging from PHP 7 to PHP 113,
+      mixing per-unit and per-kilogram scales, inflating averages by up to 750%.
+    </p>
+    <p>
+      <strong style="color:var(--text)">3. No post-2023 training data:</strong> The model was trained only through 2023
+      and had to blindly extrapolate into 2024&ndash;2027 without seeing actual price trends,
+      producing unrealistic flat projections or wild spikes for many commodities.
+    </p>
+    <table class="mini-table">
+      <thead>
+        <tr><th>Metric</th><th>Old RF Model</th><th>New GB Model</th><th>Improvement</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MAPE (Mean Abs % Error)</td>
+          <td class="bad" id="oldMapeCell">&mdash;</td>
+          <td class="good" id="newMapeCell">&mdash;</td>
+          <td id="mapeImpCell">&mdash;</td>
+        </tr>
+        <tr>
+          <td>MAE (Mean Abs Error in PHP)</td>
+          <td class="bad" id="oldMaeCell">&mdash;</td>
+          <td class="good" id="newMaeCell">&mdash;</td>
+          <td id="maeImpCell">&mdash;</td>
+        </tr>
+        <tr>
+          <td>Bias (systematic over/under prediction)</td>
+          <td class="bad" id="oldBiasCell">&mdash;</td>
+          <td class="good" id="newBiasCell">&mdash;</td>
+          <td id="biasImpCell">&mdash;</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem; color:var(--text2); font-style:italic;">
+      The old model's predictions have been removed from all visualizations below.
+      All charts now show only the actual WFP prices and the new Gradient Boosting model's outputs.
+    </p>
+  </div>
+
+  <!-- ==================== 1. PRICE TREND CHART ==================== -->
+  <div class="card">
+    <h2>1. Price Trend: Actual vs Forecast</h2>
+    <p class="subtitle">Historical actual prices alongside the new model's predictions and future forecast</p>
+    <div class="description">
+      This line chart plots the <strong>monthly average price</strong> of a selected commodity and price type over time.
+      The <strong style="color:#e4e6eb">white solid line</strong> shows actual WFP-recorded prices &mdash; these are real market observations
+      collected from monitors across Philippine markets.
+      The <strong style="color:#22c55e">green dashed line</strong> shows the Gradient Boosting model's fitted values
+      (during the 2024&ndash;Jan 2026 validation period) and its forecast into the future (Feb 2026&ndash;Dec 2027).
+      <br><br>
+      <strong>How to read it:</strong> Use the dropdowns to pick a commodity (e.g., "Rice (regular, milled)") and a price type
+      (Retail, Wholesale, or Farm Gate). The closer the green dashed line tracks the white line during 2024&ndash;2026,
+      the more accurate the model is for that commodity. Where the white line ends and only green continues, that is the
+      model's pure forecast into unobserved territory.
+    </div>
+    <div class="controls">
+      <select id="trendComm"></select>
+      <select id="trendPT"></select>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#e4e6eb"></div> Actual WFP Price</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> New Model (Gradient Boosting)</div>
+    </div>
+    <canvas id="trendChart" height="100"></canvas>
+  </div>
+
+  <!-- ==================== 2. ERROR DISTRIBUTION ==================== -->
+  <div class="card">
+    <h2>2. Prediction Error Distribution</h2>
+    <p class="subtitle">How far off are the model's predictions from actual prices?</p>
+    <div class="description">
+      This histogram shows the <strong>percentage error</strong> for every validation data point where we had both a prediction
+      and an actual price (2024 &ndash; Jan 2026). Each bar represents a range of errors.
+      The error is calculated as: (predicted &minus; actual) &divide; actual &times; 100%.
+      <br><br>
+      <strong>How to read it:</strong> A perfect model would have all bars stacked at 0%.
+      Bars to the <strong>left of zero</strong> mean the model <strong>under-predicted</strong> (real price was higher than forecast).
+      Bars to the <strong>right</strong> mean it <strong>over-predicted</strong> (forecast was too high).
+      <strong style="color:#22c55e">Green bars</strong> are within &plusmn;5% error (excellent),
+      <strong style="color:#f59e0b">yellow</strong> within &plusmn;10% (acceptable), and
+      <strong style="color:#ef4444">red</strong> beyond &plusmn;10% (poor).
+      The strong clustering near zero shows the model rarely misses by more than 10%.
+    </div>
+    <canvas id="newErrorChart" height="80"></canvas>
+  </div>
+
+  <!-- ==================== 3. ACCURACY BY COMMODITY TABLE ==================== -->
+  <div class="card">
+    <h2>3. Per-Commodity Accuracy</h2>
+    <p class="subtitle">Model accuracy graded for each of the 59 validated commodities</p>
+    <div class="description">
+      This table lists every commodity that had enough actual price records in 2024&ndash;Jan 2026 to evaluate the model.
+      Two key metrics are shown:
+      <strong>MAPE</strong> (Mean Absolute Percentage Error) &mdash; the average absolute % miss, and
+      <strong>MAE</strong> (Mean Absolute Error) &mdash; the average miss in Philippine Pesos.
+      <br><br>
+      <strong>Grading scale:</strong>
+      <strong style="color:var(--green)">Grade A</strong> = MAPE &le; 5% (excellent &mdash; predictions nearly match reality),
+      <strong style="color:var(--orange)">Grade B</strong> = 5&ndash;10% (good &mdash; minor deviations),
+      <strong style="color:var(--red)">Grade C</strong> = 10&ndash;20% (moderate &mdash; noticeable gaps),
+      <strong style="color:var(--red)">Grade D</strong> = &gt;20% (poor &mdash; predictions unreliable).
+      <br><br>
+      <strong>"Validation Pts"</strong> shows how many actual price records were available for testing &mdash;
+      more points means higher confidence in the grade. Click any column header to sort.
+      Use the grade filter buttons to focus on specific accuracy tiers.
+    </div>
+    <div class="tab-group" id="gradeFilter">
+      <button class="tab-btn active" data-grade="all">All</button>
+      <button class="tab-btn" data-grade="A">Grade A</button>
+      <button class="tab-btn" data-grade="B">Grade B</button>
+      <button class="tab-btn" data-grade="C">Grade C</button>
+      <button class="tab-btn" data-grade="D">Grade D</button>
+    </div>
+    <div class="table-wrap">
+      <table class="main-table" id="compTable">
+        <thead>
+          <tr>
+            <th data-col="commodity">Commodity</th>
+            <th data-col="new_mape">MAPE (%)</th>
+            <th data-col="mae">MAE (PHP)</th>
+            <th data-col="n_val">Validation Pts</th>
+            <th data-col="grade">Grade</th>
+          </tr>
+        </thead>
+        <tbody id="compBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== 4. FORECAST CHART ==================== -->
+  <div class="card">
+    <h2>4. Future Price Forecast: Feb 2026 &mdash; Dec 2027</h2>
+    <p class="subtitle">Predicted monthly prices from the Gradient Boosting model, with recent actuals for context</p>
+    <div class="description">
+      This chart focuses on the <strong>forward-looking prediction</strong> window.
+      The <strong style="color:#e4e6eb">solid white line</strong> shows recent actual prices (from 2023 onward) to give you
+      a sense of where prices have been heading.
+      The <strong style="color:#22c55e">green dashed line</strong> extends into the future with the model's month-by-month forecasts.
+      <br><br>
+      <strong>How forecasts are generated:</strong> The model predicts one month at a time. Each month's predicted price
+      becomes part of the input (as a lag feature) to predict the next month. This <strong>iterative forecasting</strong>
+      means uncertainty grows the further out we predict &mdash; December 2027 forecasts are inherently less certain than
+      March 2026.
+      <br><br>
+      <strong>What to look for:</strong> Seasonal patterns (fish and vegetable prices often dip around harvest months),
+      gradual inflation trends, and whether the forecast continues the trajectory of actual recent prices smoothly.
+    </div>
+    <div class="controls">
+      <select id="fcComm"></select>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#e4e6eb"></div> Recent Actual Prices</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Forecast (Gradient Boosting Model)</div>
+    </div>
+    <canvas id="forecastChart" height="80"></canvas>
+  </div>
+
+  <!-- ==================== 5. ACCURACY SUMMARY DONUT ==================== -->
+  <div class="card">
+    <h2>5. Model Accuracy Summary</h2>
+    <p class="subtitle">Distribution of accuracy grades across all validated commodities</p>
+    <div class="description">
+      This donut chart shows <strong>what proportion of the 59 validated commodities</strong> fall into each accuracy grade.
+      A strong model should have the majority in <strong style="color:var(--green)">Grade A</strong> (green)
+      and <strong style="color:var(--orange)">Grade B</strong> (yellow).
+      Commodities in Grade C or D are typically volatile items (seasonal vegetables, niche fish species)
+      or products with very sparse historical data, making them harder to predict accurately.
+    </div>
+    <div style="max-width:400px; margin:0 auto;">
+      <canvas id="gradePieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <div style="text-align:center; padding:2rem 0 1rem; color:var(--text2); font-size:0.75rem;">
+    Data source: <a href="https://data.humdata.org/dataset/wfp-food-prices-for-philippines" style="color:var(--cyan);" target="_blank" rel="noopener noreferrer">WFP Food Prices for Philippines (Humanitarian Data Exchange)</a>
+    &bull; Last updated: Feb 2026 &bull; Model: Gradient Boosting (scikit-learn)
+  </div>
+</div>
+
+<script>
+let D;
+
+async function loadData() {
+  const resp = await fetch("model_comparison.json");
+  D = await resp.json();
+  init();
+}
+
+function init() {
+  renderScoreBanner();
+  renderOldModelComparison();
+  initTrendChart();
+  renderErrorChart();
+  renderCompTable();
+  initForecastChart();
+  renderGradePie();
+}
+
+// ─── Score Banner ─────────────────────────────────────────
+function renderScoreBanner() {
+  const o = D.overall;
+  const cards = [
+    { label: "Model Accuracy (MAPE)", value: o.new_mape + "%", sub: "Mean Absolute % Error — lower is better" },
+    { label: "Price Error (MAE)", value: "PHP " + o.new_mae, sub: "Average price miss in Philippine Pesos" },
+    { label: "Commodities Validated", value: D.commComparison.length, sub: "Out of " + D.meta.commodities.length + " total tracked" },
+    { label: "Forecast Range", value: "2026–2027", sub: D.meta.forecastPeriod },
+  ];
+  document.getElementById("scoreBanner").innerHTML = cards.map(c => `
+    <div class="score-card">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join("");
+}
+
+// ─── Old Model Comparison Table (numbers) ─────────────────
+function renderOldModelComparison() {
+  const o = D.overall;
+  document.getElementById("oldMapeCell").textContent = o.old_mape + "%";
+  document.getElementById("newMapeCell").textContent = o.new_mape + "%";
+  document.getElementById("mapeImpCell").innerHTML =
+    '<span style="color:var(--green);font-weight:600">\u2193 ' +
+    (o.old_mape - o.new_mape).toFixed(1) + ' pp (' +
+    ((1 - o.new_mape / o.old_mape) * 100).toFixed(0) + '% better)</span>';
+
+  document.getElementById("oldMaeCell").textContent = "PHP " + o.old_mae;
+  document.getElementById("newMaeCell").textContent = "PHP " + o.new_mae;
+  document.getElementById("maeImpCell").innerHTML =
+    '<span style="color:var(--green);font-weight:600">\u2193 PHP ' +
+    (o.old_mae - o.new_mae).toFixed(2) + ' (' +
+    ((1 - o.new_mae / o.old_mae) * 100).toFixed(0) + '% better)</span>';
+
+  document.getElementById("oldBiasCell").textContent = "+" + o.old_bias + "%";
+  document.getElementById("newBiasCell").textContent = (o.new_bias >= 0 ? "+" : "") + o.new_bias + "%";
+  document.getElementById("biasImpCell").innerHTML =
+    '<span style="color:var(--green);font-weight:600">Near zero (was +' + o.old_bias + '% systematic over-prediction)</span>';
+}
+
+// ─── Trend Chart (Actual + New Model Only) ─────────────────
+function initTrendChart() {
+  const selComm = document.getElementById("trendComm");
+  const selPT = document.getElementById("trendPT");
+
+  D.meta.commodities.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    if (c === "Rice (regular, milled)") opt.selected = true;
+    selComm.appendChild(opt);
+  });
+  D.meta.pricetypes.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p; opt.textContent = p;
+    if (p === "Retail") opt.selected = true;
+    selPT.appendChild(opt);
+  });
+
+  const ctx = document.getElementById("trendChart").getContext("2d");
+  let chart = null;
+
+  function update() {
+    const key = selComm.value + "|" + selPT.value;
+    const series = D.trends[key] || {};
+    const allDates = Object.keys(series).sort();
+
+    const actual = [], newPred = [];
+    allDates.forEach(d => {
+      const s = series[d];
+      const dateStr = d + "-15";
+      if (s.actual != null) actual.push({ x: dateStr, y: s.actual });
+      if (s.new_pred != null) newPred.push({ x: dateStr, y: s.new_pred });
+    });
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        datasets: [
+          {
+            label: "Actual WFP Price", data: actual,
+            borderColor: "#e4e6eb", backgroundColor: "rgba(228,230,235,0.08)",
+            fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5,
+          },
+          {
+            label: "New GB Model", data: newPred,
+            borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.08)",
+            fill: false, tension: 0.3, pointRadius: 0, borderWidth: 2,
+            borderDash: [4, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { type: "time", time: { unit: "year" }, title: { display: true, text: "Date" } },
+          y: { title: { display: true, text: "Price (PHP/kg)" }, beginAtZero: false },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return " " + ctx.dataset.label + ": PHP " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : "N/A"); }
+            }
+          },
+        },
+      },
+    });
+  }
+
+  selComm.addEventListener("change", update);
+  selPT.addEventListener("change", update);
+  update();
+}
+
+// ─── Error Distribution (New Model Only) ──────────────────
+function renderErrorChart() {
+  var newErrors = [];
+
+  for (var key in D.trends) {
+    var series = D.trends[key];
+    for (var date in series) {
+      var vals = series[date];
+      if (date < "2024" || vals.actual == null || vals.actual === 0) continue;
+      if (vals.new_pred != null) {
+        newErrors.push((vals.new_pred - vals.actual) / vals.actual * 100);
+      }
+    }
+  }
+
+  function histogram(errors, bins) {
+    var counts = new Array(bins.length - 1).fill(0);
+    errors.forEach(function(e) {
+      for (var i = 0; i < bins.length - 1; i++) {
+        if (e >= bins[i] && e < bins[i + 1]) { counts[i]++; break; }
+      }
+    });
+    return counts;
+  }
+
+  var bins = [-30, -20, -15, -10, -5, -2, 0, 2, 5, 10, 15, 20, 30];
+  var counts = histogram(newErrors, bins);
+  var labels = bins.slice(0, -1).map(function(b, i) { return b + "% to " + bins[i + 1] + "%"; });
+
+  new Chart(document.getElementById("newErrorChart"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        data: counts,
+        backgroundColor: bins.slice(0, -1).map(function(b) {
+          var abs = Math.abs(b);
+          if (abs <= 2) return "rgba(34,197,94,0.7)";
+          if (abs <= 5) return "rgba(34,197,94,0.5)";
+          if (abs <= 10) return "rgba(245,158,11,0.5)";
+          return "rgba(239,68,68,0.4)";
+        }),
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.y + " predictions in this range"; } } },
+      },
+      scales: {
+        x: { title: { display: true, text: "Prediction Error (%)" } },
+        y: { title: { display: true, text: "Number of Predictions" } },
+      },
+    },
+  });
+}
+
+// ─── Comparison Table ────────────────────────────────────────
+function renderCompTable() {
+  var tbody = document.getElementById("compBody");
+  var data = D.commComparison.map(function(r) {
+    return {
+      commodity: r.commodity,
+      new_mape: r.new_mape,
+      mae: r.mae,
+      n_val: r.n_val,
+      grade: r.new_mape <= 5 ? "A" : r.new_mape <= 10 ? "B" : r.new_mape <= 20 ? "C" : "D",
+    };
+  });
+
+  var sortCol = "new_mape", sortAsc = true;
+  var gradeFilter = "all";
+
+  // Grade filter tabs
+  document.querySelectorAll("#gradeFilter .tab-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#gradeFilter .tab-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      gradeFilter = btn.dataset.grade;
+      render();
+    });
+  });
+
+  function render() {
+    var filtered = gradeFilter === "all" ? data : data.filter(function(r) { return r.grade === gradeFilter; });
+
+    var sorted = filtered.slice().sort(function(a, b) {
+      var va = a[sortCol] != null ? a[sortCol] : 9999;
+      var vb = b[sortCol] != null ? b[sortCol] : 9999;
+      if (typeof va === "string") { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+    });
+
+    tbody.innerHTML = sorted.map(function(r) {
+      var gradeCls = r.grade === "A" ? "badge-good" : r.grade === "B" ? "badge-ok" : "badge-bad";
+      return '<tr>' +
+        '<td><strong>' + r.commodity + '</strong></td>' +
+        '<td style="color:var(--green)">' + r.new_mape.toFixed(1) + '%</td>' +
+        '<td>PHP ' + r.mae.toFixed(2) + '</td>' +
+        '<td>' + r.n_val + '</td>' +
+        '<td><span class="badge ' + gradeCls + '">' + r.grade + '</span></td>' +
+        '</tr>';
+    }).join("");
+  }
+
+  document.querySelectorAll("#compTable th").forEach(function(th) {
+    th.addEventListener("click", function() {
+      var col = th.dataset.col;
+      if (sortCol === col) sortAsc = !sortAsc;
+      else { sortCol = col; sortAsc = true; }
+      render();
+    });
+  });
+
+  render();
+}
+
+// ─── Forecast Chart ──────────────────────────────────────────
+function initForecastChart() {
+  var sel = document.getElementById("fcComm");
+  D.meta.commodities.forEach(function(c) {
+    if (D.forecasts[c]) {
+      var opt = document.createElement("option");
+      opt.value = c; opt.textContent = c;
+      if (c === "Rice (regular, milled)") opt.selected = true;
+      sel.appendChild(opt);
+    }
+  });
+
+  var ctx = document.getElementById("forecastChart").getContext("2d");
+  var chart = null;
+
+  function update() {
+    var comm = sel.value;
+    var fc = D.forecasts[comm] || {};
+    var dates = Object.keys(fc).sort();
+
+    // Get recent actual for context
+    var trendKey = comm + "|Retail";
+    var trend = D.trends[trendKey] || {};
+    var actualPts = [];
+    for (var d in trend) {
+      if (d >= "2023" && trend[d].actual != null) {
+        actualPts.push({ x: d + "-15", y: trend[d].actual });
+      }
+    }
+    actualPts.sort(function(a, b) { return a.x.localeCompare(b.x); });
+
+    var fcPts = dates.map(function(d) { return { x: d + "-15", y: fc[d] }; });
+
+    // Bridge: connect actual line to forecast line
+    if (actualPts.length && fcPts.length) {
+      fcPts.unshift(actualPts[actualPts.length - 1]);
+    }
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        datasets: [
+          {
+            label: "Actual (Recent)", data: actualPts,
+            borderColor: "#e4e6eb", backgroundColor: "rgba(228,230,235,0.08)",
+            fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2,
+          },
+          {
+            label: "Forecast (New Model)", data: fcPts,
+            borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.1)",
+            fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2,
+            borderDash: [5, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { type: "time", time: { unit: "month" }, title: { display: true, text: "Date" } },
+          y: { title: { display: true, text: "Avg Retail Price (PHP)" }, beginAtZero: false },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return " " + ctx.dataset.label + ": PHP " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : "N/A"); }
+            }
+          },
+        },
+      },
+    });
+  }
+
+  sel.addEventListener("change", update);
+  update();
+}
+
+// ─── Grade Pie Chart ──────────────────────────────────────────
+function renderGradePie() {
+  var grades = { A: 0, B: 0, C: 0, D: 0 };
+  D.commComparison.forEach(function(r) {
+    var g = r.new_mape <= 5 ? "A" : r.new_mape <= 10 ? "B" : r.new_mape <= 20 ? "C" : "D";
+    grades[g]++;
+  });
+
+  new Chart(document.getElementById("gradePieChart"), {
+    type: "doughnut",
+    data: {
+      labels: [
+        "Grade A (\u22645%) \u2014 " + grades.A + " commodities",
+        "Grade B (5\u201310%) \u2014 " + grades.B + " commodities",
+        "Grade C (10\u201320%) \u2014 " + grades.C + " commodities",
+        "Grade D (>20%) \u2014 " + grades.D + " commodities",
+      ],
+      datasets: [{
+        data: [grades.A, grades.B, grades.C, grades.D],
+        backgroundColor: ["#22c55e", "#f59e0b", "#ef4444", "#991b1b"],
+        borderColor: "#1a1d27",
+        borderWidth: 3,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { padding: 12, usePointStyle: true, pointStyle: "circle", font: { size: 12 } },
+        },
+        tooltip: {
+          callbacks: { label: function(ctx) { return " " + ctx.label + ": " + ctx.parsed + " commodities"; } },
+        },
+      },
+    },
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>
