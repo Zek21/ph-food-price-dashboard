@@ -131,11 +131,13 @@ VARIANT_SEARCH = {
 
 MODEL_NAMES = list(MODEL_VARIANTS.keys())
 
-# Legacy MODEL_DEFS kept as best-default fallback (used only for single-variant runs)
-MODEL_DEFS = {
-    name: (lambda variants: lambda: variants[1])(MODEL_VARIANTS[name])
-    for name in MODEL_NAMES
-}
+# Legacy MODEL_DEFS: maps each model name to a callable that returns its
+# second (index 1) variant as a reasonable single-model default.
+MODEL_DEFS = {}
+for _name in MODEL_NAMES:
+    _variants = MODEL_VARIANTS[_name]
+    _default_idx = 1 if len(_variants) > 1 else 0
+    MODEL_DEFS[_name] = lambda _v=_variants[_default_idx]: _v
 
 MODEL_COLORS = {
     "Gradient Boosting": "#22c55e",
@@ -296,7 +298,7 @@ for i, comm in enumerate(all_commodities):
         Xt = X_train_scaled if needs_scaling else X_train
         Xv = X_val_scaled if needs_scaling else X_val
 
-        best_model, best_mape, best_idx, best_pred = None, float("inf"), 0, None
+        best_model, best_mape, best_vi, best_pred = None, float("inf"), 0, None
 
         for v_idx, variant in enumerate(variants):
             try:
@@ -307,13 +309,13 @@ for i, comm in enumerate(all_commodities):
                     if v_mape < best_mape:
                         best_mape = v_mape
                         best_model = variant
-                        best_idx = v_idx
+                        best_vi = v_idx
                         best_pred = y_pred
                 else:
                     # No validation data — keep first variant
                     if best_model is None:
                         best_model = variant
-                        best_idx = v_idx
+                        best_vi = v_idx
             except Exception:
                 continue
 
@@ -321,7 +323,7 @@ for i, comm in enumerate(all_commodities):
             continue
 
         trained_models[model_name][comm] = best_model
-        best_variant_idx[model_name][comm] = best_idx
+        best_variant_idx[model_name][comm] = best_vi
 
         # Record validation results for the winning variant
         if has_val and best_pred is not None and len(y_val) > 0:
@@ -334,7 +336,7 @@ for i, comm in enumerate(all_commodities):
                 "mae": round(mae, 2),
                 "bias": round(bias, 1),
                 "n_val": len(comm_val),
-                "best_variant": best_idx,
+                "best_variant": best_vi,
                 "val_pred": best_pred.tolist(),
                 "val_actual": y_val.tolist(),
                 "val_dates": comm_val["date"].dt.strftime("%Y-%m").tolist(),
