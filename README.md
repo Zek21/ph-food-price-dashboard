@@ -67,6 +67,24 @@ schtasks /create /tn "FoodPriceDashboard" /tr "python daily_update.py" /sc daily
 | `build_dashboard.py` | Generates self-contained dashboard.html |
 | `daily_update.py` | Auto-updater with hash-based change detection |
 | `model_comparison.json` | Pre-computed model results consumed by comparison.html |
+| `TROUBLESHOOTING.md` | Comprehensive troubleshooting guide |
+| `CHANGELOG.md` | Detailed change history and improvements |
+
+## Troubleshooting
+
+Having issues? Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for:
+- Common errors and solutions
+- Data validation checks
+- Performance optimization tips
+- Debugging commands
+
+## Recent Improvements
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed information about recent fixes:
+- Fixed Ridge Regression explosive forecasts
+- Added comprehensive data validation
+- Enhanced error messages with helpful instructions
+- Improved missing file handling
 
 ## License
 
