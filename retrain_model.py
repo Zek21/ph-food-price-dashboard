@@ -17,6 +17,7 @@ Model families (5 variants each = 25 models total per commodity):
 
 import json
 import math
+import os
 import warnings
 from collections import defaultdict
 
@@ -191,9 +192,13 @@ print("  Multi-Model Food Price Forecasting Pipeline")
 print("  (5 hyperparameter variants per model, best selected)")
 print("=" * 65)
 
+# ─── Configurable paths ─────────────────────────────────────
+DATA_PATH = os.environ.get("WFP_DATA_PATH", "wfp_food_prices_phl_latest.csv")
+OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "model_comparison.json")
+
 # ─── 1. Load WFP data ───────────────────────────────────────
 print("\n[1/5] Loading latest WFP data...")
-df = pd.read_csv("D:/ML/WFP/wfp_food_prices_phl_latest.csv")
+df = pd.read_csv(DATA_PATH)
 df["date"] = pd.to_datetime(df["date"])
 df["year"] = df["date"].dt.year
 df["month"] = df["date"].dt.month
@@ -489,7 +494,10 @@ for skey in all_series_keys:
             if dk not in series:
                 series[dk] = {}
             series[dk][model_name] = round(v["sum"] / v["count"], 2)
-    trends_json[skey] = series
+    # Skip date entries with no data and skip entirely empty series
+    series = {dk: dv for dk, dv in series.items() if dv}
+    if series:
+        trends_json[skey] = series
 
 # 3) Per-commodity comparison across all models (dict keyed by commodity)
 comm_comparison = {}
@@ -561,11 +569,11 @@ dashboard_data = {
     },
 }
 
-with open("D:/ML/Website/model_comparison.json", "w") as f:
+with open(OUTPUT_PATH, "w") as f:
     json.dump(dashboard_data, f, separators=(",", ":"))
 
 print(f"\n{'='*65}")
-print(f"  Saved: D:/ML/Website/model_comparison.json")
+print(f"  Saved: {OUTPUT_PATH}")
 best = min(overall_metrics.items(), key=lambda x: x[1]["mape"])
 print(f"  Best model: {best[0]} (MAPE {best[1]['mape']}%)")
 print(f"{'='*65}")
