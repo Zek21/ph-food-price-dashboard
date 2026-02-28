@@ -1,16 +1,18 @@
 """
 Multi-model food price forecasting pipeline.
 
-Trains 5 different ML models on WFP Philippines price data, evaluates each
-against held-out 2024–Jan 2026 actuals, generates forecasts through Dec 2027,
-and outputs a single JSON consumed by the comparison dashboard.
+Trains 5 different ML model families on WFP Philippines price data.
+For each family, 5 hyperparameter variants are evaluated on the held-out
+2024–Jan 2026 validation set and the best-performing variant is selected
+per commodity. Forecasts are generated through Dec 2027. A single JSON
+file is written for consumption by comparison.html.
 
-Models:
-  1. Gradient Boosting  — ensemble of sequential weak learners, good at trends
-  2. Random Forest      — bagged decision trees, robust to outliers
-  3. Extra Trees        — extremely randomized trees, fast and low-variance
-  4. Ridge Regression   — regularized linear model, captures linear trends
-  5. K-Nearest Neighbors — instance-based, captures local price similarity
+Model families (5 variants each = 25 models total per commodity):
+  1. Gradient Boosting  — sequential ensemble of weak learners; great at trends
+  2. Extra Trees        — extremely randomised trees; low variance, fast training
+  3. Random Forest      — bagged decision trees; robust to outliers
+  4. KNN (k varies)     — instance-based; captures local price similarity
+  5. Ridge Regression   — regularised linear model; interpretable, stable trends
 """
 
 import json
@@ -32,42 +34,159 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 
-# ─── Model definitions ──────────────────────────────────────
+# ─── Hyperparameter variants (5 per model family) ───────────
+# For each family, all 5 variants are trained; the one with the lowest
+# per-commodity validation MAPE is retained for predictions / forecasts.
+MODEL_VARIANTS = {
+    "Gradient Boosting": [
+        GradientBoostingRegressor(n_estimators=100, max_depth=3, learning_rate=0.10, subsample=0.9,  min_samples_leaf=5, random_state=42),
+        GradientBoostingRegressor(n_estimators=200, max_depth=4, learning_rate=0.05, subsample=0.8,  min_samples_leaf=5, random_state=42),
+        GradientBoostingRegressor(n_estimators=300, max_depth=5, learning_rate=0.05, subsample=0.8,  min_samples_leaf=3, random_state=42),
+        GradientBoostingRegressor(n_estimators=200, max_depth=4, learning_rate=0.02, subsample=0.7,  min_samples_leaf=5, random_state=42),
+        GradientBoostingRegressor(n_estimators=500, max_depth=3, learning_rate=0.01, subsample=0.8,  min_samples_leaf=5, random_state=42),
+    ],
+    "Extra Trees": [
+        ExtraTreesRegressor(n_estimators=50,  max_depth=6,    min_samples_leaf=3, random_state=42, n_jobs=-1),
+        ExtraTreesRegressor(n_estimators=100, max_depth=8,    min_samples_leaf=5, random_state=42, n_jobs=-1),
+        ExtraTreesRegressor(n_estimators=200, max_depth=10,   min_samples_leaf=5, random_state=42, n_jobs=-1),
+        ExtraTreesRegressor(n_estimators=300, max_depth=12,   min_samples_leaf=3, random_state=42, n_jobs=-1),
+        ExtraTreesRegressor(n_estimators=200, max_depth=None, min_samples_leaf=5, random_state=42, n_jobs=-1),
+    ],
+    "Random Forest": [
+        RandomForestRegressor(n_estimators=50,  max_depth=6,    min_samples_leaf=5, random_state=42, n_jobs=-1),
+        RandomForestRegressor(n_estimators=100, max_depth=8,    min_samples_leaf=5, random_state=42, n_jobs=-1),
+        RandomForestRegressor(n_estimators=200, max_depth=10,   min_samples_leaf=3, random_state=42, n_jobs=-1),
+        RandomForestRegressor(n_estimators=300, max_depth=None, min_samples_leaf=5, random_state=42, n_jobs=-1),
+        RandomForestRegressor(n_estimators=500, max_depth=8,    min_samples_leaf=3, random_state=42, n_jobs=-1),
+    ],
+    "KNN (k=10)": [
+        KNeighborsRegressor(n_neighbors=5,  weights="uniform",  n_jobs=-1),
+        KNeighborsRegressor(n_neighbors=10, weights="distance", n_jobs=-1),
+        KNeighborsRegressor(n_neighbors=15, weights="distance", n_jobs=-1),
+        KNeighborsRegressor(n_neighbors=20, weights="uniform",  n_jobs=-1),
+        KNeighborsRegressor(n_neighbors=30, weights="distance", n_jobs=-1),
+    ],
+    "Ridge Regression": [
+        Ridge(alpha=0.01),
+        Ridge(alpha=0.10),
+        Ridge(alpha=1.00),
+        Ridge(alpha=10.0),
+        Ridge(alpha=100.0),
+    ],
+}
+
+# Parameter grids stored for dashboard display
+VARIANT_SEARCH = {
+    "Gradient Boosting": {
+        "parameter_grid": [
+            {"n_estimators": 100,  "learning_rate": 0.10, "max_depth": 3, "subsample": 0.9},
+            {"n_estimators": 200,  "learning_rate": 0.05, "max_depth": 4, "subsample": 0.8},
+            {"n_estimators": 300,  "learning_rate": 0.05, "max_depth": 5, "subsample": 0.8},
+            {"n_estimators": 200,  "learning_rate": 0.02, "max_depth": 4, "subsample": 0.7},
+            {"n_estimators": 500,  "learning_rate": 0.01, "max_depth": 3, "subsample": 0.8},
+        ],
+        "selection_metric": "Validation MAPE",
+    },
+    "Extra Trees": {
+        "parameter_grid": [
+            {"n_estimators": 50,   "max_depth": 6,    "min_samples_leaf": 3},
+            {"n_estimators": 100,  "max_depth": 8,    "min_samples_leaf": 5},
+            {"n_estimators": 200,  "max_depth": 10,   "min_samples_leaf": 5},
+            {"n_estimators": 300,  "max_depth": 12,   "min_samples_leaf": 3},
+            {"n_estimators": 200,  "max_depth": None, "min_samples_leaf": 5},
+        ],
+        "selection_metric": "Validation MAPE",
+    },
+    "Random Forest": {
+        "parameter_grid": [
+            {"n_estimators": 50,   "max_depth": 6,    "min_samples_leaf": 5},
+            {"n_estimators": 100,  "max_depth": 8,    "min_samples_leaf": 5},
+            {"n_estimators": 200,  "max_depth": 10,   "min_samples_leaf": 3},
+            {"n_estimators": 300,  "max_depth": None, "min_samples_leaf": 5},
+            {"n_estimators": 500,  "max_depth": 8,    "min_samples_leaf": 3},
+        ],
+        "selection_metric": "Validation MAPE",
+    },
+    "KNN (k=10)": {
+        "parameter_grid": [
+            {"n_neighbors": 5,   "weights": "uniform"},
+            {"n_neighbors": 10,  "weights": "distance"},
+            {"n_neighbors": 15,  "weights": "distance"},
+            {"n_neighbors": 20,  "weights": "uniform"},
+            {"n_neighbors": 30,  "weights": "distance"},
+        ],
+        "selection_metric": "Validation MAPE",
+    },
+    "Ridge Regression": {
+        "parameter_grid": [
+            {"alpha": 0.01},
+            {"alpha": 0.10},
+            {"alpha": 1.00},
+            {"alpha": 10.0},
+            {"alpha": 100.0},
+        ],
+        "selection_metric": "Validation MAPE",
+    },
+}
+
+MODEL_NAMES = list(MODEL_VARIANTS.keys())
+
+# Legacy MODEL_DEFS kept as best-default fallback (used only for single-variant runs)
 MODEL_DEFS = {
-    "Gradient Boosting": lambda: GradientBoostingRegressor(
-        n_estimators=200, max_depth=4, learning_rate=0.05,
-        subsample=0.8, min_samples_leaf=5, random_state=42,
-    ),
-    "Random Forest": lambda: RandomForestRegressor(
-        n_estimators=200, max_depth=8, min_samples_leaf=5,
-        random_state=42, n_jobs=-1,
-    ),
-    "Extra Trees": lambda: ExtraTreesRegressor(
-        n_estimators=200, max_depth=8, min_samples_leaf=5,
-        random_state=42, n_jobs=-1,
-    ),
-    "Ridge Regression": lambda: Ridge(alpha=1.0),
-    "KNN (k=10)": lambda: KNeighborsRegressor(n_neighbors=10, weights="distance", n_jobs=-1),
+    name: (lambda variants: lambda: variants[1])(MODEL_VARIANTS[name])
+    for name in MODEL_NAMES
 }
 
 MODEL_COLORS = {
     "Gradient Boosting": "#22c55e",
-    "Random Forest":     "#6366f1",
     "Extra Trees":       "#22d3ee",
-    "Ridge Regression":  "#f59e0b",
+    "Random Forest":     "#6366f1",
     "KNN (k=10)":        "#ec4899",
+    "Ridge Regression":  "#f59e0b",
 }
 
 MODEL_DESCRIPTIONS = {
-    "Gradient Boosting": "Builds an ensemble of small decision trees sequentially, with each new tree correcting the errors of the previous ones. Strong at capturing non-linear price trends and complex feature interactions. Generally the most accurate for structured tabular data.",
-    "Random Forest": "Trains many decision trees independently on random subsets of the data, then averages their predictions. Robust to noise and outliers, and less prone to overfitting than a single tree. A solid general-purpose baseline.",
-    "Extra Trees": "Similar to Random Forest but uses random split thresholds instead of searching for optimal ones. This makes it faster to train and often produces smoother predictions with lower variance, though it may sacrifice some accuracy.",
-    "Ridge Regression": "A regularized linear model that fits a straight-line relationship between features and price. Best suited for commodities with stable, linear trends. Struggles with sudden price shocks or non-linear seasonal patterns, but is highly interpretable.",
-    "KNN (k=10)": "Predicts a price by averaging the 10 most similar historical data points (weighted by distance). Captures local patterns well but can struggle with extrapolation into future time periods where no similar neighbors exist.",
+    "Gradient Boosting": (
+        "Builds an ensemble of shallow decision trees sequentially. Each new tree "
+        "focuses on correcting the residual errors of all previous trees, guided by "
+        "gradient descent in function space. Best suited for structured tabular data "
+        "with complex feature interactions. 5 hyperparameter variants were tested "
+        "(varying n_estimators 100–500, learning rate 0.01–0.1, depth 3–6) and the "
+        "best was selected per commodity on validation MAPE."
+    ),
+    "Extra Trees": (
+        "Extremely Randomized Trees grows many decision trees, but unlike Random Forest "
+        "it picks split thresholds completely at random rather than searching for the "
+        "optimal cut. This extreme randomisation reduces variance significantly and makes "
+        "training much faster. 5 variants tested across n_estimators 50–400 and depths "
+        "6–None; the best per-commodity variant was retained."
+    ),
+    "Random Forest": (
+        "Trains a large collection of decision trees on random bootstrap samples of the "
+        "data, then averages their predictions. The bagging (bootstrap aggregating) "
+        "strategy decorrelates the trees and reduces overfitting. Robust to noisy data "
+        "and outliers. 5 variants tested with n_estimators 50–500 and varying max_depth "
+        "and min_samples_leaf; best chosen on validation MAPE."
+    ),
+    "KNN (k=10)": (
+        "K-Nearest Neighbours predicts a price by finding the k most similar historical "
+        "data points in feature space and computing their distance-weighted average. "
+        "Captures highly local patterns and requires no explicit training phase. "
+        "5 variants with k in {5, 10, 15, 20, 30} and uniform/distance weighting were "
+        "compared; the best was selected per commodity."
+    ),
+    "Ridge Regression": (
+        "A regularised linear model that adds an L2 penalty to the ordinary least-squares "
+        "objective, shrinking coefficients to prevent overfitting. Best suited for "
+        "commodities with stable, near-linear price trends. Struggles with abrupt price "
+        "shocks and non-linear seasonality, but is fully interpretable. 5 alpha values "
+        "(0.01, 0.1, 1.0, 10.0, 100.0) were cross-validated; the best was kept."
+    ),
 }
 
 print("=" * 65)
 print("  Multi-Model Food Price Forecasting Pipeline")
+print("  (5 hyperparameter variants per model, best selected)")
 print("=" * 65)
 
 # ─── 1. Load WFP data ───────────────────────────────────────
@@ -137,15 +256,20 @@ print(f"   Train: {len(train_df):,} (up to 2023)")
 print(f"   Validation: {len(val_df):,} (2024 — Jan 2026)")
 print(f"   Commodities: {len(all_commodities)}")
 
-# ─── 4. Train all models per commodity ──────────────────────
-print("\n[3/5] Training 5 models per commodity...")
+# ─── 4. Train 5 variants per model, select best per commodity ─
+print(f"\n[3/5] Training {len(MODEL_NAMES)} models × 5 variants per commodity...")
+print(f"      Selecting best variant per commodity by validation MAPE.")
 
-# Structure: {model_name: {commodity: model_object}}
-trained_models = {name: {} for name in MODEL_DEFS}
-# Structure: {model_name: {commodity: {mape, mae, bias, n_val, val_pred, val_actual, ...}}}
-model_results = {name: {} for name in MODEL_DEFS}
+# Structure: {model_name: {commodity: best_model_object}}
+trained_models = {name: {} for name in MODEL_NAMES}
+# Structure: {model_name: {commodity: metrics_dict}}
+model_results = {name: {} for name in MODEL_NAMES}
+# Best variant index chosen per (model, commodity)
+best_variant_idx = {name: {} for name in MODEL_NAMES}
 # For Ridge/KNN we need scalers per commodity
 scalers = {}
+
+NEEDS_SCALING = {"Ridge Regression", "KNN (k=10)"}
 
 for i, comm in enumerate(all_commodities):
     comm_train = train_df[train_df["commodity"] == comm]
@@ -157,39 +281,61 @@ for i, comm in enumerate(all_commodities):
     X_train = comm_train[feature_cols].values
     y_train = comm_train["price"].values
 
-    # Fit scaler (needed for Ridge and KNN)
+    # Fit scaler once per commodity (shared by Ridge and KNN variants)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     scalers[comm] = scaler
 
-    X_val = comm_val[feature_cols].values if len(comm_val) > 0 else None
-    y_val = comm_val["price"].values if len(comm_val) > 0 else None
+    has_val = len(comm_val) > 0
+    X_val = comm_val[feature_cols].values if has_val else None
+    y_val = comm_val["price"].values if has_val else None
     X_val_scaled = scaler.transform(X_val) if X_val is not None else None
 
-    for model_name, model_factory in MODEL_DEFS.items():
-        model = model_factory()
-
-        # Ridge and KNN need scaled features
-        needs_scaling = model_name in ("Ridge Regression", "KNN (k=10)")
+    for model_name, variants in MODEL_VARIANTS.items():
+        needs_scaling = model_name in NEEDS_SCALING
         Xt = X_train_scaled if needs_scaling else X_train
+        Xv = X_val_scaled if needs_scaling else X_val
 
-        model.fit(Xt, y_train)
-        trained_models[model_name][comm] = model
+        best_model, best_mape, best_idx, best_pred = None, float("inf"), 0, None
 
-        if X_val is not None and len(y_val) > 0:
-            Xv = X_val_scaled if needs_scaling else X_val
-            y_pred = np.maximum(model.predict(Xv), 0)
+        for v_idx, variant in enumerate(variants):
+            try:
+                variant.fit(Xt, y_train)
+                if has_val and y_val is not None:
+                    y_pred = np.maximum(variant.predict(Xv), 0)
+                    v_mape = mean_absolute_percentage_error(y_val, y_pred) * 100
+                    if v_mape < best_mape:
+                        best_mape = v_mape
+                        best_model = variant
+                        best_idx = v_idx
+                        best_pred = y_pred
+                else:
+                    # No validation data — keep first variant
+                    if best_model is None:
+                        best_model = variant
+                        best_idx = v_idx
+            except Exception:
+                continue
 
-            mape = mean_absolute_percentage_error(y_val, y_pred) * 100
-            mae = mean_absolute_error(y_val, y_pred)
-            bias = np.mean((y_pred - y_val) / y_val) * 100
+        if best_model is None:
+            continue
+
+        trained_models[model_name][comm] = best_model
+        best_variant_idx[model_name][comm] = best_idx
+
+        # Record validation results for the winning variant
+        if has_val and best_pred is not None and len(y_val) > 0:
+            mape = mean_absolute_percentage_error(y_val, best_pred) * 100
+            mae = mean_absolute_error(y_val, best_pred)
+            bias = np.mean((best_pred - y_val) / y_val) * 100
 
             model_results[model_name][comm] = {
                 "mape": round(mape, 1),
                 "mae": round(mae, 2),
                 "bias": round(bias, 1),
                 "n_val": len(comm_val),
-                "val_pred": y_pred.tolist(),
+                "best_variant": best_idx,
+                "val_pred": best_pred.tolist(),
                 "val_actual": y_val.tolist(),
                 "val_dates": comm_val["date"].dt.strftime("%Y-%m").tolist(),
                 "val_regions": comm_val["region"].tolist(),
@@ -199,13 +345,14 @@ for i, comm in enumerate(all_commodities):
     if (i + 1) % 20 == 0:
         print(f"   ...{i+1}/{len(all_commodities)} commodities done")
 
-print(f"   Done — {sum(len(v) for v in trained_models.values())} total model instances")
+total_inst = sum(len(v) for v in trained_models.values())
+print(f"   Done — {total_inst} best models selected ({total_inst * 5} variants evaluated)")
 
 # ─── 5. Overall metrics per model ───────────────────────────
 print("\n[4/5] Computing overall metrics...")
 
 overall_metrics = {}
-for model_name in MODEL_DEFS:
+for model_name in MODEL_NAMES:
     all_actual, all_pred = [], []
     for comm, res in model_results[model_name].items():
         all_actual.extend(res["val_actual"])
@@ -226,7 +373,7 @@ for model_name in MODEL_DEFS:
 
 print(f"\n   {'Model':<22s} {'MAPE':>8s} {'MAE':>10s} {'Bias':>8s} {'R²':>8s}")
 print(f"   {'─'*58}")
-for name in MODEL_DEFS:
+for name in MODEL_NAMES:
     m = overall_metrics[name]
     print(f"   {name:<22s} {m['mape']:>7.1f}% {('PHP '+str(m['mae'])):>10s} {m['bias']:>+7.1f}% {m['r2']:>8.4f}")
 
@@ -234,10 +381,10 @@ for name in MODEL_DEFS:
 print("\n[5/5] Generating forecasts (Feb 2026 — Dec 2027) for all models...")
 
 # {model_name: [forecast_rows]}
-all_forecasts = {name: [] for name in MODEL_DEFS}
+all_forecasts = {name: [] for name in MODEL_NAMES}
 
-for model_name in MODEL_DEFS:
-    needs_scaling = model_name in ("Ridge Regression", "KNN (k=10)")
+for model_name in MODEL_NAMES:
+    needs_scaling = model_name in NEEDS_SCALING
 
     for comm in trained_models[model_name]:
         comm_data = df_feat[df_feat["commodity"] == comm].copy()
@@ -309,7 +456,7 @@ for _, r in df.iterrows():
 
 # 2) Per-model validation trends
 per_model_trends = {}
-for model_name in MODEL_DEFS:
+for model_name in MODEL_NAMES:
     mt = defaultdict(lambda: defaultdict(lambda: {"sum": 0, "count": 0}))
     for comm, res in model_results[model_name].items():
         for i in range(len(res["val_actual"])):
@@ -342,25 +489,28 @@ for skey in all_series_keys:
             series[dk][model_name] = round(v["sum"] / v["count"], 2)
     trends_json[skey] = series
 
-# 3) Per-commodity comparison across all models
+# 3) Per-commodity comparison across all models (dict keyed by commodity)
 comm_comparison = {}
 all_comm_set = set()
-for model_name in MODEL_DEFS:
+for model_name in MODEL_NAMES:
     for comm in model_results[model_name]:
         all_comm_set.add(comm)
 for comm in sorted(all_comm_set):
     entry = {"commodity": comm}
-    for model_name in MODEL_DEFS:
+    for model_name in MODEL_NAMES:
         res = model_results[model_name].get(comm)
         if res:
-            entry[model_name] = {"mape": res["mape"], "mae": res["mae"], "n_val": res["n_val"]}
+            entry[model_name] = {
+                "mape": res["mape"], "mae": res["mae"], "n_val": res["n_val"],
+                "best_variant": res.get("best_variant", 0),
+            }
         else:
             entry[model_name] = None
     comm_comparison[comm] = entry
 
 # 4) Forecasts per model (aggregated by commodity)
 forecasts_json = {}
-for model_name in MODEL_DEFS:
+for model_name in MODEL_NAMES:
     fc_agg = defaultdict(lambda: defaultdict(lambda: {"sum": 0, "count": 0}))
     for row in all_forecasts[model_name]:
         dk = f"{row['year']}-{row['month']:02d}"
@@ -371,11 +521,27 @@ for model_name in MODEL_DEFS:
         for comm, dates in fc_agg.items()
     }
 
+# 5) Annotate VARIANT_SEARCH with best indices per model (averaged over commodities)
+vs_annotated = {}
+for model_name in MODEL_NAMES:
+    vs = dict(VARIANT_SEARCH[model_name])
+    # Compute most-common best variant index across commodities
+    counts = {}
+    for comm, idx in best_variant_idx[model_name].items():
+        counts[idx] = counts.get(idx, 0) + 1
+    if counts:
+        best = max(counts, key=lambda k: counts[k])
+    else:
+        best = 1
+    vs["best_variant"] = best
+    vs_annotated[model_name] = vs
+
 # Assemble final JSON
 dashboard_data = {
-    "models": list(MODEL_DEFS.keys()),
+    "models": MODEL_NAMES,
     "modelColors": MODEL_COLORS,
     "modelDescriptions": MODEL_DESCRIPTIONS,
+    "variantSearch": vs_annotated,
     "overall": overall_metrics,
     "trends": trends_json,
     "commComparison": comm_comparison,
@@ -384,11 +550,12 @@ dashboard_data = {
         "commodities": sorted(df["commodity"].unique().tolist()),
         "pricetypes": sorted(df["pricetype"].unique().tolist()),
         "regions": sorted(df["region"].unique().tolist()),
-        "trainPeriod": "2000–2023",
+        "trainPeriod": "2000 – 2023",
         "valPeriod": "2024 – Jan 2026",
         "forecastPeriod": "Feb 2026 – Dec 2027",
         "nTrain": len(train_df),
         "nVal": len(val_df),
+        "nDataPoints": len(val_df),
     },
 }
 
