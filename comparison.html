@@ -407,10 +407,11 @@ function loadData(){
       init();
     })
     .catch(function(e){
+      var msg=String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       document.body.innerHTML="<div style='padding:3rem;color:#ef4444;font-size:1.1rem'>"+
-        "Failed to load model_comparison.json — make sure you are serving via HTTP, not file://.<br>"+
+        "Failed to load model_comparison.json &mdash; make sure you are serving via HTTP, not file://.<br>"+
         "Run: <code>python -m http.server 8080</code> then open http://localhost:8080/comparison.html<br>"+
-        "Error: "+e+"</div>";
+        "Error: "+msg+"</div>";
     });
 }
 
