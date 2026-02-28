@@ -28,7 +28,7 @@ from pathlib import Path
 
 # ─── Configuration ──────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
-_default_wfp_csv = str(BASE_DIR.parent / "WFP" / "wfp_food_prices_phl_latest.csv")
+_default_wfp_csv = str(BASE_DIR / "wfp_food_prices_phl_latest.csv")
 WFP_CSV = Path(os.environ.get("WFP_DATA_PATH", _default_wfp_csv))
 HASH_FILE = BASE_DIR / ".last_data_hash"
 LOG_FILE = BASE_DIR / "update_log.txt"
