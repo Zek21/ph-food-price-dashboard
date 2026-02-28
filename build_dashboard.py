@@ -5,7 +5,13 @@ Aggregates large datasets and generates a self-contained HTML file.
 
 import csv
 import json
+import os
 from collections import defaultdict
+
+# ─── Configurable paths ─────────────────────────────────────
+HIST_DATA_PATH = os.environ.get("HIST_DATA_PATH", "Dataset_WFP2.csv")
+PRED_DATA_PATH = os.environ.get("PRED_DATA_PATH", "merged_file_with_location_2.csv")
+OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "dashboard.html")
 
 print("=" * 60)
 print("  WFP Philippines Food Price Dashboard Builder")
@@ -14,7 +20,7 @@ print("=" * 60)
 # ─── 1. Load Historical Data ────────────────────────────────
 print("\n[1/4] Loading historical data...")
 hist_rows = []
-with open("D:/ML/WFP/Dataset WFP2.csv", "r") as f:
+with open(HIST_DATA_PATH, "r") as f:
     reader = csv.DictReader(f)
     for r in reader:
         try:
@@ -39,7 +45,7 @@ print(f"   Loaded {len(hist_rows):,} historical rows")
 print("\n[2/4] Loading predicted data (aggregating 22M+ rows)...")
 pred_agg = defaultdict(lambda: {"sum": 0, "count": 0})
 pred_count = 0
-with open("D:/ML/merged_file_with_location_2.csv", "r") as f:
+with open(PRED_DATA_PATH, "r") as f:
     reader = csv.DictReader(f)
     for r in reader:
         pred_count += 1
@@ -875,11 +881,10 @@ Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
 </body>
 </html>"""
 
-output_path = "D:/ML/Website/dashboard.html"
-with open(output_path, "w", encoding="utf-8") as f:
+with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"\n{'=' * 60}")
-print(f"  Dashboard saved to: {output_path}")
+print(f"  Dashboard saved to: {OUTPUT_PATH}")
 print(f"  Open in browser to view!")
 print(f"{'=' * 60}")

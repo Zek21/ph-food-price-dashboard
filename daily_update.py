@@ -7,8 +7,14 @@ Usage:
   python daily_update.py --force  # Force update even if data hasn't changed
 
 Scheduling (Windows Task Scheduler):
-  Run: schtasks /create /tn "FoodPriceDashboard" /tr "python D:\\ML\\Website\\daily_update.py" /sc daily /st 06:00
+  Run: schtasks /create /tn "FoodPriceDashboard" /tr "python daily_update.py" /sc daily /st 06:00
   Delete: schtasks /delete /tn "FoodPriceDashboard" /f
+
+Scheduling (Linux/macOS cron):
+  Add via crontab -e:  0 6 * * * cd /path/to/repo && python daily_update.py
+
+Environment variables (override defaults):
+  WFP_DATA_PATH  — path to the WFP CSV file (default: ../WFP/wfp_food_prices_phl_latest.csv)
 """
 
 import hashlib
@@ -22,8 +28,8 @@ from pathlib import Path
 
 # ─── Configuration ──────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
-ML_DIR = BASE_DIR.parent  # D:/ML
-WFP_CSV = ML_DIR / "WFP" / "wfp_food_prices_phl_latest.csv"
+_default_wfp_csv = str(BASE_DIR.parent / "WFP" / "wfp_food_prices_phl_latest.csv")
+WFP_CSV = Path(os.environ.get("WFP_DATA_PATH", _default_wfp_csv))
 HASH_FILE = BASE_DIR / ".last_data_hash"
 LOG_FILE = BASE_DIR / "update_log.txt"
 
@@ -92,12 +98,16 @@ def download_latest() -> bool:
 def retrain_model():
     """Run retrain_model.py to rebuild the model and comparison JSON."""
     log.info("Retraining model...")
+    env = os.environ.copy()
+    env["WFP_DATA_PATH"] = str(WFP_CSV)
+    env["OUTPUT_PATH"] = str(BASE_DIR / "model_comparison.json")
     result = subprocess.run(
         [sys.executable, str(BASE_DIR / "retrain_model.py")],
         cwd=str(BASE_DIR),
         capture_output=True,
         text=True,
         timeout=600,
+        env=env,
     )
     if result.returncode != 0:
         log.error("retrain_model.py failed:\n%s\n%s", result.stdout[-2000:], result.stderr[-2000:])

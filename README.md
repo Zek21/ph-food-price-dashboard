@@ -44,9 +44,17 @@ python -m http.server 8787
 # Open http://localhost:8787/comparison.html
 ```
 
-### Schedule daily updates (Windows)
+### Schedule daily updates
+
+**Windows (Task Scheduler):**
 ```cmd
-schtasks /create /tn "FoodPriceDashboard" /tr "python D:\ML\Website\daily_update.py" /sc daily /st 06:00
+schtasks /create /tn "FoodPriceDashboard" /tr "python daily_update.py" /sc daily /st 06:00
+```
+
+**Linux/macOS (cron):**
+```bash
+# Run at 06:00 daily — add via: crontab -e
+0 6 * * * cd /path/to/ph-food-price-dashboard && python daily_update.py
 ```
 
 ## File Structure
