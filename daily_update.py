@@ -98,17 +98,28 @@ def download_latest() -> bool:
 def retrain_model():
     """Run retrain_model.py to rebuild the model and comparison JSON."""
     log.info("Retraining model...")
+    retrain_script = BASE_DIR / "retrain_model.py"
+    if not retrain_script.exists():
+        log.error("retrain_model.py not found at %s", retrain_script)
+        raise FileNotFoundError(f"Script not found: {retrain_script}")
+
     env = os.environ.copy()
     env["WFP_DATA_PATH"] = str(WFP_CSV)
     env["OUTPUT_PATH"] = str(BASE_DIR / "model_comparison.json")
-    result = subprocess.run(
-        [sys.executable, str(BASE_DIR / "retrain_model.py")],
-        cwd=str(BASE_DIR),
-        capture_output=True,
-        text=True,
-        timeout=600,
-        env=env,
-    )
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(retrain_script)],
+            cwd=str(BASE_DIR),
+            capture_output=True,
+            text=True,
+            timeout=600,
+            env=env,
+        )
+    except subprocess.TimeoutExpired:
+        log.error("Model retraining timed out after 600 seconds")
+        raise RuntimeError("Model retraining timed out")
+
     if result.returncode != 0:
         log.error("retrain_model.py failed:\n%s\n%s", result.stdout[-2000:], result.stderr[-2000:])
         raise RuntimeError("Model retraining failed")

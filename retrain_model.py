@@ -198,14 +198,29 @@ OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "model_comparison.json")
 
 # ─── 1. Load WFP data ───────────────────────────────────────
 print("\n[1/5] Loading latest WFP data...")
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(f"Data file not found: {DATA_PATH}. Please download WFP data first.")
+
 df = pd.read_csv(DATA_PATH)
-df["date"] = pd.to_datetime(df["date"])
+
+# Validate required columns
+required_cols = ["date", "price", "commodity", "admin1", "pricetype"]
+missing_cols = [col for col in required_cols if col not in df.columns]
+if missing_cols:
+    raise ValueError(f"Missing required columns in data: {missing_cols}")
+
+df["date"] = pd.to_datetime(df["date"], errors="coerce")
+df = df.dropna(subset=["date"])
 df["year"] = df["date"].dt.year
 df["month"] = df["date"].dt.month
 df["price"] = pd.to_numeric(df["price"], errors="coerce")
 df = df.dropna(subset=["price"])
 df = df[df["price"] > 0]
 df["region"] = df["admin1"]
+
+# Data quality check
+if len(df) < 100:
+    raise ValueError(f"Insufficient data: only {len(df)} records after cleaning. Need at least 100.")
 
 print(f"   Records: {len(df):,}")
 print(f"   Date range: {df['date'].min().date()} — {df['date'].max().date()}")
@@ -440,6 +455,12 @@ for model_name in MODEL_NAMES:
                             features = scaler.transform(features)
 
                         pred = max(0, float(model.predict(features)[0]))
+
+                        # Validate prediction: cap at 5x the recent average to prevent unrealistic forecasts
+                        recent_avg = np.mean(price_history[-12:]) if len(price_history) >= 12 else np.mean(price_history)
+                        if pred > recent_avg * 5:
+                            pred = recent_avg * 1.5  # Cap at 50% increase instead
+
                         price_history.append(pred)
 
                         all_forecasts[model_name].append({

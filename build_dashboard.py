@@ -19,6 +19,9 @@ print("=" * 60)
 
 # ─── 1. Load Historical Data ────────────────────────────────
 print("\n[1/4] Loading historical data...")
+if not os.path.exists(HIST_DATA_PATH):
+    raise FileNotFoundError(f"Historical data file not found: {HIST_DATA_PATH}")
+
 hist_rows = []
 with open(HIST_DATA_PATH, "r") as f:
     reader = csv.DictReader(f)
@@ -39,27 +42,37 @@ with open(HIST_DATA_PATH, "r") as f:
             "price": price,
             "location": r["Location"],
         })
+
+if len(hist_rows) == 0:
+    raise ValueError(f"No valid data found in {HIST_DATA_PATH}")
+
 print(f"   Loaded {len(hist_rows):,} historical rows")
 
 # ─── 2. Load Predicted Data (aggregated) ────────────────────
 print("\n[2/4] Loading predicted data (aggregating 22M+ rows)...")
-pred_agg = defaultdict(lambda: {"sum": 0, "count": 0})
-pred_count = 0
-with open(PRED_DATA_PATH, "r") as f:
-    reader = csv.DictReader(f)
-    for r in reader:
-        pred_count += 1
-        if pred_count % 5_000_000 == 0:
-            print(f"   ...processed {pred_count/1e6:.0f}M rows")
-        try:
-            price = float(r["Predicted_Price"])
-        except (ValueError, KeyError):
-            continue
-        key = (int(r["Year"]), int(r["Month"]), r["Region"], r["Category"], r["Commodity"], r["Pricetype"])
-        pred_agg[key]["sum"] += price
-        pred_agg[key]["count"] += 1
+if not os.path.exists(PRED_DATA_PATH):
+    print(f"   Warning: Predicted data file not found: {PRED_DATA_PATH}")
+    print(f"   Continuing with historical data only.")
+    pred_agg = {}
+    pred_count = 0
+else:
+    pred_agg = defaultdict(lambda: {"sum": 0, "count": 0})
+    pred_count = 0
+    with open(PRED_DATA_PATH, "r") as f:
+        reader = csv.DictReader(f)
+        for r in reader:
+            pred_count += 1
+            if pred_count % 5_000_000 == 0:
+                print(f"   ...processed {pred_count/1e6:.0f}M rows")
+            try:
+                price = float(r["Predicted_Price"])
+            except (ValueError, KeyError):
+                continue
+            key = (int(r["Year"]), int(r["Month"]), r["Region"], r["Category"], r["Commodity"], r["Pricetype"])
+            pred_agg[key]["sum"] += price
+            pred_agg[key]["count"] += 1
 
-print(f"   Processed {pred_count:,} predicted rows → {len(pred_agg):,} aggregated groups")
+    print(f"   Processed {pred_count:,} predicted rows → {len(pred_agg):,} aggregated groups")
 
 # ─── 3. Build Dashboard Data ────────────────────────────────
 print("\n[3/4] Building dashboard data structures...")

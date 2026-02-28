@@ -646,17 +646,28 @@ function rankClass(i){return["rank-1","rank-2","rank-3","rank-4","rank-5"][i]||"
 // ─── Load data ────────────────────────────────────────────────────────────
 function loadData(){
   fetch("model_comparison.json")
-    .then(function(r){return r.json()})
+    .then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status+": "+r.statusText);
+      return r.json();
+    })
     .then(function(data){
+      // Validate data structure
+      if(!data || !data.models || !data.trends) {
+        throw new Error("Invalid data format: missing required fields");
+      }
       D = data;
+      console.log("✓ Loaded model comparison data:", D.models.length, "models,", Object.keys(D.trends).length, "trend series");
       init();
     })
     .catch(function(e){
+      console.error("Failed to load data:", e);
       var msg=String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       document.body.innerHTML="<div style='padding:3rem;color:#ef4444;font-size:1.1rem'>"+
-        "Failed to load model_comparison.json &mdash; make sure you are serving via HTTP, not file://.<br>"+
-        "Run: <code>python -m http.server 8080</code> then open http://localhost:8080/comparison.html<br>"+
-        "Error: "+msg+"</div>";
+        "<h2 style='color:#ef4444;margin-bottom:1rem'>⚠ Failed to load model_comparison.json</h2>"+
+        "<p>Make sure you are serving via HTTP, not file://.</p>"+
+        "<p><strong>Run:</strong> <code style='background:#1a1d27;padding:0.3rem 0.6rem;border-radius:4px;color:#22d3ee'>python -m http.server 8080</code></p>"+
+        "<p>Then open: <code style='background:#1a1d27;padding:0.3rem 0.6rem;border-radius:4px;color:#22d3ee'>http://localhost:8080/comparison_enhanced.html</code></p>"+
+        "<p style='margin-top:1.5rem;color:#8b8fa3;font-size:0.9rem'><strong>Error:</strong> "+msg+"</p></div>";
     });
 }
 
