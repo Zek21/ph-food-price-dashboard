@@ -270,12 +270,15 @@ df_feat = df_feat.dropna(subset=feature_cols)
 print(f"   Features: {len(feature_cols)}, Usable rows: {len(df_feat):,}")
 
 # ─── 3. Train / Validate Split ──────────────────────────────
-train_df = df_feat[df_feat["year"] <= 2023]
-val_df = df_feat[df_feat["year"] >= 2024]
+# Dynamic: validate on last 24 months from actual data (auto-adapts as new data arrives)
+_latest_date = df["date"].max()
+_val_start = (_latest_date - pd.DateOffset(months=24)).replace(day=1)
+train_df = df_feat[df_feat["date"] < _val_start]
+val_df = df_feat[df_feat["date"] >= _val_start]
 all_commodities = df_feat["commodity"].unique()
 
-print(f"   Train: {len(train_df):,} (up to 2023)")
-print(f"   Validation: {len(val_df):,} (2024 — Jan 2026)")
+print(f"   Train: {len(train_df):,} (up to {(_val_start - pd.DateOffset(months=1)).strftime('%b %Y')})")
+print(f"   Validation: {len(val_df):,} ({_val_start.strftime('%Y-%m')} -- {_latest_date.strftime('%b %Y')})")
 print(f"   Commodities: {len(all_commodities)}")
 
 # ─── 4. Train 5 variants per model, select best per commodity ─
