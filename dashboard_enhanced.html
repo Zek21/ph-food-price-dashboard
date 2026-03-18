@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Philippines Food Price Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+  /* <!-- signed: alpha --> */
   :root {
     --bg: #0f1117;
     --card: #1a1d27;
@@ -23,17 +29,54 @@
     --red: #ef4444;
     --orange: #f59e0b;
     --pink: #ec4899;
+    --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    --map-tiles: dark_all;
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #d1d5db;
+    --text: #1f2937;
+    --text2: #6b7280;
+    --accent: #4f46e5;
+    --accent2: #0891b2;
+    --green: #16a34a;
+    --red: #dc2626;
+    --orange: #d97706;
+    --pink: #db2777;
+    --header-bg: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 50%, #c7d2fe 100%);
+    --map-tiles: light_all;
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
+    transition: background 0.3s, color 0.3s;
     color: var(--text);
     line-height: 1.6;
     min-height: 100vh;
   }
+  /* Theme toggle */
+  .theme-toggle {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
   .header {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    background: var(--header-bg);
     padding: 2rem 2rem 1.5rem;
     border-bottom: 1px solid var(--border);
   }
@@ -200,7 +243,7 @@
   .card-title-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem}
   .zoom-hint{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:#888;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.7rem;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
   .card:hover .zoom-hint{opacity:1}
-  .action-bar{position:sticky;top:0;z-index:100;background:#1a1d27;border-bottom:1px solid #2a2d3a;padding:0.8rem 1.5rem;display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+  .action-bar{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);padding:0.8rem 1.5rem;display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;box-shadow:var(--card-shadow)}
   .btn{background:#6366f1;color:#fff;border:none;padding:0.5rem 1rem;border-radius:6px;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
   .btn:hover{background:#5558e3;transform:translateY(-1px);box-shadow:0 4px 8px rgba(99,102,241,0.3)}
   .btn-secondary{background:rgba(99,102,241,0.2);color:#6366f1}
@@ -220,17 +263,23 @@
 </div>
 
 <!-- Global Action Bar -->
-<div class="action-bar">
+<div class="action-bar" role="toolbar" aria-label="Dashboard controls">
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme (Ctrl+D)">
+    <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+  </button>
   <button class="btn" onclick="exportDashboardData()">📥 Export Data (JSON)</button>
+  <button class="btn btn-secondary" onclick="exportExcel()">📊 Export Excel</button>
   <button class="btn btn-secondary" onclick="exportTrendsCSV()">📊 Export Trends (CSV)</button>
   <button class="btn btn-secondary" onclick="resetDashboard()">🔄 Reset</button>
   <input type="text" placeholder="🔍 Search commodities..." 
-    style="background:#0f1117;border:1px solid #2a2d3a;padding:0.5rem 1rem;border-radius:6px;color:#e4e6eb;font-size:0.85rem;min-width:250px;flex:1;max-width:300px" 
+    style="background:var(--bg);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:6px;color:var(--text);font-size:0.85rem;min-width:250px;flex:1;max-width:300px" 
     id="dashboardSearch"
-    oninput="filterCommodityTable(this.value)">
-  <span style="margin-left:auto;color:#8b8fa3;font-size:0.75rem">
-    <kbd style="background:#0f1117;padding:0.2rem 0.4rem;border-radius:4px">Ctrl+E</kbd> Export |
-    <kbd style="background:#0f1117;padding:0.2rem 0.4rem;border-radius:4px">Ctrl+R</kbd> Reset
+    oninput="filterCommodityTable(this.value)"
+    aria-label="Search commodities">
+  <span style="margin-left:auto;color:var(--text2);font-size:0.75rem">
+    <kbd style="background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px">Ctrl+E</kbd> Export |
+    <kbd style="background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px">Ctrl+D</kbd> Theme |
+    <kbd style="background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px">Ctrl+R</kbd> Reset
   </span>
 </div>
 
@@ -243,8 +292,8 @@
     <h2>Price Trends</h2>
     <p class="subtitle">Historical prices + ML predictions. Select a commodity and price type to explore.</p>
     <div class="controls">
-      <select id="trendCommodity"></select>
-      <select id="trendPriceType"></select>
+      <select id="trendCommodity" aria-label="Select commodity"></select>
+      <select id="trendPriceType" aria-label="Select price type"></select>
     </div>
     <div class="legend-row">
       <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> Historical</div>
@@ -352,10 +401,12 @@ const D = {"trends":{"Rice (regular, milled)|Retail":{"2020-01":{"price":45.5,"t
   `).join("");
 })();
 
-// ─── Chart.js Defaults ──────────────────────────────────
+// ─── Chart.js Defaults (performance optimized) ─────────
 Chart.defaults.color = "#8b8fa3";
 Chart.defaults.borderColor = "#2a2d3a";
 Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.normalized = true;
+Chart.defaults.spanGaps = true;
 
 // ─── Price Trend Chart ──────────────────────────────────
 (function() {
@@ -674,32 +725,53 @@ Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
   render();
 })();
 </script>
-</body>
-</html>
+
 <script>
+// <!-- signed: alpha -->
 // ========================================================================
-// DASHBOARD ENHANCEMENTS
+// DASHBOARD ENHANCEMENTS — Dark Mode, PWA, Excel Export, Perf, A11y
 // ========================================================================
 
-// Enable Chart.js zoom plugin globally
+// ── Theme Toggle ────────────────────────────────────────
+function getPreferredTheme() {
+  var saved = localStorage.getItem('ph-dashboard-theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  var icon = document.getElementById('themeIcon');
+  var label = document.getElementById('themeLabel');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('ph-dashboard-theme', theme);
+  // Update Chart.js defaults for theme
+  if (window.Chart) {
+    Chart.defaults.color = theme === 'dark' ? '#8b8fa3' : '#4b5563';
+    Chart.defaults.borderColor = theme === 'dark' ? '#2a2d3a' : '#d1d5db';
+  }
+}
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+// Apply on load
+applyTheme(getPreferredTheme());
+// Listen for OS theme changes
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+  if (!localStorage.getItem('ph-dashboard-theme')) {
+    applyTheme(e.matches ? 'light' : 'dark');
+  }
+});
+
+// ── Chart.js Enhancements ───────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   if (window.Chart && window['chartjs-plugin-zoom']) {
     Chart.register(window['chartjs-plugin-zoom']);
-    
-    // Apply zoom/pan to all charts
     Chart.defaults.plugins.zoom = {
-      zoom: {
-        wheel: { enabled: true },
-        pinch: { enabled: true },
-        mode: 'xy',
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      }
+      zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' },
+      pan: { enabled: true, mode: 'xy' }
     };
-    
-    // Enhanced tooltips
     Chart.defaults.plugins.tooltip = {
       backgroundColor: 'rgba(0, 0, 0, 0.95)',
       titleColor: '#6366f1',
@@ -708,29 +780,28 @@ document.addEventListener('DOMContentLoaded', function() {
       borderWidth: 1,
       padding: 12
     };
-    
-    // Smooth animations
-    Chart.defaults.animation = {
-      duration: 750,
-      easing: 'easeInOutQuart'
-    };
+    Chart.defaults.animation = { duration: 750, easing: 'easeInOutQuart' };
   }
-  
-  // Add click handlers to summary cards
+  // Summary card click handlers
   setTimeout(function() {
     var cards = document.querySelectorAll('.summary-card');
-    cards.forEach(function(card) {
+    cards.forEach(function(card, idx) {
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', card.querySelector('.label')?.textContent || 'Summary card ' + (idx+1));
       card.addEventListener('click', function() {
-        cards.forEach(c => c.classList.remove('active'));
+        cards.forEach(function(c) { c.classList.remove('active'); });
         card.classList.add('active');
       });
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+      });
     });
-  }, 1000);
-  
+  }, 500);
   console.log('✅ Dashboard enhancements loaded');
 });
 
-// Export dashboard data
+// ── Export: JSON ─────────────────────────────────────────
 function exportDashboardData() {
   if (typeof D !== 'undefined') {
     var json = JSON.stringify(D, null, 2);
@@ -739,58 +810,98 @@ function exportDashboardData() {
     link.download = 'dashboard-data-' + new Date().toISOString().slice(0, 10) + '.json';
     link.href = URL.createObjectURL(blob);
     link.click();
-    console.log('✅ Data exported');
   }
 }
 
-// Export trends as CSV
+// ── Export: CSV ──────────────────────────────────────────
 function exportTrendsCSV() {
   if (typeof D === 'undefined' || !D.trends) return;
-  
   var csv = 'Commodity,PriceType,Date,Price,Type\n';
   Object.keys(D.trends).forEach(function(key) {
     var parts = key.split('|');
-    var comm = parts[0];
-    var pt = parts[1];
+    var comm = parts[0], pt = parts[1];
     var series = D.trends[key];
     Object.keys(series).forEach(function(date) {
       var entry = series[date];
       csv += '"' + comm + '","' + pt + '","' + date + '",' + entry.price + ',' + entry.type + '\n';
     });
   });
-  
   var blob = new Blob([csv], { type: 'text/csv' });
   var link = document.createElement('a');
   link.download = 'price-trends-' + new Date().toISOString().slice(0, 10) + '.csv';
   link.href = URL.createObjectURL(blob);
   link.click();
-  console.log('✅ Trends exported to CSV');
 }
 
-// Reset dashboard
+// ── Export: Excel (SheetJS) ─────────────────────────────
+function exportExcel() {
+  if (typeof XLSX === 'undefined' || typeof D === 'undefined') {
+    alert('Excel export library not loaded. Please check your internet connection.');
+    return;
+  }
+  var wb = XLSX.utils.book_new();
+  // Sheet 1: Commodity Table
+  if (D.commodityTable && D.commodityTable.length) {
+    var wsData = [['Commodity', 'Category', 'Avg Price (PHP/kg)', 'Min', 'Max', 'Records']];
+    D.commodityTable.forEach(function(r) {
+      wsData.push([r.name, r.category, r.avg, r.min, r.max, r.records]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Commodities');
+  }
+  // Sheet 2: Price Trends
+  if (D.trends) {
+    var trendData = [['Commodity', 'Price Type', 'Date', 'Price (PHP)', 'Type']];
+    Object.keys(D.trends).forEach(function(key) {
+      var parts = key.split('|');
+      var series = D.trends[key];
+      Object.keys(series).sort().forEach(function(date) {
+        trendData.push([parts[0], parts[1], date, series[date].price, series[date].type]);
+      });
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(trendData), 'Price Trends');
+  }
+  // Sheet 3: Year-over-Year
+  if (D.yoy) {
+    var years = Object.keys(D.yoy).sort();
+    var cats = D.meta ? D.meta.categories : Object.keys(D.yoy[years[0]] || {});
+    var yoyHeader = ['Year'].concat(cats.map(function(c) { return c.charAt(0).toUpperCase() + c.slice(1); }));
+    var yoyData = [yoyHeader];
+    years.forEach(function(y) {
+      var row = [y];
+      cats.forEach(function(c) { row.push(D.yoy[y][c] || ''); });
+      yoyData.push(row);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(yoyData), 'Year-over-Year');
+  }
+  // Sheet 4: Regional
+  if (D.regional) {
+    var regData = [['Region', 'Category', 'Avg Price (PHP/kg)']];
+    Object.keys(D.regional).forEach(function(region) {
+      Object.keys(D.regional[region]).forEach(function(cat) {
+        regData.push([region, cat, D.regional[region][cat]]);
+      });
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(regData), 'Regional');
+  }
+  XLSX.writeFile(wb, 'ph-food-prices-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
+// ── Reset ───────────────────────────────────────────────
 function resetDashboard() {
   var selects = document.querySelectorAll('select');
-  selects.forEach(function(sel) {
-    if (sel.options.length > 0) sel.selectedIndex = 0;
-  });
-  
+  selects.forEach(function(sel) { if (sel.options.length > 0) sel.selectedIndex = 0; });
   var search = document.getElementById('dashboardSearch');
   if (search) search.value = '';
-  
   var input = document.getElementById('tableSearch');
   if (input) input.value = '';
-  
   filterCommodityTable('');
-  
-  console.log('✅ Dashboard reset');
 }
 
-// Filter commodity table
+// ── Filter ──────────────────────────────────────────────
 function filterCommodityTable(query) {
   query = query.toLowerCase();
   var tbody = document.getElementById('commTableBody');
   if (!tbody) return;
-  
   var rows = tbody.querySelectorAll('tr');
   rows.forEach(function(row) {
     var text = row.textContent.toLowerCase();
@@ -798,19 +909,47 @@ function filterCommodityTable(query) {
   });
 }
 
-// Keyboard shortcuts
+// ── Keyboard Shortcuts (A11y) ───────────────────────────
 document.addEventListener('keydown', function(e) {
-  // Ctrl+E or Cmd+E: Export
-  if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-    e.preventDefault();
-    exportDashboardData();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); exportDashboardData(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); resetDashboard(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); toggleTheme(); }
+  // Arrow key chart navigation
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    var active = document.activeElement;
+    if (active && active.tagName === 'CANVAS') {
+      var chart = Chart.getChart(active);
+      if (chart && chart.data && chart.data.labels) {
+        e.preventDefault();
+        var tooltip = chart.tooltip;
+        var idx = (tooltip && tooltip.dataPoints && tooltip.dataPoints.length) ? tooltip.dataPoints[0].dataIndex : -1;
+        var maxIdx = chart.data.labels.length - 1;
+        if (e.key === 'ArrowRight') idx = Math.min(idx + 1, maxIdx);
+        else idx = Math.max(idx - 1, 0);
+        chart.tooltip.setActiveElements([{datasetIndex: 0, index: idx}], {x: 0, y: 0});
+        chart.setActiveElements([{datasetIndex: 0, index: idx}]);
+        chart.update('none');
+      }
+    }
   }
-  // Ctrl+R or Cmd+R: Reset
-  if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-    e.preventDefault();
-    resetDashboard();
+  // Tab navigation for charts
+  if (e.key === 'Tab') {
+    var canvases = document.querySelectorAll('canvas');
+    canvases.forEach(function(c) { c.setAttribute('tabindex', '0'); c.setAttribute('role', 'img'); });
   }
 });
 
+// ── PWA Service Worker Registration ─────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('✅ Service Worker registered, scope:', reg.scope);
+    }).catch(function(err) {
+      console.log('Service Worker registration skipped:', err.message);
+    });
+  });
+}
 </script>
+</body>
+</html>
 

@@ -4,22 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Philippines Food Price — Enhanced Multi-Model Forecast Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
+/* <!-- signed: alpha --> */
 :root {
   --bg:#0f1117; --card:#1a1d27; --border:#2a2d3a;
   --text:#e4e6eb; --text2:#8b8fa3;
   --accent:#6366f1; --green:#22c55e; --cyan:#22d3ee;
   --orange:#f59e0b; --pink:#ec4899; --red:#ef4444;
+  --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+[data-theme="light"] {
+  --bg:#f5f5f7; --card:#ffffff; --border:#d1d5db;
+  --text:#1f2937; --text2:#6b7280;
+  --accent:#4f46e5; --green:#16a34a; --cyan:#0891b2;
+  --orange:#d97706; --pink:#db2777; --red:#dc2626;
+  --header-bg: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 50%, #c7d2fe 100%);
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s}
 
 /* ── Header with Enhanced Controls ── */
-.header{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);padding:2.5rem 2rem 2rem;border-bottom:1px solid var(--border);position:relative}
+.header{background:var(--header-bg);padding:2.5rem 2rem 2rem;border-bottom:1px solid var(--border);position:relative}
 .header h1{font-size:1.8rem;font-weight:700;background:linear-gradient(90deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header p{color:var(--text2);font-size:.9rem;margin-top:.3rem;max-width:900px}
 .header .pill-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
@@ -142,6 +158,11 @@ table.dt tr:hover td{background:rgba(99,102,241,.05)}
 .shortcuts-hint:hover{opacity:1}
 .shortcuts-hint kbd{background:var(--bg);padding:0.2rem 0.4rem;border-radius:4px;font-family:monospace;color:var(--accent)}
 
+/* ── Theme Toggle ── */
+.theme-toggle{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.4rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;transition:all 0.2s;display:flex;align-items:center;gap:0.4rem}
+.theme-toggle:hover{border-color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
 </style>
 </head>
 <body>
@@ -169,9 +190,15 @@ table.dt tr:hover td{background:rgba(99,102,241,.05)}
 </div>
 
 <!-- NEW: Global Action Bar -->
-<div class="action-bar">
+<div class="action-bar" role="toolbar" aria-label="Dashboard controls">
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme (Ctrl+D)">
+    <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+  </button>
   <button class="btn btn-small" onclick="dashboardEnhancements.exportToJSON(window.D, 'model-comparison-' + new Date().toISOString().slice(0,10))">
     📥 Export All Data (JSON)
+  </button>
+  <button class="btn btn-secondary btn-small" onclick="exportExcelComparison()">
+    📊 Export Excel
   </button>
   <button class="btn btn-secondary btn-small" onclick="dashboardEnhancements.resetAllFilters()">
     🔄 Reset Filters
@@ -179,9 +206,9 @@ table.dt tr:hover td{background:rgba(99,102,241,.05)}
   <button class="btn btn-secondary btn-small" onclick="dashboardEnhancements.clearState()">
     🗑️ Clear State
   </button>
-  <input type="text" class="search-box" placeholder="🔍 Search commodities..." id="globalSearch" data-search="commTable">
+  <input type="text" class="search-box" placeholder="🔍 Search commodities..." id="globalSearch" data-search="commTable" aria-label="Search commodities">
   <div style="margin-left:auto;color:var(--text2);font-size:0.75rem">
-    <kbd>Ctrl+E</kbd> Export | <kbd>Ctrl+R</kbd> Reset | <kbd>Esc</kbd> Clear
+    <kbd>Ctrl+E</kbd> Export | <kbd>Ctrl+D</kbd> Theme | <kbd>Ctrl+R</kbd> Reset | <kbd>Esc</kbd> Clear
   </div>
 </div>
 
@@ -1318,11 +1345,7 @@ function buildVsearchGrid(){
 }
 
 loadData();
-</script>
-</body>
-</html>
 
-<script>
 // ========================================================================
 // DASHBOARD ENHANCEMENTS - Injected Features
 // ========================================================================
@@ -1472,15 +1495,13 @@ document.addEventListener('DOMContentLoaded', function() {
     cards.forEach(function(card) {
       card.addEventListener('click', function() {
         cards.forEach(c => c.classList.remove('active'));
-        card.classList.add('active'));
+        card.classList.add('active');
       });
     });
   }, 1000);
   
   console.log('✅ Dashboard enhancements loaded!');
 });
-
-</script>
 
 // ========================================================================
 // COMPREHENSIVE DASHBOARD ENHANCEMENTS
@@ -1825,4 +1846,120 @@ window.dashboardEnhancements = {
   showLoading: showLoading,
   hideLoading: hideLoading
 };
-</body></html>
+
+// ========================================================================
+// THEME TOGGLE — signed: alpha
+// ========================================================================
+function getPreferredTheme() {
+  var saved = localStorage.getItem('ph-comparison-theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  var icon = document.getElementById('themeIcon');
+  var label = document.getElementById('themeLabel');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('ph-comparison-theme', theme);
+  if (window.Chart) {
+    Chart.defaults.color = theme === 'dark' ? '#8b8fa3' : '#4b5563';
+    Chart.defaults.borderColor = theme === 'dark' ? '#2a2d3a' : '#d1d5db';
+  }
+}
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+applyTheme(getPreferredTheme());
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+  if (!localStorage.getItem('ph-comparison-theme')) {
+    applyTheme(e.matches ? 'light' : 'dark');
+  }
+});
+
+// ========================================================================
+// EXCEL EXPORT — signed: alpha
+// ========================================================================
+function exportExcelComparison() {
+  if (typeof XLSX === 'undefined') {
+    alert('Excel export library not loaded. Please check your internet connection.');
+    return;
+  }
+  if (!window.D) {
+    alert('Data not loaded yet. Please wait for data to finish loading.');
+    return;
+  }
+  var wb = XLSX.utils.book_new();
+
+  // Sheet 1: Model Overview
+  var overviewData = [['Model', 'MAPE (%)', 'MAE (PHP)', 'Bias (%)', 'R²', 'Validation Samples']];
+  if (D.models && D.overall) {
+    D.models.forEach(function(name) {
+      var m = D.overall[name];
+      if (m) overviewData.push([name, m.mape, m.mae, m.bias, m.r2, m.n_val]);
+    });
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(overviewData), 'Model Overview');
+
+  // Sheet 2: Per-Commodity Comparison
+  var commData = [['Commodity']];
+  if (D.models) {
+    D.models.forEach(function(name) { commData[0].push(name + ' MAPE', name + ' MAE'); });
+    if (D.commComparison) {
+      Object.keys(D.commComparison).sort().forEach(function(comm) {
+        var row = [comm];
+        var entry = D.commComparison[comm];
+        D.models.forEach(function(name) {
+          if (entry[name]) { row.push(entry[name].mape, entry[name].mae); }
+          else { row.push('N/A', 'N/A'); }
+        });
+        commData.push(row);
+      });
+    }
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(commData), 'Commodity Comparison');
+
+  // Sheet 3: Forecasts (all models)
+  var fcData = [['Model', 'Commodity', 'Date', 'Forecast Price (PHP)']];
+  if (D.models && D.forecasts) {
+    D.models.forEach(function(name) {
+      var modelFc = D.forecasts[name];
+      if (modelFc) {
+        Object.keys(modelFc).sort().forEach(function(comm) {
+          var dates = modelFc[comm];
+          Object.keys(dates).sort().forEach(function(dt) {
+            fcData.push([name, comm, dt, dates[dt]]);
+          });
+        });
+      }
+    });
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(fcData), 'Forecasts');
+
+  // Sheet 4: Comparison Table (from visible DOM table)
+  var table = document.getElementById('commTable');
+  if (table) {
+    var ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, 'Comparison Table');
+  }
+
+  XLSX.writeFile(wb, 'ph-model-comparison-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
+// ========================================================================
+// KEYBOARD SHORTCUTS — signed: alpha
+// ========================================================================
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); toggleTheme(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); exportExcelComparison(); }
+  if (e.key === 'Escape') {
+    var search = document.getElementById('globalSearch');
+    if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+  }
+});
+
+</script>
+<!-- signed: alpha -->
+</body>
+</html>

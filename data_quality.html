@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Quality Dashboard — Philippine Food Prices</title>
+<!-- signed: gamma -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e4e6eb;
+    --text2: #8b8fa3;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --green: #22c55e;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --pink: #ec4899;
+    --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f5f5f7; --card: #ffffff; --border: #d1d5db;
+    --text: #1f2937; --text2: #6b7280;
+    --accent: #4f46e5; --accent2: #0891b2;
+    --green: #16a34a; --red: #dc2626; --orange: #d97706; --pink: #db2777;
+    --header-bg: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 50%, #c7d2fe 100%);
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.6; min-height: 100vh;
+  }
+  .header {
+    background: var(--header-bg);
+    padding: 2rem 2rem 1.5rem; text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .header p { color: var(--text2); font-size: 0.95rem; }
+  .header-controls { display:flex; justify-content:center; gap:0.5rem; margin-top:0.8rem; }
+  .theme-toggle, .nav-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .theme-toggle:hover, .nav-btn:hover { border-color: var(--accent); }
+  .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+  .grid { display: grid; gap: 1.5rem; }
+  .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+  .grid-1 { grid-template-columns: 1fr; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    box-shadow: var(--card-shadow); transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent2); }
+  .card h3 { font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text2); }
+
+  /* Summary cards */
+  .stat-card { text-align: center; }
+  .stat-value { font-size: 2.2rem; font-weight: 700; }
+  .stat-label { color: var(--text2); font-size: 0.85rem; margin-top: 0.3rem; }
+  .stat-sub { color: var(--text2); font-size: 0.75rem; margin-top: 0.2rem; }
+  .good { color: var(--green); }
+  .warn { color: var(--orange); }
+  .bad { color: var(--red); }
+
+  /* Tables */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .data-table th { text-align: left; padding: 0.6rem 0.8rem; color: var(--text2);
+    border-bottom: 2px solid var(--border); font-weight: 600; position: sticky; top: 0;
+    background: var(--card); }
+  .data-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
+  .data-table tr:hover td { background: rgba(99,102,241,0.08); }
+  .table-scroll { max-height: 400px; overflow-y: auto; }
+
+  /* Freshness indicator */
+  .freshness-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-right: 0.5rem; animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* Badge */
+  .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 600; }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+
+  /* Progress bar */
+  .progress-bar { background: var(--border); border-radius: 6px; overflow: hidden; height: 8px; }
+  .progress-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 3rem; color: var(--text2); }
+  .spinner { display: inline-block; width: 40px; height: 40px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box { background: rgba(239,68,68,0.1); border: 1px solid var(--red);
+    border-radius: 8px; padding: 1rem; color: var(--red); margin: 1rem 0; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 2rem; color: var(--text2); font-size: 0.8rem;
+    border-top: 1px solid var(--border); margin-top: 2rem; }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Data Quality Dashboard</h1>
+  <p>Philippine Food Price Monitoring — Freshness, Coverage &amp; Accuracy</p>
+  <div class="header-controls">
+    <a href="dashboard_enhanced.html" class="nav-btn">📈 Price Explorer</a>
+    <a href="comparison_enhanced.html" class="nav-btn">🤖 Model Comparison</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </div>
+</div>
+
+<div class="container" id="app">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem">Loading data quality metrics...</p>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Data source: WFP Humanitarian Data Exchange &bull; Models: scikit-learn &bull;
+  Dashboard generated <span id="genTime">—</span></p>
+  <!-- signed: gamma -->
+</div>
+
+<script>
+// signed: gamma
+
+// Theme toggle (matches dashboard_enhanced.html)
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? '' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('dq-theme', t);
+  // Re-render charts with updated colors
+  if (window._chartsRendered) location.reload();
+}
+(function() {
+  const saved = localStorage.getItem('dq-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function getCSS(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+
+// -------------------------------------------------------------------------
+// Data loading
+// -------------------------------------------------------------------------
+
+async function loadData() {
+  try {
+    const [ddResp, mcResp] = await Promise.all([
+      fetch('dashboard_data.json'),
+      fetch('model_comparison.json')
+    ]);
+    if (!ddResp.ok) throw new Error('Failed to load dashboard_data.json: ' + ddResp.status);
+    if (!mcResp.ok) throw new Error('Failed to load model_comparison.json: ' + mcResp.status);
+    const dd = await ddResp.json();
+    const mc = await mcResp.json();
+    render(dd, mc);
+  } catch (err) {
+    document.getElementById('app').innerHTML =
+      '<div class="error-box"><strong>Error:</strong> ' + err.message +
+      '<br><br>Make sure dashboard_data.json and model_comparison.json exist in this directory.' +
+      '<br>Run: <code>python build_dashboard.py</code> to generate them.</div>';
+  }
+}
+
+// -------------------------------------------------------------------------
+// Rendering
+// -------------------------------------------------------------------------
+
+function render(dd, mc) {
+  const meta = dd.meta || {};
+  const table = dd.commodityTable || [];
+  const regional = dd.regional || {};
+  const trends = dd.trends || {};
+  const overall = mc.overall || {};
+
+  // Compute metrics
+  const totalRecords = meta.totalHistRows || 0;
+  const numCommodities = (meta.commodities || []).length;
+  const numRegions = (meta.regions || []).length;
+  const numCategories = (meta.categories || []).length;
+  const yearRange = meta.histYearRange || [0, 0];
+  const dateLabel = meta.histDateRangeLabel || 'Unknown';
+
+  // Records per commodity
+  const byComm = table.map(c => ({
+    name: c.name, records: c.records || 0, category: c.category || 'unknown',
+    avg: c.avg || 0, min: c.min || 0, max: c.max || 0
+  })).sort((a, b) => b.records - a.records);
+
+  // Missing data: commodities with thin coverage
+  const thinThreshold = 100;
+  const thinComms = byComm.filter(c => c.records < thinThreshold);
+  const coveragePct = ((1 - thinComms.length / Math.max(byComm.length, 1)) * 100).toFixed(1);
+
+  // Price anomalies: extreme spread (max/avg > 4)
+  const anomalies = byComm
+    .filter(c => c.avg > 0 && (c.max - c.min) / c.avg > 3)
+    .map(c => ({ ...c, spread: ((c.max - c.min) / c.avg).toFixed(1) }))
+    .sort((a, b) => b.spread - a.spread);
+
+  // Model accuracy
+  const models = Object.entries(overall).map(([name, m]) => ({
+    name, mape: m.mape, mae: m.mae, r2: m.r2, bias: m.bias, n_val: m.n_val
+  })).sort((a, b) => a.mape - b.mape);
+
+  // Records by category
+  const catRecords = {};
+  byComm.forEach(c => {
+    catRecords[c.category] = (catRecords[c.category] || 0) + c.records;
+  });
+
+  // Data freshness — check file modification via dashboard meta
+  const freshDays = computeFreshness(yearRange);
+
+  // Build HTML
+  const app = document.getElementById('app');
+  app.innerHTML = buildSummaryCards(totalRecords, numCommodities, numRegions, coveragePct, freshDays, dateLabel, models)
+    + buildFreshnessSection(dateLabel, yearRange, meta)
+    + buildChartsSection()
+    + buildModelAccuracySection(models, mc)
+    + buildRecordsTable(byComm)
+    + buildAnomaliesSection(anomalies)
+    + buildMissingDataSection(thinComms, thinThreshold, numCommodities);
+
+  document.getElementById('genTime').textContent = new Date().toLocaleString();
+  document.getElementById('loading').style.display = 'none';
+
+  // Render charts after DOM update
+  requestAnimationFrame(() => {
+    renderCategoryChart(catRecords);
+    renderRecordDistributionChart(byComm);
+    renderModelChart(models);
+    renderCoverageTimeline(trends, meta);
+    window._chartsRendered = true;
+  });
+}
+
+function computeFreshness(yearRange) {
+  if (!yearRange || yearRange.length < 2) return null;
+  const latestYear = yearRange[1];
+  const now = new Date();
+  const diffMonths = (now.getFullYear() - latestYear) * 12 + now.getMonth();
+  return diffMonths;
+}
+
+// -------------------------------------------------------------------------
+// Section builders
+// -------------------------------------------------------------------------
+
+function buildSummaryCards(total, comms, regions, coverage, freshMonths, dateLabel, models) {
+  const bestModel = models.length > 0 ? models[0] : null;
+  const freshClass = freshMonths <= 2 ? 'good' : freshMonths <= 6 ? 'warn' : 'bad';
+  const freshLabel = freshMonths <= 2 ? 'Current' : freshMonths <= 6 ? 'Aging' : 'Stale';
+  const coverClass = parseFloat(coverage) >= 90 ? 'good' : parseFloat(coverage) >= 70 ? 'warn' : 'bad';
+  return `
+  <div class="grid grid-4" style="margin-bottom:1.5rem">
+    <div class="card stat-card">
+      <div class="stat-value">${total.toLocaleString()}</div>
+      <div class="stat-label">Total Records</div>
+      <div class="stat-sub">${dateLabel}</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value">${comms}</div>
+      <div class="stat-label">Commodities Tracked</div>
+      <div class="stat-sub">${regions} Regions</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value ${coverClass}">${coverage}%</div>
+      <div class="stat-label">Data Coverage</div>
+      <div class="stat-sub">&ge;100 records per commodity</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value ${freshClass}">${freshLabel}</div>
+      <div class="stat-label">Data Freshness</div>
+      <div class="stat-sub">${freshMonths != null ? freshMonths + ' months since latest' : 'Unknown'}</div>
+    </div>
+  </div>`;
+}
+
+function buildFreshnessSection(dateLabel, yearRange, meta) {
+  const predRange = meta.predYearRange || [];
+  const predLabel = predRange.length === 2 ? predRange[0] + ' – ' + predRange[1] : 'None';
+  return `
+  <div class="grid grid-2" style="margin-bottom:1.5rem">
+    <div class="card">
+      <h2>📅 Data Timeline</h2>
+      <table class="data-table">
+        <tr><td><strong>Historical Period</strong></td><td>${dateLabel}</td></tr>
+        <tr><td><strong>Years Covered</strong></td><td>${yearRange[1] - yearRange[0] + 1} years</td></tr>
+        <tr><td><strong>Forecast Period</strong></td><td>${predLabel}</td></tr>
+        <tr><td><strong>Price Types</strong></td><td>${(meta.pricetypes || []).join(', ')}</td></tr>
+        <tr><td><strong>Categories</strong></td><td>${(meta.categories || []).length} food groups</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>📊 Records by Category</h2>
+      <div class="chart-container" style="height:250px">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildChartsSection() {
+  return `
+  <div class="grid grid-2" style="margin-bottom:1.5rem">
+    <div class="card">
+      <h2>📈 Record Distribution by Commodity</h2>
+      <div class="chart-container">
+        <canvas id="recordDistChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔬 Model Accuracy Comparison (MAPE %)</h2>
+      <div class="chart-container">
+        <canvas id="modelChart"></canvas>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildModelAccuracySection(models, mc) {
+  if (models.length === 0) return '<div class="card"><h2>No model data available</h2></div>';
+  const commComp = mc.commComparison || {};
+  const commNames = Object.keys(commComp);
+  let rows = models.map(m => {
+    const grade = m.mape <= 3 ? 'A' : m.mape <= 5 ? 'B' : m.mape <= 10 ? 'C' : 'D';
+    const gradeClass = grade === 'A' ? 'badge-green' : grade === 'B' ? 'badge-green' :
+                       grade === 'C' ? 'badge-orange' : 'badge-red';
+    return `<tr>
+      <td><strong>${m.name}</strong></td>
+      <td><span class="badge ${gradeClass}">${grade}</span> ${m.mape.toFixed(1)}%</td>
+      <td>₱${m.mae.toFixed(2)}</td>
+      <td>${(m.r2 * 100).toFixed(1)}%</td>
+      <td class="${m.bias > 0 ? 'warn' : ''}">${m.bias > 0 ? '+' : ''}${m.bias.toFixed(1)}%</td>
+      <td>${m.n_val}</td>
+    </tr>`;
+  }).join('');
+
+  // Per-commodity breakdown
+  let commRows = '';
+  commNames.forEach(cn => {
+    const cd = commComp[cn];
+    models.forEach((m, i) => {
+      const cm = cd[m.name];
+      if (!cm) return;
+      const grade = cm.mape <= 3 ? 'A' : cm.mape <= 5 ? 'B' : cm.mape <= 10 ? 'C' : 'D';
+      const gc = grade === 'A' || grade === 'B' ? 'badge-green' : grade === 'C' ? 'badge-orange' : 'badge-red';
+      commRows += `<tr>
+        <td>${i === 0 ? cn : ''}</td>
+        <td>${m.name}</td>
+        <td><span class="badge ${gc}">${grade}</span> ${cm.mape.toFixed(1)}%</td>
+        <td>₱${cm.mae.toFixed(2)}</td>
+      </tr>`;
+    });
+  });
+
+  return `
+  <div class="grid grid-1" style="margin-bottom:1.5rem">
+    <div class="card">
+      <h2>🤖 Model Performance Summary</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Model</th><th>MAPE</th><th>MAE</th><th>R²</th><th>Bias</th><th>Validation Points</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${commNames.length > 0 ? `
+      <h3 style="margin-top:1.5rem">Per-Commodity Accuracy</h3>
+      <div class="table-scroll" style="max-height:250px">
+        <table class="data-table">
+          <thead><tr><th>Commodity</th><th>Model</th><th>MAPE</th><th>MAE</th></tr></thead>
+          <tbody>${commRows}</tbody>
+        </table>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+function buildRecordsTable(byComm) {
+  const top20 = byComm.slice(0, 20);
+  const bottom10 = byComm.slice(-10).reverse();
+  const maxRec = byComm.length > 0 ? byComm[0].records : 1;
+
+  function makeRows(items) {
+    return items.map(c => {
+      const pct = (c.records / maxRec * 100).toFixed(0);
+      const barColor = c.records >= 500 ? 'var(--green)' : c.records >= 100 ? 'var(--orange)' : 'var(--red)';
+      return `<tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.category}</td>
+        <td>${c.records.toLocaleString()}</td>
+        <td style="min-width:120px">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        </td>
+        <td>₱${c.avg.toFixed(0)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  return `
+  <div class="grid grid-2" style="margin-bottom:1.5rem">
+    <div class="card">
+      <h2>🏆 Top 20 Commodities by Records</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Commodity</th><th>Category</th><th>Records</th><th>Coverage</th><th>Avg Price</th></tr></thead>
+          <tbody>${makeRows(top20)}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>⚠️ Bottom 10 Commodities by Records</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Commodity</th><th>Category</th><th>Records</th><th>Coverage</th><th>Avg Price</th></tr></thead>
+          <tbody>${makeRows(bottom10)}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildAnomaliesSection(anomalies) {
+  if (anomalies.length === 0) {
+    return `<div class="card" style="margin-bottom:1.5rem">
+      <h2>✅ Price Anomalies</h2>
+      <p class="good">No extreme price spread anomalies detected.</p>
+    </div>`;
+  }
+  const rows = anomalies.map(a => `<tr>
+    <td><strong>${a.name}</strong></td>
+    <td>₱${a.min.toFixed(0)}</td>
+    <td>₱${a.max.toFixed(0)}</td>
+    <td>₱${a.avg.toFixed(0)}</td>
+    <td class="bad">${a.spread}x</td>
+  </tr>`).join('');
+  return `
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2>🚨 Price Anomalies (Spread &gt; 3x Average)</h2>
+    <p style="color:var(--text2);margin-bottom:1rem">Commodities with extreme min/max range relative to average.
+    May indicate data quality issues or genuine price volatility.</p>
+    <div class="table-scroll" style="max-height:300px">
+      <table class="data-table">
+        <thead><tr><th>Commodity</th><th>Min</th><th>Max</th><th>Avg</th><th>Spread</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function buildMissingDataSection(thinComms, threshold, totalComms) {
+  if (thinComms.length === 0) {
+    return `<div class="card" style="margin-bottom:1.5rem">
+      <h2>✅ Missing Data</h2>
+      <p class="good">All ${totalComms} commodities have &ge;${threshold} records. Full coverage.</p>
+    </div>`;
+  }
+  const rows = thinComms.map(c => `<tr>
+    <td>${c.name}</td><td>${c.category}</td>
+    <td class="bad">${c.records}</td>
+  </tr>`).join('');
+  return `
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2>⚠️ Low-Coverage Commodities (&lt;${threshold} records)</h2>
+    <p style="color:var(--text2);margin-bottom:1rem">${thinComms.length} of ${totalComms} commodities
+    have fewer than ${threshold} data points, which may affect forecast reliability.</p>
+    <div class="table-scroll" style="max-height:250px">
+      <table class="data-table">
+        <thead><tr><th>Commodity</th><th>Category</th><th>Records</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// -------------------------------------------------------------------------
+// Chart rendering
+// -------------------------------------------------------------------------
+
+function renderCategoryChart(catRecords) {
+  const labels = Object.keys(catRecords).sort();
+  const data = labels.map(l => catRecords[l]);
+  const colors = ['#6366f1', '#22d3ee', '#22c55e', '#f59e0b', '#ec4899', '#ef4444', '#8b5cf6'];
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+      datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { color: getCSS('--text'), font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderRecordDistributionChart(byComm) {
+  // Histogram: bucket commodities by record count ranges
+  const buckets = [
+    { label: '<50', min: 0, max: 50, count: 0 },
+    { label: '50-200', min: 50, max: 200, count: 0 },
+    { label: '200-500', min: 200, max: 500, count: 0 },
+    { label: '500-1000', min: 500, max: 1000, count: 0 },
+    { label: '1000-2000', min: 1000, max: 2000, count: 0 },
+    { label: '2000-5000', min: 2000, max: 5000, count: 0 },
+    { label: '5000+', min: 5000, max: Infinity, count: 0 },
+  ];
+  byComm.forEach(c => {
+    for (const b of buckets) {
+      if (c.records >= b.min && c.records < b.max) { b.count++; break; }
+    }
+  });
+  const barColors = buckets.map(b =>
+    b.min >= 500 ? '#22c55e' : b.min >= 100 ? '#f59e0b' : '#ef4444'
+  );
+  new Chart(document.getElementById('recordDistChart'), {
+    type: 'bar',
+    data: {
+      labels: buckets.map(b => b.label),
+      datasets: [{
+        label: 'Commodities',
+        data: buckets.map(b => b.count),
+        backgroundColor: barColors,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: 'Record Count Range', color: getCSS('--text2') },
+             ticks: { color: getCSS('--text2') }, grid: { color: 'transparent' } },
+        y: { title: { display: true, text: 'Number of Commodities', color: getCSS('--text2') },
+             ticks: { color: getCSS('--text2'), stepSize: 1 },
+             grid: { color: getCSS('--border') }, beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderModelChart(models) {
+  if (models.length === 0) return;
+  const colors = ['#22c55e', '#22d3ee', '#6366f1', '#f59e0b', '#ef4444'];
+  new Chart(document.getElementById('modelChart'), {
+    type: 'bar',
+    data: {
+      labels: models.map(m => m.name),
+      datasets: [{
+        label: 'MAPE %',
+        data: models.map(m => m.mape),
+        backgroundColor: colors.slice(0, models.length),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: 'MAPE % (lower = better)', color: getCSS('--text2') },
+             ticks: { color: getCSS('--text2') }, grid: { color: getCSS('--border') }, beginAtZero: true },
+        y: { ticks: { color: getCSS('--text') }, grid: { color: 'transparent' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderCoverageTimeline(trends, meta) {
+  // Not enough trend keys to make a useful timeline chart in the summary view
+  // This section is handled by the records table and distribution chart instead
+}
+
+// -------------------------------------------------------------------------
+// Init
+// -------------------------------------------------------------------------
+loadData();
+</script>
+</body>
+</html>

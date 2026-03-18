@@ -15,14 +15,18 @@ Model families (5 variants each = 25 models total per commodity):
   5. Ridge Regression   — regularised linear model; interpretable, stable trends
 """
 
+import hashlib
 import json
 import math
 import os
+import time
 import warnings
 from collections import defaultdict
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import (
@@ -34,6 +38,16 @@ from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
+
+# ─── Model caching configuration ────────────────────────────
+# signed: beta
+# signed: alpha — fixed Path(__file__) crash when imported as module or from frozen context
+try:
+    _SCRIPT_DIR = Path(os.path.abspath(__file__)).parent
+except NameError:
+    _SCRIPT_DIR = Path.cwd()
+MODEL_CACHE_DIR = _SCRIPT_DIR / ".model_cache"
+MODEL_CACHE_DIR.mkdir(exist_ok=True)
 
 # ─── Hyperparameter variants (5 per model family) ───────────
 # For each family, all 5 variants are trained; the one with the lowest
@@ -293,34 +307,62 @@ model_results = {name: {} for name in MODEL_NAMES}
 best_variant_idx = {name: {} for name in MODEL_NAMES}
 # For Ridge/KNN we need scalers per commodity
 scalers = {}
+# Training time tracking per model family  # signed: beta
+training_times = {name: 0.0 for name in MODEL_NAMES}
 
 NEEDS_SCALING = {"Ridge Regression", "KNN (k=10)"}
 
-for i, comm in enumerate(all_commodities):
-    comm_train = train_df[train_df["commodity"] == comm]
-    comm_val = val_df[val_df["commodity"] == comm]
+# Data hash for cache invalidation  # signed: beta
+_data_hash = hashlib.md5(
+    f"{len(train_df)}_{len(val_df)}_{len(all_commodities)}".encode()
+).hexdigest()[:12]
 
+
+def _cache_path(model_name: str, comm: str) -> Path:
+    """Return cache file path for a trained model."""
+    safe_name = model_name.replace(" ", "_").replace("(", "").replace(")", "")
+    safe_comm = comm.replace(" ", "_").replace("/", "_").replace("(", "").replace(")", "")
+    return MODEL_CACHE_DIR / f"{safe_name}__{safe_comm}__{_data_hash}.joblib"
+
+
+def _train_commodity(comm, comm_train, comm_val, feature_cols):
+    """Train all model variants for a single commodity. Returns results dict.
+
+    Designed for use with joblib.Parallel for cross-commodity parallelism.
+    """
+    # signed: beta
     if len(comm_train) < 20:
-        continue
+        return None
 
     X_train = comm_train[feature_cols].values
     y_train = comm_train["price"].values
 
-    # Fit scaler once per commodity (shared by Ridge and KNN variants)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
-    scalers[comm] = scaler
 
     has_val = len(comm_val) > 0
     X_val = comm_val[feature_cols].values if has_val else None
     y_val = comm_val["price"].values if has_val else None
     X_val_scaled = scaler.transform(X_val) if X_val is not None else None
 
+    comm_results = {}
+
     for model_name, variants in MODEL_VARIANTS.items():
         needs_scaling = model_name in NEEDS_SCALING
         Xt = X_train_scaled if needs_scaling else X_train
         Xv = X_val_scaled if needs_scaling else X_val
 
+        # Check cache first  # signed: beta
+        cache_file = _cache_path(model_name, comm)
+        if cache_file.exists():
+            try:
+                cached = joblib.load(cache_file)
+                comm_results[model_name] = cached
+                continue
+            except Exception:
+                pass  # Cache corrupt — retrain
+
+        t0 = time.perf_counter()
         best_model, best_mape, best_vi, best_pred = None, float("inf"), 0, None
 
         for v_idx, variant in enumerate(variants):
@@ -335,26 +377,29 @@ for i, comm in enumerate(all_commodities):
                         best_vi = v_idx
                         best_pred = y_pred
                 else:
-                    # No validation data — keep first variant
                     if best_model is None:
                         best_model = variant
                         best_vi = v_idx
             except Exception:
                 continue
 
+        elapsed = time.perf_counter() - t0
+
         if best_model is None:
             continue
 
-        trained_models[model_name][comm] = best_model
-        best_variant_idx[model_name][comm] = best_vi
+        result_entry = {
+            "model": best_model,
+            "scaler": scaler,
+            "best_vi": best_vi,
+            "train_time_s": round(elapsed, 3),
+        }
 
-        # Record validation results for the winning variant
         if has_val and best_pred is not None and len(y_val) > 0:
             mape = mean_absolute_percentage_error(y_val, best_pred) * 100
             mae = mean_absolute_error(y_val, best_pred)
             bias = np.mean((best_pred - y_val) / y_val) * 100
-
-            model_results[model_name][comm] = {
+            result_entry["metrics"] = {
                 "mape": round(mape, 1),
                 "mae": round(mae, 2),
                 "bias": round(bias, 1),
@@ -367,11 +412,53 @@ for i, comm in enumerate(all_commodities):
                 "val_pricetypes": comm_val["pricetype"].tolist(),
             }
 
-    if (i + 1) % 20 == 0:
-        print(f"   ...{i+1}/{len(all_commodities)} commodities done")
+        # Cache the trained result  # signed: beta
+        try:
+            joblib.dump(result_entry, cache_file)
+        except Exception:
+            pass
+
+        comm_results[model_name] = result_entry
+
+    return {"commodity": comm, "scaler": scaler, "results": comm_results}
+
+
+# Parallel training across commodities using joblib  # signed: beta
+pipeline_t0 = time.perf_counter()
+print(f"   Using joblib parallel training (n_jobs=-1) across {len(all_commodities)} commodities...")
+
+parallel_results = joblib.Parallel(n_jobs=-1, prefer="processes", verbose=0)(
+    joblib.delayed(_train_commodity)(
+        comm,
+        train_df[train_df["commodity"] == comm],
+        val_df[val_df["commodity"] == comm],
+        feature_cols,
+    )
+    for comm in all_commodities
+)
+
+# Reassemble results from parallel execution  # signed: beta
+for result in parallel_results:
+    if result is None:
+        continue
+    comm = result["commodity"]
+    scalers[comm] = result["scaler"]
+    for model_name, entry in result["results"].items():
+        trained_models[model_name][comm] = entry["model"]
+        best_variant_idx[model_name][comm] = entry["best_vi"]
+        training_times[model_name] += entry.get("train_time_s", 0.0)
+        if "metrics" in entry:
+            model_results[model_name][comm] = entry["metrics"]
+
+pipeline_elapsed = time.perf_counter() - pipeline_t0
 
 total_inst = sum(len(v) for v in trained_models.values())
 print(f"   Done — {total_inst} best models selected ({total_inst * 5} variants evaluated)")
+print(f"   Total training time: {pipeline_elapsed:.1f}s (wall clock, parallel)")
+print(f"\n   Per-model training times (cumulative CPU):")
+for name in MODEL_NAMES:
+    print(f"     {name:<22s}  {training_times[name]:>7.2f}s")
+# signed: beta
 
 # ─── 5. Overall metrics per model ───────────────────────────
 print("\n[4/5] Computing overall metrics...")

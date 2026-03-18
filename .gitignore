@@ -21,6 +21,11 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.playwright-mcp/
 
 # Backup files
 *_old_backup.*
+
+# Temporary dashboard audit screenshots
+desktop-*.png
+mobile-*.png

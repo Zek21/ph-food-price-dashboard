@@ -1,0 +1,16 @@
+{
+  "name": "Philippine Food Price Dashboard",
+  "short_name": "PH Prices",
+  "description": "ML-powered food price forecasting dashboard for the Philippines",
+  "start_url": "./dashboard_enhanced.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

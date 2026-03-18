@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- signed: gamma -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Price Early Warning System — Philippines</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg: #0f0f23; --card: #1a1a2e; --border: #2a2a4a; --text: #e0e0e0;
+  --accent: #4fc3f7; --critical: #ff1744; --high: #ff9100; --medium: #ffd600; --low: #69f0ae;
+  --muted: #888; --hover: #252545;
+}
+[data-theme="light"] {
+  --bg: #f5f5f5; --card: #fff; --border: #ddd; --text: #222;
+  --accent: #1976d2; --muted: #666; --hover: #eee;
+  --critical: #d32f2f; --high: #e65100; --medium: #f9a825; --low: #2e7d32;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; }
+.header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); padding:24px 32px; border-bottom:2px solid var(--critical); }
+[data-theme="light"] .header { background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 50%,#90caf9 100%); border-bottom-color:var(--critical); }
+.header h1 { font-size:1.8em; font-weight:700; display:flex; align-items:center; gap:12px; }
+.header h1 .icon { font-size:1.4em; }
+.header .subtitle { color:var(--muted); margin-top:4px; font-size:0.9em; }
+.toolbar { display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+.toolbar select, .toolbar input { background:var(--card); color:var(--text); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-size:0.85em; }
+.toolbar button { background:var(--accent); color:#000; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85em; }
+.toolbar button:hover { opacity:0.85; }
+.nav-links { display:flex; gap:8px; margin-left:auto; }
+.nav-links a { color:var(--accent); text-decoration:none; font-size:0.85em; padding:4px 10px; border:1px solid var(--border); border-radius:6px; }
+.nav-links a:hover { background:var(--hover); }
+.theme-toggle { cursor:pointer; background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:6px; font-size:0.85em; }
+.container { max-width:1400px; margin:0 auto; padding:20px; }
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px; }
+.summary-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; position:relative; overflow:hidden; }
+.summary-card .value { font-size:2.2em; font-weight:700; }
+.summary-card .label { color:var(--muted); font-size:0.85em; margin-top:4px; }
+.summary-card.critical { border-left:4px solid var(--critical); }
+.summary-card.critical .value { color:var(--critical); }
+.summary-card.high { border-left:4px solid var(--high); }
+.summary-card.high .value { color:var(--high); }
+.summary-card.medium { border-left:4px solid var(--medium); }
+.summary-card.medium .value { color:var(--medium); }
+.summary-card.low { border-left:4px solid var(--low); }
+.summary-card.low .value { color:var(--low); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+@media (max-width:900px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.card h3 { font-size:1.1em; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+#map { height:400px; border-radius:8px; }
+.chart-container { position:relative; height:300px; }
+table { width:100%; border-collapse:collapse; font-size:0.85em; }
+th { text-align:left; padding:8px 10px; border-bottom:2px solid var(--border); color:var(--muted); font-weight:600; }
+td { padding:8px 10px; border-bottom:1px solid var(--border); }
+tr:hover { background:var(--hover); }
+.severity-badge { padding:3px 10px; border-radius:12px; font-weight:700; font-size:0.8em; text-transform:uppercase; display:inline-block; }
+.severity-badge.critical { background:rgba(255,23,68,0.2); color:var(--critical); }
+.severity-badge.high { background:rgba(255,145,0,0.2); color:var(--high); }
+.severity-badge.medium { background:rgba(255,214,0,0.2); color:var(--medium); }
+.severity-badge.low { background:rgba(105,240,174,0.2); color:var(--low); }
+.alert-row { cursor:pointer; }
+.alert-detail { display:none; background:var(--hover); }
+.alert-detail td { padding:12px 16px; font-size:0.85em; line-height:1.5; }
+.recommendation { background:rgba(79,195,247,0.1); border-left:3px solid var(--accent); padding:8px 12px; margin-top:6px; border-radius:0 6px 6px 0; }
+.timeline-bar { display:flex; gap:2px; margin-top:8px; }
+.timeline-bar .month { flex:1; height:24px; border-radius:3px; position:relative; cursor:pointer; min-width:4px; }
+.timeline-bar .month:hover::after { content:attr(data-tip); position:absolute; bottom:28px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75em; white-space:nowrap; z-index:10; }
+.legend { display:flex; gap:16px; margin-top:8px; font-size:0.8em; }
+.legend-item { display:flex; align-items:center; gap:4px; }
+.legend-dot { width:12px; height:12px; border-radius:3px; }
+.scan-info { font-size:0.8em; color:var(--muted); text-align:right; margin-bottom:10px; }
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+.loading { text-align:center; padding:60px; color:var(--muted); font-size:1.2em; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1><span class="icon">⚠️</span> Food Price Early Warning System
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </h1>
+  <div class="subtitle">Philippine commodity price anomaly detection — FEWS NET inspired methodology</div>
+  <div class="toolbar">
+    <select id="filterSeverity">
+      <option value="">All Severities</option>
+      <option value="critical">🔴 Critical</option>
+      <option value="high">🟠 High</option>
+      <option value="medium">🟡 Medium</option>
+      <option value="low">🟢 Low</option>
+    </select>
+    <select id="filterType">
+      <option value="">All Types</option>
+      <option value="spike">Price Spike</option>
+      <option value="yoy_increase">YoY Increase</option>
+      <option value="regional_divergence">Regional Divergence</option>
+      <option value="model_divergence">Model Divergence</option>
+    </select>
+    <input type="text" id="filterCommodity" placeholder="Filter commodity..." />
+    <select id="filterDateRange">
+      <option value="">All Dates</option>
+      <option value="2026">2026+</option>
+      <option value="2025">2025+</option>
+      <option value="2024">2024+</option>
+    </select>
+    <button onclick="applyFilters()">Apply</button>
+    <button onclick="resetFilters()" style="background:var(--border);color:var(--text)">Reset</button>
+    <div class="nav-links">
+      <a href="dashboard_enhanced.html">📊 Dashboard</a>
+      <a href="comparison_enhanced.html">📈 Models</a>
+      <a href="data_quality.html">🔍 Data Quality</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="loading" class="loading">Loading early warning data...</div>
+  <div id="content" style="display:none">
+
+    <div class="scan-info" id="scanInfo"></div>
+
+    <div class="summary-grid" id="summaryCards"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>🗺️ Regional Alert Map</h3>
+        <div id="map"></div>
+      </div>
+      <div class="card">
+        <h3>📅 Alert Timeline</h3>
+        <div id="timeline"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--critical)"></div>Critical</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--high)"></div>High</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--medium)"></div>Medium</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--low)"></div>Low</div>
+        </div>
+        <div class="chart-container" style="height:200px;margin-top:12px">
+          <canvas id="typeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>🔴 Severity Distribution</h3>
+        <div class="chart-container"><canvas id="severityChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>🌾 Top Affected Commodities</h3>
+        <div class="chart-container"><canvas id="commodityChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>📊 Alert Types</h3>
+        <div class="chart-container"><canvas id="alertTypeChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <h3>🚨 Active Alerts <span id="alertCount" style="color:var(--muted);font-weight:400;font-size:0.85em"></span></h3>
+      <div style="overflow-x:auto">
+        <table id="alertTable">
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Date</th>
+              <th>Commodity</th>
+              <th>Region</th>
+              <th>Type</th>
+              <th>Change</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody id="alertBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// signed: gamma
+const SEV_COLORS = {critical:'#ff1744',high:'#ff9100',medium:'#ffd600',low:'#69f0ae'};
+const TYPE_LABELS = {spike:'Price Spike',yoy_increase:'YoY Increase',regional_divergence:'Regional Divergence',model_divergence:'Model Divergence'};
+
+const REGION_COORDS = {
+  "National Capital Region":[14.5995,120.9842],
+  "National Capital region":[14.5995,120.9842],
+  "Cordillera Administrative Region":[16.4023,120.5960],
+  "Cordillera Administrative region":[16.4023,120.5960],
+  "Ilocos region":[16.0832,120.6200],"Cagayan Valley":[16.9754,121.8107],
+  "Central Luzon":[15.4828,120.7120],"Calabarzon":[14.1008,121.0794],
+  "Mimaropa":[12.5107,121.1845],"Bicol region":[13.4210,123.4137],
+  "Western Visayas":[11.0050,122.5373],"Central Visayas":[9.8169,124.0642],
+  "Eastern Visayas":[11.0,125.0],"Zamboanga Peninsula":[7.8325,123.3443],
+  "Northern Mindanao":[8.0202,124.6857],"Davao region":[7.3079,126.0893],
+  "Soccsksargen":[6.2707,124.6857],"Caraga":[8.8015,125.7407],
+  "Autonomous region in Muslim Mindanao":[6.9568,124.2421],
+};
+
+let alertData = null;
+let filteredAlerts = [];
+let map = null;
+let markerLayer = null;
+let charts = {};
+
+async function init() {
+  try {
+    const res = await fetch('alerts.json');
+    if (!res.ok) throw new Error('alerts.json not found — run: python early_warning.py --scan');
+    alertData = await res.json();
+    filteredAlerts = alertData.alerts;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    renderAll();
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="color:var(--critical)">❌ ${e.message}</div>
+       <div style="margin-top:12px;font-size:0.9em">Run: <code>python early_warning.py --scan --output alerts.json</code></div>`;
+  }
+}
+
+function renderAll() {
+  renderScanInfo();
+  renderSummaryCards();
+  renderMap();
+  renderTimeline();
+  renderCharts();
+  renderAlertTable();
+}
+
+function renderScanInfo() {
+  const ts = new Date(alertData.scan_timestamp).toLocaleString();
+  document.getElementById('scanInfo').textContent = `Last scan: ${ts} | ${alertData.summary.total_alerts} alerts detected`;
+}
+
+function renderSummaryCards() {
+  const s = alertData.summary.by_severity;
+  const total = filteredAlerts.length;
+  const fc = count(filteredAlerts,'severity');
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="summary-card"><div class="value">${total}</div><div class="label">Total Alerts</div></div>
+    <div class="summary-card critical"><div class="value ${fc.critical?'pulse':''}">${fc.critical||0}</div><div class="label">Critical</div></div>
+    <div class="summary-card high"><div class="value">${fc.high||0}</div><div class="label">High</div></div>
+    <div class="summary-card medium"><div class="value">${fc.medium||0}</div><div class="label">Medium</div></div>
+    <div class="summary-card low"><div class="value">${fc.low||0}</div><div class="label">Low</div></div>
+  `;
+}
+
+function renderMap() {
+  if (map) { map.remove(); }
+  map = L.map('map').setView([12.5, 122], 6);
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${isDark?'dark_all':'light_all'}/{z}/{x}/{y}{r}.png`, {
+    attribution: '&copy; CartoDB'
+  }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+
+  const regionalAlerts = {};
+  filteredAlerts.forEach(a => {
+    if (a.region === 'National') return;
+    const key = a.region;
+    if (!regionalAlerts[key]) regionalAlerts[key] = {alerts:[],maxSev:'low'};
+    regionalAlerts[key].alerts.push(a);
+    if (sevRank(a.severity) > sevRank(regionalAlerts[key].maxSev))
+      regionalAlerts[key].maxSev = a.severity;
+  });
+
+  Object.entries(regionalAlerts).forEach(([region, data]) => {
+    const coords = findCoords(region);
+    if (!coords) return;
+    const color = SEV_COLORS[data.maxSev];
+    const radius = Math.min(5 + data.alerts.length * 2, 25);
+    const marker = L.circleMarker(coords, {
+      radius, color, fillColor: color, fillOpacity: 0.6, weight: 2
+    });
+    const popup = `<b>${region}</b><br>${data.alerts.length} alerts<br>Max severity: <b style="color:${color}">${data.maxSev.toUpperCase()}</b>`;
+    marker.bindPopup(popup);
+    markerLayer.addLayer(marker);
+  });
+
+  // Add national marker
+  const natAlerts = filteredAlerts.filter(a => a.region === 'National');
+  if (natAlerts.length) {
+    const maxSev = natAlerts.reduce((m,a) => sevRank(a.severity)>sevRank(m)?a.severity:m, 'low');
+    L.circleMarker([12.5,122], {
+      radius: 8, color: '#4fc3f7', fillColor: '#4fc3f7', fillOpacity: 0.3, weight: 1, dashArray: '4'
+    }).bindPopup(`<b>National</b><br>${natAlerts.length} alerts`).addTo(markerLayer);
+  }
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline');
+  const dateCounts = {};
+  filteredAlerts.forEach(a => {
+    if (!dateCounts[a.date]) dateCounts[a.date] = {critical:0,high:0,medium:0,low:0,total:0};
+    dateCounts[a.date][a.severity]++;
+    dateCounts[a.date].total++;
+  });
+
+  const dates = Object.keys(dateCounts).sort();
+  if (!dates.length) { container.innerHTML = '<p style="color:var(--muted)">No alerts in current filter</p>'; return; }
+
+  // Show last 36 months or all if fewer
+  const showDates = dates.slice(-36);
+  const maxCount = Math.max(...showDates.map(d => dateCounts[d].total));
+
+  let html = '<div class="timeline-bar">';
+  showDates.forEach(d => {
+    const c = dateCounts[d];
+    const height = Math.max(4, Math.round((c.total / maxCount) * 60));
+    let color = SEV_COLORS.low;
+    if (c.critical) color = SEV_COLORS.critical;
+    else if (c.high) color = SEV_COLORS.high;
+    else if (c.medium) color = SEV_COLORS.medium;
+    html += `<div class="month" style="height:${height}px;background:${color};align-self:flex-end" data-tip="${d}: ${c.total} alerts (C:${c.critical} H:${c.high} M:${c.medium} L:${c.low})"></div>`;
+  });
+  html += '</div>';
+  html += `<div style="display:flex;justify-content:space-between;font-size:0.75em;color:var(--muted);margin-top:4px"><span>${showDates[0]}</span><span>${showDates[showDates.length-1]}</span></div>`;
+  container.innerHTML = html;
+}
+
+function renderCharts() {
+  // Severity doughnut
+  const sevCounts = count(filteredAlerts, 'severity');
+  renderDoughnut('severityChart', ['Critical','High','Medium','Low'],
+    [sevCounts.critical||0,sevCounts.high||0,sevCounts.medium||0,sevCounts.low||0],
+    [SEV_COLORS.critical,SEV_COLORS.high,SEV_COLORS.medium,SEV_COLORS.low]);
+
+  // Alert type doughnut
+  const typeCounts = count(filteredAlerts, 'alert_type');
+  const typeNames = Object.keys(typeCounts).map(t => TYPE_LABELS[t]||t);
+  const typeVals = Object.values(typeCounts);
+  renderDoughnut('alertTypeChart', typeNames, typeVals,
+    ['#4fc3f7','#ce93d8','#ffcc02','#80cbc4']);
+
+  // Top commodities bar
+  const commCounts = count(filteredAlerts, 'commodity');
+  const sorted = Object.entries(commCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
+  renderBar('commodityChart', sorted.map(s=>s[0]), sorted.map(s=>s[1]));
+
+  // Type over time (line)
+  renderTypeTimeline();
+}
+
+function renderDoughnut(id, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { color: getComputedStyle(document.body).getPropertyValue('--text'), font: {size:11} } } }
+    }
+  });
+}
+
+function renderBar(id, labels, data) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: '#4fc3f7', borderRadius: 4 }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text'), font:{size:10} }, grid: { display:false } }
+      }
+    }
+  });
+}
+
+function renderTypeTimeline() {
+  if (charts.typeChart) charts.typeChart.destroy();
+  const byMonth = {};
+  filteredAlerts.forEach(a => {
+    const m = a.date.substring(0,7);
+    if (!byMonth[m]) byMonth[m] = {spike:0,yoy_increase:0,regional_divergence:0,model_divergence:0};
+    byMonth[m][a.alert_type]++;
+  });
+  const months = Object.keys(byMonth).sort().slice(-24);
+  const datasets = [
+    {label:'Spike',data:months.map(m=>(byMonth[m]||{}).spike||0),borderColor:'#4fc3f7',fill:false,tension:0.3},
+    {label:'YoY',data:months.map(m=>(byMonth[m]||{}).yoy_increase||0),borderColor:'#ce93d8',fill:false,tension:0.3},
+    {label:'Regional',data:months.map(m=>(byMonth[m]||{}).regional_divergence||0),borderColor:'#ffcc02',fill:false,tension:0.3},
+    {label:'Model',data:months.map(m=>(byMonth[m]||{}).model_divergence||0),borderColor:'#80cbc4',fill:false,tension:0.3},
+  ];
+  charts.typeChart = new Chart(document.getElementById('typeChart'), {
+    type:'line', data:{labels:months,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text'),font:{size:10}}}},
+      scales:{x:{ticks:{color:'var(--muted)',maxRotation:45,font:{size:9}},grid:{display:false}},
+              y:{ticks:{color:'var(--muted)'},grid:{color:'rgba(255,255,255,0.05)'}}}
+    }
+  });
+}
+
+function renderAlertTable() {
+  const body = document.getElementById('alertBody');
+  document.getElementById('alertCount').textContent = `(${filteredAlerts.length} shown)`;
+  const show = filteredAlerts.slice(0, 200); // cap for performance
+  let html = '';
+  show.forEach((a, i) => {
+    const priceStr = a.current_price ? `₱${a.current_price.toLocaleString()}` : '—';
+    html += `<tr class="alert-row" onclick="toggleDetail(${i})">
+      <td><span class="severity-badge ${a.severity}">${a.severity}</span></td>
+      <td>${a.date}</td>
+      <td>${a.commodity}</td>
+      <td>${a.region}</td>
+      <td>${TYPE_LABELS[a.alert_type]||a.alert_type}</td>
+      <td style="color:${a.pct_change>0?'var(--critical)':'var(--low)'}">${a.pct_change>0?'+':''}${a.pct_change}%</td>
+      <td>${priceStr}</td>
+    </tr>
+    <tr class="alert-detail" id="detail-${i}">
+      <td colspan="7">
+        <b>Model:</b> ${a.model}<br>
+        ${a.current_price ? `<b>Current/Base:</b> ₱${a.current_price} → <b>Predicted/Ref:</b> ₱${a.predicted_price||'—'}<br>` : ''}
+        <b>Threshold:</b> ${a.threshold}<br>
+        ${a.model_predictions ? `<b>Model Predictions:</b> ${Object.entries(a.model_predictions).map(([m,p])=>`${m}: ₱${p}`).join(', ')}<br>` : ''}
+        <div class="recommendation"><b>📋 Policy Recommendation:</b><br>${a.recommendation}</div>
+      </td>
+    </tr>`;
+  });
+  if (filteredAlerts.length > 200) {
+    html += `<tr><td colspan="7" style="text-align:center;color:var(--muted)">Showing 200 of ${filteredAlerts.length} alerts. Use filters to narrow results.</td></tr>`;
+  }
+  body.innerHTML = html;
+}
+
+function toggleDetail(idx) {
+  const el = document.getElementById(`detail-${idx}`);
+  el.style.display = el.style.display === 'table-row' ? 'none' : 'table-row';
+}
+
+function applyFilters() {
+  const sev = document.getElementById('filterSeverity').value;
+  const type = document.getElementById('filterType').value;
+  const comm = document.getElementById('filterCommodity').value.toLowerCase();
+  const dateRange = document.getElementById('filterDateRange').value;
+
+  filteredAlerts = alertData.alerts.filter(a => {
+    if (sev && a.severity !== sev) return false;
+    if (type && a.alert_type !== type) return false;
+    if (comm && !a.commodity.toLowerCase().includes(comm)) return false;
+    if (dateRange && a.date < dateRange) return false;
+    return true;
+  });
+  renderAll();
+}
+
+function resetFilters() {
+  document.getElementById('filterSeverity').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterCommodity').value = '';
+  document.getElementById('filterDateRange').value = '';
+  filteredAlerts = alertData.alerts;
+  renderAll();
+}
+
+function count(arr, key) {
+  const c = {};
+  arr.forEach(a => { c[a[key]] = (c[a[key]]||0)+1; });
+  return c;
+}
+
+function sevRank(s) { return {low:0,medium:1,high:2,critical:3}[s]||0; }
+
+function findCoords(region) {
+  for (const [name, coords] of Object.entries(REGION_COORDS)) {
+    if (region.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(region.toLowerCase()))
+      return coords;
+  }
+  return null;
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('ew-theme', next);
+  if (map) renderMap();
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  renderCharts();
+}
+
+// Init
+(function() {
+  const saved = localStorage.getItem('ew-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  init();
+})();
+</script>
+</body>
+</html>
