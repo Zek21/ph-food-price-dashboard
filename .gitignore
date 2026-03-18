@@ -26,6 +26,10 @@ Thumbs.db
 # Backup files
 *_old_backup.*
 
+# Model cache directories
+.lstm_models/
+.model_cache/
+
 # Temporary dashboard audit screenshots
 desktop-*.png
 mobile-*.png

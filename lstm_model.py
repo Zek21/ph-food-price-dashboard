@@ -34,9 +34,16 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
+
+try:
+    import torch
+    import torch.nn as nn
+    from torch.utils.data import DataLoader, TensorDataset
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None  # type: ignore
+
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 
@@ -746,4 +753,8 @@ def main():
 
 
 if __name__ == "__main__":
+    if not TORCH_AVAILABLE:  # signed: delta
+        print("ERROR: PyTorch is required but not installed.")
+        print("Install with: pip install torch")
+        sys.exit(1)
     main()
