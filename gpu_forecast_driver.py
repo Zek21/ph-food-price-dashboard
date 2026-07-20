@@ -1,4 +1,4 @@
-"""Native AMD GPU inference driver for the Philippine food-price LSTM models.
+"""DirectML inference driver for the Philippine food-price LSTM models.
 
 This is an ML execution driver, not a Windows display or kernel driver.  It
 exports the project's PyTorch checkpoints to ONNX, runs the tensor graph through
@@ -73,7 +73,7 @@ def probe() -> dict:
         "device_id": int(os.environ.get("GPU_DML_DEVICE_ID", "0")),
         "truth_note": (
             "DirectML availability proves a usable provider. Per-node profiling is required "
-            "before claiming that a specific model graph executed natively on the GPU."
+            "before claiming DirectML device placement for a specific model graph."
         ),
     }
 
@@ -350,21 +350,35 @@ def _profile_placement(session, model_input: np.ndarray) -> dict:
     node_events = [event for event in events if event.get("cat") == "Node"]
     by_provider: dict[str, int] = {}
     ops: dict[str, int] = {}
+    nodes: list[dict] = []
     for event in node_events:
         args = event.get("args") or {}
         provider = args.get("provider", "unknown")
         operation = args.get("op_name", event.get("name", "unknown"))
         by_provider[provider] = by_provider.get(provider, 0) + 1
         ops[operation] = ops.get(operation, 0) + 1
+        nodes.append(
+            {
+                "name": event.get("name", ""),
+                "op_name": operation,
+                "provider": provider,
+                "duration_us": event.get("dur"),
+            }
+        )
     profile_path.unlink(missing_ok=True)
-    return {"node_events": len(node_events), "by_provider": by_provider, "operations": ops}
+    return {
+        "node_events": len(node_events),
+        "by_provider": by_provider,
+        "operations": ops,
+        "nodes": nodes,
+    }
 
 
 def benchmark(model_path: Path, data_path: Path, output_path: Path, *,
               batch_sizes: tuple[int, ...] = (1, 8, 32, 128), iterations: int = 100) -> dict:
     runtime = probe()
     if not runtime["directml_available"]:
-        raise RuntimeError("DmlExecutionProvider is unavailable; native GPU benchmark cannot run")
+        raise RuntimeError("DmlExecutionProvider is unavailable; DirectML benchmark cannot run")
     monthly, data_summary = _load_monthly(data_path)
     profile_session = _session(
         model_path,

@@ -1,9 +1,9 @@
 {
   "schema": "ph-food-price-directml-benchmark-v1",
-  "generated_at": "2026-07-19T22:37:13.555005+00:00",
+  "generated_at": "2026-07-20T01:05:03.881300+00:00",
   "model": {
     "commodity": "Rice (regular, milled)",
-    "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(regular,_milled).onnx",
+    "path": ".onnx_models\\lstm_Rice_(regular,_milled).onnx",
     "bytes": 845143,
     "sha256": "afdf2c03b773eb977b0125ee077b2b0b7c30152f1d2929710579d6ef8e92be63",
     "input_shape": [
@@ -59,7 +59,117 @@
       "Squeeze": 3,
       "Gemm": 2,
       "Relu": 1
-    }
+    },
+    "nodes": [
+      {
+        "name": "/lstm/Shape_kernel_time",
+        "op_name": "Shape",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 186
+      },
+      {
+        "name": "/lstm/Gather_kernel_time",
+        "op_name": "Gather",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 25
+      },
+      {
+        "name": "/lstm/Unsqueeze_kernel_time",
+        "op_name": "Unsqueeze",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 25
+      },
+      {
+        "name": "/lstm/Concat_kernel_time",
+        "op_name": "Concat",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 42
+      },
+      {
+        "name": "/lstm/ConstantOfShape_kernel_time",
+        "op_name": "ConstantOfShape",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 1806
+      },
+      {
+        "name": "/lstm/Slice_3_kernel_time",
+        "op_name": "Slice",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 1131
+      },
+      {
+        "name": "/lstm/Slice_1_kernel_time",
+        "op_name": "Slice",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 698
+      },
+      {
+        "name": "/lstm/Transpose_kernel_time",
+        "op_name": "Transpose",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 520
+      },
+      {
+        "name": "/lstm/LSTM_kernel_time",
+        "op_name": "LSTM",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 15053
+      },
+      {
+        "name": "/lstm/Squeeze_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 76
+      },
+      {
+        "name": "/lstm/LSTM_1_kernel_time",
+        "op_name": "LSTM",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 9624
+      },
+      {
+        "name": "/lstm/Squeeze_1_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 46
+      },
+      {
+        "name": "/lstm/Transpose_1_kernel_time",
+        "op_name": "Transpose",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 119
+      },
+      {
+        "name": "/Gather_kernel_time",
+        "op_name": "Gather",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 542
+      },
+      {
+        "name": "/head/head.0/Gemm_kernel_time",
+        "op_name": "Gemm",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 382
+      },
+      {
+        "name": "/head/head.1/Relu_kernel_time",
+        "op_name": "Relu",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 795
+      },
+      {
+        "name": "/head/head.3/Gemm_kernel_time",
+        "op_name": "Gemm",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 365
+      },
+      {
+        "name": "/Squeeze_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 50
+      }
+    ]
   },
   "native_gpu_verified": true,
   "iterations_per_batch": 100,
@@ -68,61 +178,61 @@
     {
       "batch_size": 1,
       "gpu_directml": {
-        "median_ms": 1.0284,
-        "p95_ms": 2.0896,
-        "throughput_items_s": 972.38
+        "median_ms": 0.9808,
+        "p95_ms": 1.9176,
+        "throughput_items_s": 1019.63
       },
       "cpu": {
-        "median_ms": 0.1688,
-        "p95_ms": 0.352,
-        "throughput_items_s": 5925.93
+        "median_ms": 0.1685,
+        "p95_ms": 1.2312,
+        "throughput_items_s": 5934.72
       },
-      "gpu_speedup_vs_cpu": 0.164,
+      "gpu_speedup_vs_cpu": 0.172,
       "max_abs_output_difference": 3.81e-06
     },
     {
       "batch_size": 8,
       "gpu_directml": {
-        "median_ms": 21.0898,
-        "p95_ms": 24.1776,
-        "throughput_items_s": 379.33
+        "median_ms": 21.3591,
+        "p95_ms": 26.0747,
+        "throughput_items_s": 374.55
       },
       "cpu": {
-        "median_ms": 0.4688,
-        "p95_ms": 2.4401,
-        "throughput_items_s": 17063.03
+        "median_ms": 0.3564,
+        "p95_ms": 1.6879,
+        "throughput_items_s": 22449.84
       },
-      "gpu_speedup_vs_cpu": 0.022,
+      "gpu_speedup_vs_cpu": 0.017,
       "max_abs_output_difference": 0.0
     },
     {
       "batch_size": 32,
       "gpu_directml": {
-        "median_ms": 21.087,
-        "p95_ms": 24.273,
-        "throughput_items_s": 1517.53
+        "median_ms": 21.6465,
+        "p95_ms": 25.5534,
+        "throughput_items_s": 1478.3
       },
       "cpu": {
-        "median_ms": 0.7249,
-        "p95_ms": 2.5415,
-        "throughput_items_s": 44144.02
+        "median_ms": 0.5867,
+        "p95_ms": 3.0722,
+        "throughput_items_s": 54537.71
       },
-      "gpu_speedup_vs_cpu": 0.034,
+      "gpu_speedup_vs_cpu": 0.027,
       "max_abs_output_difference": 0.0
     },
     {
       "batch_size": 128,
       "gpu_directml": {
-        "median_ms": 21.733,
-        "p95_ms": 24.5723,
-        "throughput_items_s": 5889.67
+        "median_ms": 22.2508,
+        "p95_ms": 25.6192,
+        "throughput_items_s": 5752.62
       },
       "cpu": {
-        "median_ms": 2.7801,
-        "p95_ms": 5.7552,
-        "throughput_items_s": 46041.51
+        "median_ms": 3.2285,
+        "p95_ms": 6.6564,
+        "throughput_items_s": 39647.51
       },
-      "gpu_speedup_vs_cpu": 0.128,
+      "gpu_speedup_vs_cpu": 0.145,
       "max_abs_output_difference": 0.0
     }
   ],

@@ -17,11 +17,11 @@ The driver has four proof-producing stages:
 ## Install and run
 
 ```powershell
-python -m venv env
-.\env\Scripts\python.exe -m pip install -r requirements.txt
-.\env\Scripts\python.exe -m pip install torch
-.\env\Scripts\python.exe -m pip install -r requirements-gpu.txt
-.\env\Scripts\python.exe gpu_forecast_driver.py run-all
+python -m venv .venv-directml
+.\.venv-directml\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv-directml\Scripts\python.exe -m pip install torch
+.\.venv-directml\Scripts\python.exe -m pip install -r requirements-gpu.txt
+.\.venv-directml\Scripts\python.exe gpu_forecast_driver.py run-all
 ```
 
 Generated ONNX graphs stay under `.onnx_models/`. Reproducible JSON receipts are
@@ -33,8 +33,13 @@ receipts until their licensing, units, and validation gates pass.
 The benchmark covers warmed inference for this repository's LSTM graph. It does
 not benchmark model training, end-to-end CSV preparation, all Python workloads,
 or GPUs other than the tested host. A DirectML provider listing alone is not
-treated as native execution proof: the benchmark must also find model-node events
+treated as device-placement proof: the benchmark must also find model-node events
 assigned to `DmlExecutionProvider` in the ONNX Runtime profile.
+
+The benchmark schema retains the field name `native_gpu_verified` for receipt
+compatibility. In this project it means that profiling found at least one node
+event assigned to `DmlExecutionProvider`; it does not mean GPU-only execution,
+full-graph placement, or a latency advantage.
 
 Forecasts are unvalidated experimental output and not financial advice. A local
 July 2026 run was withheld from the release candidate after the older checkpoint
