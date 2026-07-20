@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<rect width="1400" height="900" fill="#07111f"/>
+<text x="80" y="85" fill="#f8fafc" font-family="Arial" font-size="46" font-weight="700">Native AMD GPU worked. CPU won this graph.</text>
+<text x="80" y="135" fill="#94a3b8" font-family="Arial" font-size="25">Rice LSTM · warmed median latency · RX 6600 DirectML vs CPU · lower is better</text>
+<rect x="80" y="165" width="24" height="24" rx="4" fill="#ec4899"/><text x="118" y="185" fill="#cbd5e1" font-family="Arial" font-size="22">DirectML</text>
+<rect x="280" y="165" width="24" height="24" rx="4" fill="#22d3ee"/><text x="318" y="185" fill="#cbd5e1" font-family="Arial" font-size="22">CPU</text>
+<line x1="150" y1="700" x2="1250" y2="700" stroke="#475569" stroke-width="2"/>
+<rect x="245.5" y="677.8" width="48" height="22.2" rx="7" fill="#ec4899"/>
+<text x="269.5" y="665.8" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">1.028</text>
+<rect x="305.5" y="696.3" width="48" height="3.7" rx="7" fill="#22d3ee"/>
+<text x="329.5" y="684.3" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">0.169</text>
+<text x="287.5" y="742" text-anchor="middle" fill="#f8fafc" font-family="Arial" font-size="24" font-weight="700">batch 1</text>
+<text x="287.5" y="775" text-anchor="middle" fill="#67e8f9" font-family="Arial" font-size="19">CPU 6.09× faster</text>
+<rect x="520.5" y="243.9" width="48" height="456.1" rx="7" fill="#ec4899"/>
+<text x="544.5" y="231.9" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">21.090</text>
+<rect x="580.5" y="689.9" width="48" height="10.1" rx="7" fill="#22d3ee"/>
+<text x="604.5" y="677.9" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">0.469</text>
+<text x="562.5" y="742" text-anchor="middle" fill="#f8fafc" font-family="Arial" font-size="24" font-weight="700">batch 8</text>
+<text x="562.5" y="775" text-anchor="middle" fill="#67e8f9" font-family="Arial" font-size="19">CPU 44.99× faster</text>
+<rect x="795.5" y="244.0" width="48" height="456.0" rx="7" fill="#ec4899"/>
+<text x="819.5" y="232.0" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">21.087</text>
+<rect x="855.5" y="684.3" width="48" height="15.7" rx="7" fill="#22d3ee"/>
+<text x="879.5" y="672.3" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">0.725</text>
+<text x="837.5" y="742" text-anchor="middle" fill="#f8fafc" font-family="Arial" font-size="24" font-weight="700">batch 32</text>
+<text x="837.5" y="775" text-anchor="middle" fill="#67e8f9" font-family="Arial" font-size="19">CPU 29.09× faster</text>
+<rect x="1070.5" y="230.0" width="48" height="470.0" rx="7" fill="#ec4899"/>
+<text x="1094.5" y="222.0" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">21.733</text>
+<rect x="1130.5" y="639.9" width="48" height="60.1" rx="7" fill="#22d3ee"/>
+<text x="1154.5" y="627.9" text-anchor="middle" fill="#e2e8f0" font-family="Arial" font-size="18">2.780</text>
+<text x="1112.5" y="742" text-anchor="middle" fill="#f8fafc" font-family="Arial" font-size="24" font-weight="700">batch 128</text>
+<text x="1112.5" y="775" text-anchor="middle" fill="#67e8f9" font-family="Arial" font-size="19">CPU 7.82× faster</text>
+<text x="80" y="805" fill="#a7f3d0" font-family="Arial" font-size="24" font-weight="700">Profile proof: 15 DirectML nodes, including 2 LSTM ops · max CPU/GPU difference 3.81e-6</text>
+<text x="80" y="850" fill="#94a3b8" font-family="Arial" font-size="20">Truth boundary: one warmed project graph on one host. This is not a universal GPU benchmark.</text>
+</svg>

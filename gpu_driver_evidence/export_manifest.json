@@ -1,0 +1,440 @@
+{
+  "generated_at": "2026-07-19T22:37:04.094152+00:00",
+  "exported_count": 72,
+  "failure_count": 0,
+  "exported": [
+    {
+      "commodity": "Anchovies",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Anchovies.onnx",
+      "bytes": 845131,
+      "sha256": "b569fa27823144bbe0d159343b788cc86a0a026af1c0e757c08099fb0458351c"
+    },
+    {
+      "commodity": "Bananas (lakatan)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Bananas_(lakatan).onnx",
+      "bytes": 845139,
+      "sha256": "2483eca569cc556e95d78cc21d3e56d3f6eb23f8e8d2c9facb4d6ba3a93b36df"
+    },
+    {
+      "commodity": "Bananas (latundan)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Bananas_(latundan).onnx",
+      "bytes": 845141,
+      "sha256": "3547610381ef93b3d19ef47aedc08368c9a6388a8dc506ed1dfdb31bda9ccdd1"
+    },
+    {
+      "commodity": "Bananas (saba)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Bananas_(saba).onnx",
+      "bytes": 845136,
+      "sha256": "e4966ea9e1ae5185b2623c46f8e710df012f42f6d14d40d54e94ed076d0affdb"
+    },
+    {
+      "commodity": "Beans (green, fresh)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Beans_(green,_fresh).onnx",
+      "bytes": 845143,
+      "sha256": "1e3a87319c7c680a9ad7028d0eb36ff5a496c0ef8ecc65987d046fe82f9c139e"
+    },
+    {
+      "commodity": "Beans (mung)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Beans_(mung).onnx",
+      "bytes": 845133,
+      "sha256": "4adcc435c600a41700e48004db90a7de7649cad804ce994abf0efccd513d349c"
+    },
+    {
+      "commodity": "Beans (string)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Beans_(string).onnx",
+      "bytes": 845137,
+      "sha256": "6c1d38b3a12e211de3449ab50841e24a6750c979bc216b0f15199eb88eb0c4fd"
+    },
+    {
+      "commodity": "Bitter melon",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Bitter_melon.onnx",
+      "bytes": 845134,
+      "sha256": "eeccbce422f1b777dd76d18fb44d56e07d27478a3e4d2ed3907921b1397f5f56"
+    },
+    {
+      "commodity": "Bottle gourd",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Bottle_gourd.onnx",
+      "bytes": 845134,
+      "sha256": "5095bcd01efeaa156069c2f759c03c6e79676750d063aaf01ccd878e21205fd4"
+    },
+    {
+      "commodity": "Cabbage",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Cabbage.onnx",
+      "bytes": 845130,
+      "sha256": "02e15984d40bd90dc7a88569151591aa192f242981a80ce1ede4e47d05f2821e"
+    },
+    {
+      "commodity": "Cabbage (chinese)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Cabbage_(chinese).onnx",
+      "bytes": 845137,
+      "sha256": "69a168f475f124a28b35dcde6d010af7dd2e5769b40c5ef47c431bf28b0a859e"
+    },
+    {
+      "commodity": "Calamansi",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Calamansi.onnx",
+      "bytes": 845131,
+      "sha256": "7697da311178615168a65d165fbff2d46b010ed784b93958f6c3d808c3e9d8e8"
+    },
+    {
+      "commodity": "Carrots",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Carrots.onnx",
+      "bytes": 845130,
+      "sha256": "b88f82fd232fd5c644d81a73ab2512f8478c1989d102b3ee2fc8d7131dbda4a4"
+    },
+    {
+      "commodity": "Choko",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Choko.onnx",
+      "bytes": 845129,
+      "sha256": "c8065efd9c1d2e1b2cc1075472fbd1374f5c3a2642ec206aeb4eb46799e42523"
+    },
+    {
+      "commodity": "Coconut",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Coconut.onnx",
+      "bytes": 845130,
+      "sha256": "86b4fbb9e8f4eff037b20ea004061a7973f4f70f95c054c285cb863f78320805"
+    },
+    {
+      "commodity": "Crab",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Crab.onnx",
+      "bytes": 845127,
+      "sha256": "bff965e133dc7e989df847bcdb7905bd8ddcd16e1b076baceb7994661407d214"
+    },
+    {
+      "commodity": "Eggplants",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Eggplants.onnx",
+      "bytes": 845132,
+      "sha256": "634c523352916f2a66f2ae43e5dbd9cfaf8a1da30f42a0328d688a73634af255"
+    },
+    {
+      "commodity": "Eggs",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Eggs.onnx",
+      "bytes": 845126,
+      "sha256": "dd4b69293977073c63d9b97cdc482579ea53f93db2613bff5139e2e9aa7f53e4"
+    },
+    {
+      "commodity": "Eggs (duck)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Eggs_(duck).onnx",
+      "bytes": 845134,
+      "sha256": "9cf22ec81d79544581e82c9e0e1da408784d383a5a5353fe90a8d0a504276d78"
+    },
+    {
+      "commodity": "Fish (fresh)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(fresh).onnx",
+      "bytes": 845134,
+      "sha256": "c04d4ff0d49622e18e4112ee52bed90b33dc0e76021cb1108346d772dbc81f8c"
+    },
+    {
+      "commodity": "Fish (frigate tuna)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(frigate_tuna).onnx",
+      "bytes": 845143,
+      "sha256": "2d004d853e614e3cd9f88a2f8e2ee2f931326d6fba650e82581257da57db691f"
+    },
+    {
+      "commodity": "Fish (mackerel, fresh)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(mackerel,_fresh).onnx",
+      "bytes": 845145,
+      "sha256": "7eb12feb3af3e8f95a7deea779ba4b73eb77d7154f072f2e50ae528f94e675fa"
+    },
+    {
+      "commodity": "Fish (milkfish)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(milkfish).onnx",
+      "bytes": 845139,
+      "sha256": "34e8df827cd948506d64501f3b4bef7463877e7973abf88e4f952b70c1d6f5f0"
+    },
+    {
+      "commodity": "Fish (redbelly yellowtail fusilier)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(redbelly_yellowtail_fusilier).onnx",
+      "bytes": 845157,
+      "sha256": "28f01446e5827ec43edaa0980dbadf48f459327378121ebdb2e63ed5aa40c8f0"
+    },
+    {
+      "commodity": "Fish (roundscad)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(roundscad).onnx",
+      "bytes": 845139,
+      "sha256": "09c74cfce4280d743ed1f05452dcfb2a568eab5e4b1bc62b6f95e950da7455b4"
+    },
+    {
+      "commodity": "Fish (slipmouth)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(slipmouth).onnx",
+      "bytes": 845139,
+      "sha256": "033b83fbf2115ca57615d84ee18cca2aa4772bb133da6188691649184a476a22"
+    },
+    {
+      "commodity": "Fish (threadfin bream)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(threadfin_bream).onnx",
+      "bytes": 845144,
+      "sha256": "724d80386dee12fad9383107a253eb6547610a7b7c6970b56c8f8a0b6942323c"
+    },
+    {
+      "commodity": "Fish (tilapia)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Fish_(tilapia).onnx",
+      "bytes": 845137,
+      "sha256": "c69dc21fba2cf3f86d6c19c1a5b593f0391cc3449199e6255382aca1af53758a"
+    },
+    {
+      "commodity": "Garlic",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Garlic.onnx",
+      "bytes": 845130,
+      "sha256": "215e68a053ef0d9c0929a9850d1b8f12638e360826bace266278464dcfc9bf58"
+    },
+    {
+      "commodity": "Garlic (large)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Garlic_(large).onnx",
+      "bytes": 845137,
+      "sha256": "359325cf89ecfa8dd2ef8eccc0a888cf6fe081e27df216840e72327f440f0f0c"
+    },
+    {
+      "commodity": "Garlic (small)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Garlic_(small).onnx",
+      "bytes": 845137,
+      "sha256": "da1e94d51ef1193fed195185c59be65a3ac0ddf02c6aee477c0d368bbb95db37"
+    },
+    {
+      "commodity": "Ginger",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Ginger.onnx",
+      "bytes": 845129,
+      "sha256": "b40e94465b311353c199753fe08138686ca03da204360e305b78c0e042578ab6"
+    },
+    {
+      "commodity": "Groundnuts (shelled)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Groundnuts_(shelled).onnx",
+      "bytes": 845143,
+      "sha256": "39f4638e293fc65015dee598b39398c9f47da1bf31abb5cb5874dac293764c74"
+    },
+    {
+      "commodity": "Groundnuts (unshelled)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Groundnuts_(unshelled).onnx",
+      "bytes": 845145,
+      "sha256": "d8b9533fb368f57021ae0cc5ad9d3e495930314bcabfc562333bd6924892c2bb"
+    },
+    {
+      "commodity": "Maize (white)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Maize_(white).onnx",
+      "bytes": 845136,
+      "sha256": "292d2ac2ef2600b97aa99f11717d4e17cea7330d57270fe4179a9d5204f548ff"
+    },
+    {
+      "commodity": "Maize (yellow)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Maize_(yellow).onnx",
+      "bytes": 845136,
+      "sha256": "4b81bfee25af8ebde42a9c06d59295e15dad3627afd85821948f37b6258729ff"
+    },
+    {
+      "commodity": "Maize flour (white)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Maize_flour_(white).onnx",
+      "bytes": 845141,
+      "sha256": "b53805670be5d69cf26544caffb00f83f1a3870f2c8e78187202a1ca42f061aa"
+    },
+    {
+      "commodity": "Maize flour (yellow)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Maize_flour_(yellow).onnx",
+      "bytes": 845143,
+      "sha256": "94c2b298006bce708e24e2721e6a91614e0aca83e3154e5ed72fec552116e38a"
+    },
+    {
+      "commodity": "Mandarins",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Mandarins.onnx",
+      "bytes": 845131,
+      "sha256": "90d9304461b2e78ff24fbdd6662933f0cc94e6492299f9663f1079e22f15f26f"
+    },
+    {
+      "commodity": "Mangoes (carabao)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Mangoes_(carabao).onnx",
+      "bytes": 845140,
+      "sha256": "1d8491f3518613f36532a188546d55c1bf69b37f29a7bdab315b22e5b541bc14"
+    },
+    {
+      "commodity": "Mangoes (piko)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Mangoes_(piko).onnx",
+      "bytes": 845137,
+      "sha256": "e2bab978945652881251200daaf6f65e3b003014bf8c289e2bf44fb1e0073740"
+    },
+    {
+      "commodity": "Meat (beef)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(beef).onnx",
+      "bytes": 845134,
+      "sha256": "702cd582bfc5ea2890482a5f57363ab6b91b7db42c165ae72cf90fb3cc25b894"
+    },
+    {
+      "commodity": "Meat (beef, chops with bones)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(beef,_chops_with_bones).onnx",
+      "bytes": 845152,
+      "sha256": "0f6d29377ef08965a4aba7bf6f0e194644bdd72a7a18ae537716d0bea9dcac16"
+    },
+    {
+      "commodity": "Meat (chicken, whole)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(chicken,_whole).onnx",
+      "bytes": 845145,
+      "sha256": "d774586c619e97599ff570b0ea0b56fd35f1b2e0c7e9c5b29775bfde4c6ddefe"
+    },
+    {
+      "commodity": "Meat (pork)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(pork).onnx",
+      "bytes": 845134,
+      "sha256": "fbfe47611edd1d7875d0e91ecc33a7621f50c693f0fde94a49d301f792559db7"
+    },
+    {
+      "commodity": "Meat (pork, hock)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(pork,_hock).onnx",
+      "bytes": 845140,
+      "sha256": "708aff75d363d0ecced810bbb028473df7661f09991e134ddfc39fbd24a2ffb4"
+    },
+    {
+      "commodity": "Meat (pork, with bones)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(pork,_with_bones).onnx",
+      "bytes": 845147,
+      "sha256": "3dbb79be78666c04f923563f925daa0a90f5ea465a8644719060c4293c31821c"
+    },
+    {
+      "commodity": "Meat (pork, with fat)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Meat_(pork,_with_fat).onnx",
+      "bytes": 845134,
+      "sha256": "6850b161417d768f062071ad88409088c07be76bd50a6aae60fd7e85f6ef4227"
+    },
+    {
+      "commodity": "Oil (cooking)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Oil_(cooking).onnx",
+      "bytes": 845136,
+      "sha256": "4587711658eec9115e0d0f77dae6e44f0ee9e84eb4e77744abb200cd65c8d128"
+    },
+    {
+      "commodity": "Onions (red)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Onions_(red).onnx",
+      "bytes": 845135,
+      "sha256": "82c4da1d85dca87e5011cc57a98f0116a92e346f461a99be0256eb2e23273e25"
+    },
+    {
+      "commodity": "Onions (white)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Onions_(white).onnx",
+      "bytes": 845137,
+      "sha256": "998066346b83a800cb9a23d78060a04c96c51135d376d4c6eb4b7099f23060e7"
+    },
+    {
+      "commodity": "Papaya",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Papaya.onnx",
+      "bytes": 845129,
+      "sha256": "517f2620d550e377da4c9aa283d50f8ba97b8112feac2c4d785ffc64c4cfbaab"
+    },
+    {
+      "commodity": "Pineapples",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Pineapples.onnx",
+      "bytes": 845133,
+      "sha256": "51802fd0a4c792823467b83ab48586ae96c9a546a626c9fb72137f278a68fef1"
+    },
+    {
+      "commodity": "Potatoes (Irish)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Potatoes_(Irish).onnx",
+      "bytes": 845139,
+      "sha256": "0dbce873d0ae0f9db47facb1362dee5bfc9a6b60669fe006ccd1094a9e647545"
+    },
+    {
+      "commodity": "Rice (milled, superior)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(milled,_superior).onnx",
+      "bytes": 845145,
+      "sha256": "b459d4ef89fec6c0264aa9dba093ecf19e133ab9f2bd74d82d4b361f5c666438"
+    },
+    {
+      "commodity": "Rice (paddy)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(paddy).onnx",
+      "bytes": 845135,
+      "sha256": "4c89c4fdb810d24d1d19f0bb92f5f820f59485f9254ebdd7f664b7b48ab153cb"
+    },
+    {
+      "commodity": "Rice (premium)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(premium).onnx",
+      "bytes": 845138,
+      "sha256": "93119d472738a17be85a1a90dc38ad4d4ab41317f4949ff5bfc0009daf7d0a6a"
+    },
+    {
+      "commodity": "Rice (regular, milled)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(regular,_milled).onnx",
+      "bytes": 845143,
+      "sha256": "afdf2c03b773eb977b0125ee077b2b0b7c30152f1d2929710579d6ef8e92be63"
+    },
+    {
+      "commodity": "Rice (special)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(special).onnx",
+      "bytes": 845136,
+      "sha256": "ceffcbb834c8c4dba1d645a8bfec02f15e129bf5f286b9106d4cde0965358983"
+    },
+    {
+      "commodity": "Rice (well milled)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(well_milled).onnx",
+      "bytes": 845139,
+      "sha256": "dbdfcc9e7274137e78648ba88c93dc7289ec478d1c13482401aa274d356f5c17"
+    },
+    {
+      "commodity": "Semolina (white)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Semolina_(white).onnx",
+      "bytes": 845138,
+      "sha256": "70b1e273ff4aeb416ccd732911256b803153e9f96bf22e04a252516f1698ceac"
+    },
+    {
+      "commodity": "Semolina (yellow)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Semolina_(yellow).onnx",
+      "bytes": 845140,
+      "sha256": "99016ca590b133000625237b267a8b323982dd9e5fbab07f002c1fa0512bbcf8"
+    },
+    {
+      "commodity": "Shrimp (endeavor)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Shrimp_(endeavor).onnx",
+      "bytes": 845140,
+      "sha256": "5ceae72e0ff5c997bdadd4429813a8df98ba2bfc3adbc168db2ea2a4acddafe3"
+    },
+    {
+      "commodity": "Shrimp (tiger)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Shrimp_(tiger).onnx",
+      "bytes": 845136,
+      "sha256": "90f58465e8c433a447af2155aadbeb271b8c578eaed0f72cfb2f0f7720ceaab4"
+    },
+    {
+      "commodity": "Squashes",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Squashes.onnx",
+      "bytes": 845132,
+      "sha256": "5ec35fb6c7c7061cdadab2ca1c5674122e7193901c67c50064c492cb596219c6"
+    },
+    {
+      "commodity": "Sugar (brown)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Sugar_(brown).onnx",
+      "bytes": 845136,
+      "sha256": "8f83ea9601c508910cc6e17c8bda5e75455fe2da9cea563b212b25baf70404db"
+    },
+    {
+      "commodity": "Sugar (white)",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Sugar_(white).onnx",
+      "bytes": 845126,
+      "sha256": "b25a04876c81b052a331a15df0565117c8d1d632f578fdfcc979528c1fb7ff79"
+    },
+    {
+      "commodity": "Sweet Potato leaves",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Sweet_Potato_leaves.onnx",
+      "bytes": 845143,
+      "sha256": "d4a09fb94eef74be8e3bf22ae9238a965555a66954b98a838c7f0aa5681ddc95"
+    },
+    {
+      "commodity": "Sweet potatoes",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Sweet_potatoes.onnx",
+      "bytes": 845136,
+      "sha256": "af805ec029037c2108e5a67b258f318256aa90e36cf0cbadb7894c2620fa57cb"
+    },
+    {
+      "commodity": "Taro",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Taro.onnx",
+      "bytes": 845127,
+      "sha256": "b51e5dde1f51d1ef728b01ce97f4b2e8680212c34a5a13724ae3f759fb40275c"
+    },
+    {
+      "commodity": "Tomatoes",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Tomatoes.onnx",
+      "bytes": 845132,
+      "sha256": "823bbabdb35d5dad76c3a644217b7d03af5b60c802584b3709307fe99dffba80"
+    },
+    {
+      "commodity": "Water spinach",
+      "path": "D:\\ML\\Website\\.onnx_models\\lstm_Water_spinach.onnx",
+      "bytes": 845135,
+      "sha256": "8145d140eb81bd6d220ccaf34889bbf81c9045e7a17f81b5e64878bd4c5fb4fb"
+    }
+  ],
+  "failures": []
+}

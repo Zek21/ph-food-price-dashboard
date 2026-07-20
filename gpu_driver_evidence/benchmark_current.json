@@ -1,0 +1,130 @@
+{
+  "schema": "ph-food-price-directml-benchmark-v1",
+  "generated_at": "2026-07-19T22:37:13.555005+00:00",
+  "model": {
+    "commodity": "Rice (regular, milled)",
+    "path": "D:\\ML\\Website\\.onnx_models\\lstm_Rice_(regular,_milled).onnx",
+    "bytes": 845143,
+    "sha256": "afdf2c03b773eb977b0125ee077b2b0b7c30152f1d2929710579d6ef8e92be63",
+    "input_shape": [
+      "batch",
+      12,
+      6
+    ]
+  },
+  "data": {
+    "rows": 236252,
+    "commodities": 73,
+    "regions": 17,
+    "price_types": 3,
+    "min_date": "2000-01-15",
+    "max_date": "2026-06-15",
+    "sha256": "9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124"
+  },
+  "runtime": {
+    "python": "3.13.7",
+    "onnxruntime": "1.24.4",
+    "available_providers": [
+      "DmlExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "directml_available": true,
+    "device_id": 0,
+    "truth_note": "DirectML availability proves a usable provider. Per-node profiling is required before claiming that a specific model graph executed natively on the GPU."
+  },
+  "sessions": {
+    "gpu": [
+      "DmlExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "cpu": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "profile": {
+    "node_events": 18,
+    "by_provider": {
+      "DmlExecutionProvider": 15,
+      "CPUExecutionProvider": 3
+    },
+    "operations": {
+      "Shape": 1,
+      "Gather": 2,
+      "Unsqueeze": 1,
+      "Concat": 1,
+      "ConstantOfShape": 1,
+      "Slice": 2,
+      "Transpose": 2,
+      "LSTM": 2,
+      "Squeeze": 3,
+      "Gemm": 2,
+      "Relu": 1
+    }
+  },
+  "native_gpu_verified": true,
+  "iterations_per_batch": 100,
+  "warmup_iterations": 10,
+  "results": [
+    {
+      "batch_size": 1,
+      "gpu_directml": {
+        "median_ms": 1.0284,
+        "p95_ms": 2.0896,
+        "throughput_items_s": 972.38
+      },
+      "cpu": {
+        "median_ms": 0.1688,
+        "p95_ms": 0.352,
+        "throughput_items_s": 5925.93
+      },
+      "gpu_speedup_vs_cpu": 0.164,
+      "max_abs_output_difference": 3.81e-06
+    },
+    {
+      "batch_size": 8,
+      "gpu_directml": {
+        "median_ms": 21.0898,
+        "p95_ms": 24.1776,
+        "throughput_items_s": 379.33
+      },
+      "cpu": {
+        "median_ms": 0.4688,
+        "p95_ms": 2.4401,
+        "throughput_items_s": 17063.03
+      },
+      "gpu_speedup_vs_cpu": 0.022,
+      "max_abs_output_difference": 0.0
+    },
+    {
+      "batch_size": 32,
+      "gpu_directml": {
+        "median_ms": 21.087,
+        "p95_ms": 24.273,
+        "throughput_items_s": 1517.53
+      },
+      "cpu": {
+        "median_ms": 0.7249,
+        "p95_ms": 2.5415,
+        "throughput_items_s": 44144.02
+      },
+      "gpu_speedup_vs_cpu": 0.034,
+      "max_abs_output_difference": 0.0
+    },
+    {
+      "batch_size": 128,
+      "gpu_directml": {
+        "median_ms": 21.733,
+        "p95_ms": 24.5723,
+        "throughput_items_s": 5889.67
+      },
+      "cpu": {
+        "median_ms": 2.7801,
+        "p95_ms": 5.7552,
+        "throughput_items_s": 46041.51
+      },
+      "gpu_speedup_vs_cpu": 0.128,
+      "max_abs_output_difference": 0.0
+    }
+  ],
+  "claim_boundary": "This measures warmed ONNX LSTM inference on one real project graph. It does not measure training, end-to-end CSV processing, every Python operation, or other GPUs."
+}

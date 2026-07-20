@@ -30,6 +30,7 @@ ML_DIR = BASE_DIR.parent  # D:/ML
 WFP_CSV = ML_DIR / "WFP" / "wfp_food_prices_phl_latest.csv"
 HASH_FILE = BASE_DIR / ".last_data_hash"
 LOG_FILE = BASE_DIR / "update_log.txt"
+RETRAIN_TIMEOUT_SECONDS = int(os.environ.get("MODEL_RETRAIN_TIMEOUT_SECONDS", "3600"))
 
 DATA_URL = (
     "https://data.humdata.org/dataset/ea251823-8694-47b4-82d0-7d27f00e8aba"
@@ -178,12 +179,17 @@ def check_data_quality() -> bool:
 def retrain_model():
     """Run retrain_model.py to rebuild the model and comparison JSON."""
     log.info("Retraining model...")
+    child_env = os.environ.copy()
+    # Keep the updater and trainer on one canonical data contract.  The CSV
+    # lives in D:\ML\WFP, not in the Website working directory.
+    child_env["WFP_DATA_PATH"] = str(WFP_CSV.resolve())
     result = subprocess.run(
         [sys.executable, str(BASE_DIR / "retrain_model.py")],
         cwd=str(BASE_DIR),
+        env=child_env,
         capture_output=True,
         text=True,
-        timeout=1800,
+        timeout=RETRAIN_TIMEOUT_SECONDS,
     )
     if result.returncode != 0:
         log.error("retrain_model.py failed:\n%s\n%s", result.stdout[-2000:], result.stderr[-2000:])

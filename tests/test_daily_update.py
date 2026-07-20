@@ -219,6 +219,16 @@ class TestSubprocessWrappers:
             # Should invoke python retrain_model.py
             assert "retrain_model.py" in str(cmd[-1])
 
+    def test_retrain_model_passes_canonical_wfp_path(self):
+        """The child trainer must receive the updater's canonical WFP CSV."""
+        du = _import_daily_update()
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0, stdout="OK", stderr="")
+            du.retrain_model()
+            child_env = mock_run.call_args.kwargs["env"]
+            assert child_env["WFP_DATA_PATH"] == str(du.WFP_CSV.resolve())
+            assert mock_run.call_args.kwargs["timeout"] == du.RETRAIN_TIMEOUT_SECONDS
+
     def test_retrain_model_raises_on_failure(self):
         """retrain_model() should raise RuntimeError on non-zero exit."""
         du = _import_daily_update()

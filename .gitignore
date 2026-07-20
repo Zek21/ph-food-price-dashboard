@@ -33,3 +33,5 @@ Thumbs.db
 # Temporary dashboard audit screenshots
 desktop-*.png
 mobile-*.png
+.onnx_models/
+gpu_driver_evidence/*.zip

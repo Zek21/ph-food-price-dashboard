@@ -2,6 +2,10 @@
 
 Interactive visualization, ML forecasting, and early warning system for Philippine food commodity prices, using official [WFP Humanitarian Data Exchange](https://data.humdata.org/dataset/wfp-food-prices-for-philippines) data.
 
+The optional [AMD DirectML inference driver](GPU_DRIVER.md) exports the project's
+LSTM checkpoints to ONNX, verifies per-node GPU placement, benchmarks the same
+graph on DirectML and CPU, and produces hash-backed current forecasts.
+
 <!-- signed: gamma -->
 
 ## Architecture
@@ -84,7 +88,7 @@ Interactive visualization, ML forecasting, and early warning system for Philippi
 ## Data
 
 - **Source**: [WFP VAM Food Prices — Philippines](https://data.humdata.org/dataset/wfp-food-prices-for-philippines)
-- **Coverage**: 117K+ records, 2000–present, updated weekly
+- **Coverage**: 236,252 current source rows, January 2000–June 2026 (July 20, 2026 snapshot)
 - **Commodities**: 73 (rice, vegetables, meat, fish, eggs, spices, etc.)
 - **Regions**: 17 Philippine administrative regions
 - **Exogenous**: ENSO ONI Index (NOAA), USD/PHP exchange rate (ECB), FAO Food Price Index
@@ -101,6 +105,16 @@ pip install -r requirements.txt
 ```bash
 pip install torch
 ```
+
+### AMD GPU inference (optional)
+
+```bash
+pip install -r requirements-gpu.txt
+python gpu_forecast_driver.py run-all
+```
+
+This is an ONNX Runtime DirectML execution path for ML tensor graphs. It is not
+a Windows display/kernel driver and does not move ordinary Python code to a GPU.
 
 ### Full installation
 ```bash

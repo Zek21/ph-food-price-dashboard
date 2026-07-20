@@ -201,14 +201,20 @@ MODEL_DESCRIPTIONS = {
     ),
 }
 
+# Resolve the input before the pipeline starts so imports, tests, scheduled
+# runs, and direct CLI execution all share the same location-independent path.
+_default_data_path = _SCRIPT_DIR / "wfp_food_prices_phl_latest.csv"
+if not _default_data_path.exists():
+    _canonical_wfp_path = _SCRIPT_DIR.parent / "WFP" / "wfp_food_prices_phl_latest.csv"
+    if _canonical_wfp_path.exists():
+        _default_data_path = _canonical_wfp_path
+DATA_PATH = os.environ.get("WFP_DATA_PATH", str(_default_data_path))
+OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "model_comparison.json")
+
 print("=" * 65)
 print("  Multi-Model Food Price Forecasting Pipeline")
 print("  (5 hyperparameter variants per model, best selected)")
 print("=" * 65)
-
-# ─── Configurable paths ─────────────────────────────────────
-DATA_PATH = os.environ.get("WFP_DATA_PATH", "wfp_food_prices_phl_latest.csv")
-OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "model_comparison.json")
 
 # ─── 1. Load WFP data ───────────────────────────────────────
 print("\n[1/5] Loading latest WFP data...")
@@ -245,6 +251,10 @@ print("\n[2/5] Engineering features...")
 
 def build_features(data):
     data = data.sort_values("date").copy()
+    # Every predictor for row t must be computable before price[t] is observed.
+    # Rolling means and differences therefore operate on the one-step-lagged
+    # series; using the unshifted target here lets linear models reconstruct it.
+    prior_price = data["price"].shift(1)
     data["year_num"] = data["year"] - 2000
     data["month_sin"] = np.sin(2 * np.pi * data["month"] / 12)
     data["month_cos"] = np.cos(2 * np.pi * data["month"] / 12)
@@ -252,11 +262,11 @@ def build_features(data):
     data["price_lag3"] = data["price"].shift(3)
     data["price_lag6"] = data["price"].shift(6)
     data["price_lag12"] = data["price"].shift(12)
-    data["price_ma3"] = data["price"].rolling(3, min_periods=1).mean()
-    data["price_ma6"] = data["price"].rolling(6, min_periods=1).mean()
-    data["price_ma12"] = data["price"].rolling(12, min_periods=1).mean()
-    data["price_diff1"] = data["price"].diff(1)
-    data["price_diff12"] = data["price"].diff(12)
+    data["price_ma3"] = prior_price.rolling(3, min_periods=1).mean()
+    data["price_ma6"] = prior_price.rolling(6, min_periods=1).mean()
+    data["price_ma12"] = prior_price.rolling(12, min_periods=1).mean()
+    data["price_diff1"] = prior_price.diff(1)
+    data["price_diff12"] = prior_price.diff(12)
     return data
 
 pieces = []
@@ -313,8 +323,9 @@ training_times = {name: 0.0 for name in MODEL_NAMES}
 NEEDS_SCALING = {"Ridge Regression", "KNN (k=10)"}
 
 # Data hash for cache invalidation  # signed: beta
+FEATURE_CONTRACT_VERSION = "target-leakage-safe-v2"
 _data_hash = hashlib.md5(
-    f"{len(train_df)}_{len(val_df)}_{len(all_commodities)}".encode()
+    f"{FEATURE_CONTRACT_VERSION}_{len(train_df)}_{len(val_df)}_{len(all_commodities)}".encode()
 ).hexdigest()[:12]
 
 

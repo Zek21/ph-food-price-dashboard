@@ -217,6 +217,19 @@ class TestModelConstants:
         assert "KNN (k=10)" in ns
         assert "Gradient Boosting" not in ns
 
+    def test_default_data_path_is_location_independent(self, constants):
+        """Default data discovery must not depend on the process CWD."""
+        data_path = Path(constants["DATA_PATH"])
+        assert data_path.is_absolute()
+        assert data_path.name == "wfp_food_prices_phl_latest.csv"
+
+    def test_feature_engineering_does_not_use_current_target(self):
+        source = RETRAIN_PATH.read_text(encoding="utf-8")
+        assert 'prior_price = data["price"].shift(1)' in source
+        assert 'data["price_ma3"] = prior_price.rolling' in source
+        assert 'data["price_diff1"] = prior_price.diff(1)' in source
+        assert 'FEATURE_CONTRACT_VERSION = "target-leakage-safe-v2"' in source
+
     @pytest.mark.parametrize("family,expected_type", [
         ("Gradient Boosting", GradientBoostingRegressor),
         ("Extra Trees", ExtraTreesRegressor),
@@ -286,10 +299,11 @@ class TestBuildFeatures:
     def test_rolling_mean_values(self, build_features_fn):
         df = _make_price_series(n_months=24)
         result = build_features_fn(df)
-        # price_ma3 at index 5 should be mean of prices[3:6]
+        # At row 5, only rows through index 4 are observable.  The three-value
+        # window is therefore source prices[2:5], never the row-5 target.
         prices = result["price"].values
         ma3 = result["price_ma3"].values
-        expected_ma3_at_5 = np.mean(prices[3:6])
+        expected_ma3_at_5 = np.mean(prices[2:5])
         np.testing.assert_allclose(ma3[5], expected_ma3_at_5, rtol=1e-5)
 
     def test_diff_features(self, build_features_fn):
@@ -297,8 +311,9 @@ class TestBuildFeatures:
         result = build_features_fn(df)
         prices = result["price"].values
         diff1 = result["price_diff1"].values
-        # diff1[i] = prices[i] - prices[i-1]
-        np.testing.assert_allclose(diff1[1:], prices[1:] - prices[:-1])
+        # diff1[i] uses the two most recent prices known before row i.
+        assert np.isnan(diff1[0]) and np.isnan(diff1[1])
+        np.testing.assert_allclose(diff1[2:], prices[1:-1] - prices[:-2])
 
     def test_sorted_by_date(self, build_features_fn):
         df = _make_price_series(n_months=24)

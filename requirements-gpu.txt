@@ -1,0 +1,5 @@
+# Native AMD GPU inference path for gpu_forecast_driver.py.
+# Install inside an isolated project environment; plain onnxruntime conflicts
+# with onnxruntime-directml because both provide the onnxruntime module.
+onnx>=1.17,<2
+onnxruntime-directml>=1.23,<2
