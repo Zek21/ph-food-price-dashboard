@@ -1,0 +1,186 @@
+{
+  "schema": "amd-rx6600-pytorch-directml-proof-v1",
+  "generated_at": "2026-07-20T08:48:06.920556+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13",
+    "torch": "2.4.1+cpu",
+    "torch_directml": "0.2.5.dev240914"
+  },
+  "device": {
+    "dml_device_count": 1,
+    "dml_device_name": "AMD Radeon RX 6600\u0000",
+    "torch_device": "privateuseone:0"
+  },
+  "placement_proof": {
+    "input_device": "privateuseone:0",
+    "result_device": "privateuseone:0",
+    "on_gpu": true,
+    "checksum": -7943.7421875
+  },
+  "matmul_benchmark": [
+    {
+      "n": 512,
+      "gpu": {
+        "n": 512,
+        "iters": 50,
+        "ms_per_matmul": 0.5286,
+        "gflops": 507.8,
+        "checksum": -1748.311767578125
+      },
+      "cpu": {
+        "n": 512,
+        "iters": 12,
+        "ms_per_matmul": 0.9258,
+        "gflops": 290.0,
+        "checksum": 1734.889892578125
+      },
+      "gpu_speedup_vs_cpu": 1.75
+    },
+    {
+      "n": 1024,
+      "gpu": {
+        "n": 1024,
+        "iters": 50,
+        "ms_per_matmul": 1.2526,
+        "gflops": 1714.4,
+        "checksum": 7856.9912109375
+      },
+      "cpu": {
+        "n": 1024,
+        "iters": 12,
+        "ms_per_matmul": 6.5839,
+        "gflops": 326.2,
+        "checksum": -13250.583984375
+      },
+      "gpu_speedup_vs_cpu": 5.26
+    },
+    {
+      "n": 2048,
+      "gpu": {
+        "n": 2048,
+        "iters": 20,
+        "ms_per_matmul": 7.1918,
+        "gflops": 2388.8,
+        "checksum": -97541.1171875
+      },
+      "cpu": {
+        "n": 2048,
+        "iters": 5,
+        "ms_per_matmul": 57.8576,
+        "gflops": 296.9,
+        "checksum": -170326.828125
+      },
+      "gpu_speedup_vs_cpu": 8.04
+    },
+    {
+      "n": 4096,
+      "gpu": {
+        "n": 4096,
+        "iters": 8,
+        "ms_per_matmul": 50.7197,
+        "gflops": 2709.8,
+        "checksum": -367278.46875
+      },
+      "cpu": {
+        "n": 4096,
+        "iters": 3,
+        "ms_per_matmul": 388.3911,
+        "gflops": 353.9,
+        "checksum": 290861.6875
+      },
+      "gpu_speedup_vs_cpu": 7.66
+    }
+  ],
+  "training": {
+    "gpu": {
+      "device": "privateuseone:0",
+      "param_device": "privateuseone:0",
+      "grad_device": "privateuseone:0",
+      "steps": 300,
+      "sec_total": 2.787,
+      "ms_per_step": 9.29,
+      "loss_curve": [
+        [
+          0,
+          0.5394439697265625
+        ],
+        [
+          50,
+          0.2529131770133972
+        ],
+        [
+          100,
+          0.02332526072859764
+        ],
+        [
+          150,
+          0.00328992772847414
+        ],
+        [
+          200,
+          0.0016977032646536827
+        ],
+        [
+          250,
+          0.0005026092403568327
+        ],
+        [
+          299,
+          0.00028247034060768783
+        ]
+      ],
+      "loss_start": 0.5394439697265625,
+      "loss_end": 0.00028247034060768783,
+      "learned": true
+    },
+    "cpu": {
+      "device": "cpu",
+      "param_device": "cpu",
+      "grad_device": "cpu",
+      "steps": 300,
+      "sec_total": 5.123,
+      "ms_per_step": 17.076,
+      "loss_curve": [
+        [
+          0,
+          0.5394439697265625
+        ],
+        [
+          50,
+          0.25288960337638855
+        ],
+        [
+          100,
+          0.023317094892263412
+        ],
+        [
+          150,
+          0.0037005755584686995
+        ],
+        [
+          200,
+          0.00029751972761005163
+        ],
+        [
+          250,
+          0.0001402364287059754
+        ],
+        [
+          299,
+          0.006561323534697294
+        ]
+      ],
+      "loss_start": 0.5394439697265625,
+      "loss_end": 0.006561323534697294,
+      "learned": true
+    },
+    "gpu_trained_on_device": true,
+    "gpu_loss_decreased": true,
+    "train_speedup_vs_cpu": 1.84
+  },
+  "lstm_probe": {
+    "ok": false,
+    "error": "NotImplementedError: Could not run 'aten::_thnn_fused_lstm_cell' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on"
+  }
+}

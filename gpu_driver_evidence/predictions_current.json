@@ -1,0 +1,1907 @@
+{
+  "schema": "ph-food-price-directml-predictions-v1",
+  "generated_at": "2026-07-20T03:50:27.355272+00:00",
+  "execution": {
+    "requested": "directml",
+    "runtime_probe": {
+      "python": "3.13.7",
+      "onnxruntime": "1.24.4",
+      "available_providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "directml_available": true,
+      "device_id": 0,
+      "truth_note": "DirectML availability proves a usable provider. Per-node profiling is required before claiming DirectML device placement for a specific model graph."
+    },
+    "native_gpu_claim": "supported_by_provider_binding; see benchmark profile for per-node placement proof"
+  },
+  "data": {
+    "rows": 236252,
+    "commodities": 73,
+    "regions": 17,
+    "price_types": 3,
+    "min_date": "2000-01-15",
+    "max_date": "2026-06-15",
+    "sha256": "9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124"
+  },
+  "method": {
+    "model": "project LSTM checkpoints exported to ONNX",
+    "horizon_months": 18,
+    "forecast_start": "2026-07",
+    "forecast_end": "2027-12",
+    "eligibility": "A model is forecast only when its most recent observation equals the dataset-wide latest month. Stale series are recorded, not extrapolated.",
+    "limitation": "Inference uses the latest WFP observations with previously trained checkpoints. Forecasts are experimental decision support, not financial advice."
+  },
+  "publication_gate": {
+    "status": "withheld_failed_validation",
+    "passed": false,
+    "requirements": {
+      "minimum_models": 10,
+      "minimum_points": 30,
+      "model_mape_lt_naive": true,
+      "model_mae_lt_naive": true
+    },
+    "reasons": [
+      "model MAPE 85.6945 did not beat naive MAPE 7.5142",
+      "model MAE 141.9462 did not beat naive MAE 8.4031"
+    ]
+  },
+  "model_count": 59,
+  "skipped_model_count": 13,
+  "forecast_point_count": 1062,
+  "models": [
+    {
+      "commodity": "Anchovies",
+      "model_sha256": "b569fa27823144bbe0d159343b788cc86a0a026af1c0e757c08099fb0458351c",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "cedc0263b6df197857768b73207589f590f2ff29e899d69e7193b7146769302b",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:19:47.625482+00:00"
+    },
+    {
+      "commodity": "Bananas (lakatan)",
+      "model_sha256": "2483eca569cc556e95d78cc21d3e56d3f6eb23f8e8d2c9facb4d6ba3a93b36df",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "49c986328c05d3dbad7f7d2a30f033d54cb3e932ce4d97ba1113487591032842",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:19:53.476342+00:00"
+    },
+    {
+      "commodity": "Bananas (latundan)",
+      "model_sha256": "3547610381ef93b3d19ef47aedc08368c9a6388a8dc506ed1dfdb31bda9ccdd1",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "7c24a01abddce1b9598570daf37a35c1c41cf757a4571420fe587d97d5dc11fe",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:02.444665+00:00"
+    },
+    {
+      "commodity": "Bananas (saba)",
+      "model_sha256": "e4966ea9e1ae5185b2623c46f8e710df012f42f6d14d40d54e94ed076d0affdb",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "51aaaa7bf05ccf3f7989174d2ac01a40c83bf3394bc08f230de3c248e0fb8084",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:05.866351+00:00"
+    },
+    {
+      "commodity": "Beans (green, fresh)",
+      "model_sha256": "1e3a87319c7c680a9ad7028d0eb36ff5a496c0ef8ecc65987d046fe82f9c139e",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "da5d8328612133413cee4b5fa35f4871a81f98ee71ae9088abb341e15428f992",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:11.239974+00:00"
+    },
+    {
+      "commodity": "Beans (mung)",
+      "model_sha256": "4adcc435c600a41700e48004db90a7de7649cad804ce994abf0efccd513d349c",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "52cff3859b4f282fec08a3d31feb744fa34337dea5793f8c4994e20f50c41744",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:24.030038+00:00"
+    },
+    {
+      "commodity": "Beans (string)",
+      "model_sha256": "6c1d38b3a12e211de3449ab50841e24a6750c979bc216b0f15199eb88eb0c4fd",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "9c6feb6053001142dac582673a41f5dc840747e9e5501c7c93866449b11af2e9",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:32.256437+00:00"
+    },
+    {
+      "commodity": "Bitter melon",
+      "model_sha256": "eeccbce422f1b777dd76d18fb44d56e07d27478a3e4d2ed3907921b1397f5f56",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "ca5dd8f85cc197cbdb6bd9f4307f40808f1b42aa1d5d13f7b348fcce5e09086a",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:38.869741+00:00"
+    },
+    {
+      "commodity": "Bottle gourd",
+      "model_sha256": "5095bcd01efeaa156069c2f759c03c6e79676750d063aaf01ccd878e21205fd4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "a0b498fc1388f132dde2a8937228ba14a031bd43127abcfb2e4495ee1c7a216a",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:42.431738+00:00"
+    },
+    {
+      "commodity": "Cabbage",
+      "model_sha256": "02e15984d40bd90dc7a88569151591aa192f242981a80ce1ede4e47d05f2821e",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "d99bb18bd74eee9ac9a50480b4008eba365a6ee826646a8f4c43eea7480faebe",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:20:59.504490+00:00"
+    },
+    {
+      "commodity": "Cabbage (chinese)",
+      "model_sha256": "69a168f475f124a28b35dcde6d010af7dd2e5769b40c5ef47c431bf28b0a859e",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "5347da8f3ba8a701f0a51ba85ed283ae25ddb0382f37f844de5a4037e6fd915b",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:00.599613+00:00"
+    },
+    {
+      "commodity": "Calamansi",
+      "model_sha256": "7697da311178615168a65d165fbff2d46b010ed784b93958f6c3d808c3e9d8e8",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "97287a1dd9a23b6eebf187e48002f5618df95640e5f913157981b4d609fd4868",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:05.406204+00:00"
+    },
+    {
+      "commodity": "Carrots",
+      "model_sha256": "b88f82fd232fd5c644d81a73ab2512f8478c1989d102b3ee2fc8d7131dbda4a4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "0bcea0586b7c9343b37addb166809ddd895f2859fc8a18a85fabbc1261a14c40",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:14.572364+00:00"
+    },
+    {
+      "commodity": "Choko",
+      "model_sha256": "c8065efd9c1d2e1b2cc1075472fbd1374f5c3a2642ec206aeb4eb46799e42523",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "b4ca3bdb4e60a5cb079fcc81a67de01ec790ae4038bfe25612d846f5314be043",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:19.532408+00:00"
+    },
+    {
+      "commodity": "Coconut",
+      "model_sha256": "86b4fbb9e8f4eff037b20ea004061a7973f4f70f95c054c285cb863f78320805",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "d3e1bc5b87a046a897969e3fea381acae5a2c80f4237f9c18654d819c7753441",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:25.300206+00:00"
+    },
+    {
+      "commodity": "Crab",
+      "model_sha256": "bff965e133dc7e989df847bcdb7905bd8ddcd16e1b076baceb7994661407d214",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "1534c947dbfbe40fbf55d6322c2a36609cb36190f5958bd6c4406085a56d680b",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:30.175265+00:00"
+    },
+    {
+      "commodity": "Eggplants",
+      "model_sha256": "634c523352916f2a66f2ae43e5dbd9cfaf8a1da30f42a0328d688a73634af255",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "c100649a016842e9607bbaf0df2ff65062b7c3a3adfb808a2f4aa9d69feb5961",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:35.116504+00:00"
+    },
+    {
+      "commodity": "Eggs",
+      "model_sha256": "dd4b69293977073c63d9b97cdc482579ea53f93db2613bff5139e2e9aa7f53e4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "e666b56138d2ba3e791b91b7b098ebe707c35fc29fe2fe909abadd9608cf9ca9",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:45.461372+00:00"
+    },
+    {
+      "commodity": "Eggs (duck)",
+      "model_sha256": "9cf22ec81d79544581e82c9e0e1da408784d383a5a5353fe90a8d0a504276d78",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "1883a1b851c4b2552471d5a25044ed92974f75adc3fd5593fefef80dfade1007",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:45.747209+00:00"
+    },
+    {
+      "commodity": "Fish (frigate tuna)",
+      "model_sha256": "2d004d853e614e3cd9f88a2f8e2ee2f931326d6fba650e82581257da57db691f",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "87e996832f02ace481b9bebda71b8dcfc1a50e4d63828fbd9b1f24f1719d3bc4",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:46.885049+00:00"
+    },
+    {
+      "commodity": "Fish (mackerel, fresh)",
+      "model_sha256": "7eb12feb3af3e8f95a7deea779ba4b73eb77d7154f072f2e50ae528f94e675fa",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "2113add6d5f2dbb9f62659c10a4b8f263b0220732607586016d8267399a1c008",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:47.109648+00:00"
+    },
+    {
+      "commodity": "Fish (milkfish)",
+      "model_sha256": "34e8df827cd948506d64501f3b4bef7463877e7973abf88e4f952b70c1d6f5f0",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "c72811b987ac66ee56acf5732bcfe98a38d2fdfcd0d33af8c3d8bbce11db222d",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:47.742053+00:00"
+    },
+    {
+      "commodity": "Fish (redbelly yellowtail fusilier)",
+      "model_sha256": "28f01446e5827ec43edaa0980dbadf48f459327378121ebdb2e63ed5aa40c8f0",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "e00bab9896027efb63bc7ee0272c2841efc3b132215dcee38b5f8be89b375712",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:48.145864+00:00"
+    },
+    {
+      "commodity": "Fish (roundscad)",
+      "model_sha256": "09c74cfce4280d743ed1f05452dcfb2a568eab5e4b1bc62b6f95e950da7455b4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "6324525ce8503f434211d1b10bd5982c4a943a5f29e001f2b8cf9a44f78606d4",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:48.707019+00:00"
+    },
+    {
+      "commodity": "Fish (slipmouth)",
+      "model_sha256": "033b83fbf2115ca57615d84ee18cca2aa4772bb133da6188691649184a476a22",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "b366f844b66cf75ee8f705591f07c42f98eec0fbeaf41e738f806975e95abea2",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:48.992171+00:00"
+    },
+    {
+      "commodity": "Fish (threadfin bream)",
+      "model_sha256": "724d80386dee12fad9383107a253eb6547610a7b7c6970b56c8f8a0b6942323c",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "01b26e113e8de31440122482cd0c594b7b1ebcd1a80088884fc975a9992d4254",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:49.256001+00:00"
+    },
+    {
+      "commodity": "Fish (tilapia)",
+      "model_sha256": "c69dc21fba2cf3f86d6c19c1a5b593f0391cc3449199e6255382aca1af53758a",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "534c24d6759c265e9d188f59b0302b8e291464252ab9052f463de77364766791",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:49.868835+00:00"
+    },
+    {
+      "commodity": "Garlic",
+      "model_sha256": "215e68a053ef0d9c0929a9850d1b8f12638e360826bace266278464dcfc9bf58",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "0e4c7e438bd8981c1d7e6fe8cdf5b905d85f64c86386771196308883460ecbe6",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:50.653471+00:00"
+    },
+    {
+      "commodity": "Ginger",
+      "model_sha256": "b40e94465b311353c199753fe08138686ca03da204360e305b78c0e042578ab6",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "1332bbaaca02f3fe7b042681733dd8009a3147587b35366652ed40bcbe8192d7",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:51.218417+00:00"
+    },
+    {
+      "commodity": "Groundnuts (shelled)",
+      "model_sha256": "39f4638e293fc65015dee598b39398c9f47da1bf31abb5cb5874dac293764c74",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "2781afae008267892e9d4534a0bc8d75538479c19e1d7ee97ee50ef4ea6d6e13",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:51.679740+00:00"
+    },
+    {
+      "commodity": "Groundnuts (unshelled)",
+      "model_sha256": "d8b9533fb368f57021ae0cc5ad9d3e495930314bcabfc562333bd6924892c2bb",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "55647996201ac660f537ac769d583c749f7bed0bfa822bc8c636e5a722675799",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:51.940467+00:00"
+    },
+    {
+      "commodity": "Maize (yellow)",
+      "model_sha256": "4b81bfee25af8ebde42a9c06d59295e15dad3627afd85821948f37b6258729ff",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "3e3908fad3085bcdd779a3cef8bead085f8eb3c2901af339c436ee7c0ccaa917",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:52.336354+00:00"
+    },
+    {
+      "commodity": "Mandarins",
+      "model_sha256": "90d9304461b2e78ff24fbdd6662933f0cc94e6492299f9663f1079e22f15f26f",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "3cf903af306bb2aca5e35c4dc8cce18de7f7e3b6e8fee8ebdd9789c9feb03feb",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:53.278350+00:00"
+    },
+    {
+      "commodity": "Mangoes (carabao)",
+      "model_sha256": "1d8491f3518613f36532a188546d55c1bf69b37f29a7bdab315b22e5b541bc14",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "73ce86aa61e22269c824e041d84351d84e9a1da84e240eaf3411fcb47b15c480",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:53.687042+00:00"
+    },
+    {
+      "commodity": "Mangoes (piko)",
+      "model_sha256": "e2bab978945652881251200daaf6f65e3b003014bf8c289e2bf44fb1e0073740",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "5b30838eeb71fe7002df8fdfef18b3230996d50c37d39dfe006c38221df4df30",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:53.805556+00:00"
+    },
+    {
+      "commodity": "Meat (beef)",
+      "model_sha256": "702cd582bfc5ea2890482a5f57363ab6b91b7db42c165ae72cf90fb3cc25b894",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "9ebf67c9a08cdbc65733e0c6a932f34a2d8c87d1d59f9b7375c8f09c7791b3d1",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:54.470154+00:00"
+    },
+    {
+      "commodity": "Meat (beef, chops with bones)",
+      "model_sha256": "0f6d29377ef08965a4aba7bf6f0e194644bdd72a7a18ae537716d0bea9dcac16",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "9306f51aae7f02028599c8da7c822fc4cca3eb69061eb8c6feefecfda08be910",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:56.304185+00:00"
+    },
+    {
+      "commodity": "Meat (chicken, whole)",
+      "model_sha256": "d774586c619e97599ff570b0ea0b56fd35f1b2e0c7e9c5b29775bfde4c6ddefe",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "7dad18cc93b9ddbf21952dd310c4663a0235ab561e00d472465907b787a49121",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:21:58.814122+00:00"
+    },
+    {
+      "commodity": "Meat (pork)",
+      "model_sha256": "fbfe47611edd1d7875d0e91ecc33a7621f50c693f0fde94a49d301f792559db7",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "822dfbdb87ebdb369848af7ea3c35c790e91247c607f0737d10dd9ac0e828ece",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:00.422927+00:00"
+    },
+    {
+      "commodity": "Meat (pork, hock)",
+      "model_sha256": "708aff75d363d0ecced810bbb028473df7661f09991e134ddfc39fbd24a2ffb4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "01b93365e7538ad07dde1266171865db6c7990bfbd19a7bbb9a53b5936f6b6ca",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:00.602546+00:00"
+    },
+    {
+      "commodity": "Meat (pork, with bones)",
+      "model_sha256": "3dbb79be78666c04f923563f925daa0a90f5ea465a8644719060c4293c31821c",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "d4f77ca84397d68bb0330e80cdd60d2834cf5a848d1f92496e95e4ad34236d55",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:01.127299+00:00"
+    },
+    {
+      "commodity": "Onions (red)",
+      "model_sha256": "82c4da1d85dca87e5011cc57a98f0116a92e346f461a99be0256eb2e23273e25",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "ffe91523e1d20c7f8e2cec59de79e8df9c571cbd13c19346bc01ef277d2a68fb",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:02.464409+00:00"
+    },
+    {
+      "commodity": "Onions (white)",
+      "model_sha256": "998066346b83a800cb9a23d78060a04c96c51135d376d4c6eb4b7099f23060e7",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "dbf0949f89b6a431057e3236951d6ddbd786535c3b3b488a5ada4c09d9c997ca",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:03.496216+00:00"
+    },
+    {
+      "commodity": "Papaya",
+      "model_sha256": "517f2620d550e377da4c9aa283d50f8ba97b8112feac2c4d785ffc64c4cfbaab",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "656c29196b520cd03f30ade1f33c5ce141cc053fcc8de50b997455c69631f685",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:03.654853+00:00"
+    },
+    {
+      "commodity": "Pineapples",
+      "model_sha256": "51802fd0a4c792823467b83ab48586ae96c9a546a626c9fb72137f278a68fef1",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "8a78fa91423cf2c85d20a4b025b0e2c43e224a3e2ce696a207603a6f306a6a62",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:03.941060+00:00"
+    },
+    {
+      "commodity": "Potatoes (Irish)",
+      "model_sha256": "0dbce873d0ae0f9db47facb1362dee5bfc9a6b60669fe006ccd1094a9e647545",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "e4b7feef37d58e62ca43df3ca0b26e6dd61ab459d75c51e9944f09bdc188add1",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:05.248320+00:00"
+    },
+    {
+      "commodity": "Rice (regular, milled)",
+      "model_sha256": "afdf2c03b773eb977b0125ee077b2b0b7c30152f1d2929710579d6ef8e92be63",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "c463d6a6b3ef18e5437a9d2c5bde5c1cda178395319cc4c321727ddae5096d08",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:09.520629+00:00"
+    },
+    {
+      "commodity": "Rice (special)",
+      "model_sha256": "ceffcbb834c8c4dba1d645a8bfec02f15e129bf5f286b9106d4cde0965358983",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "f13a56f3ac7fd3169a13cc7410055f40ea9100c5a8ed30aa934eaceb62800499",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:10.055851+00:00"
+    },
+    {
+      "commodity": "Rice (well milled)",
+      "model_sha256": "dbdfcc9e7274137e78648ba88c93dc7289ec478d1c13482401aa274d356f5c17",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "377007eddc8787904c36712d3da3cabed5ad68e5970a7ac7874cfc19a705935e",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:11.181789+00:00"
+    },
+    {
+      "commodity": "Semolina (white)",
+      "model_sha256": "70b1e273ff4aeb416ccd732911256b803153e9f96bf22e04a252516f1698ceac",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "b5aa0c219e82f9a2df54809da7a19d68d1f5185b9697f5f405fb263c15d0ab17",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:11.368395+00:00"
+    },
+    {
+      "commodity": "Semolina (yellow)",
+      "model_sha256": "99016ca590b133000625237b267a8b323982dd9e5fbab07f002c1fa0512bbcf8",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "df754e16ecc2eb0e0c18da5f1bfd7de46e9e061b63895bae9f959d425460b3a9",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:11.563791+00:00"
+    },
+    {
+      "commodity": "Shrimp (endeavor)",
+      "model_sha256": "5ceae72e0ff5c997bdadd4429813a8df98ba2bfc3adbc168db2ea2a4acddafe3",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "574b98893a075aacd0ffa387e202b90ee4c4cbfec471d9ff1aa26764f9a0eb98",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:11.802215+00:00"
+    },
+    {
+      "commodity": "Shrimp (tiger)",
+      "model_sha256": "90f58465e8c433a447af2155aadbeb271b8c578eaed0f72cfb2f0f7720ceaab4",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "e907f4eac3f79d79cd6cb51073528267dead29f854bf60204a492edd80b29f89",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:12.308382+00:00"
+    },
+    {
+      "commodity": "Squashes",
+      "model_sha256": "5ec35fb6c7c7061cdadab2ca1c5674122e7193901c67c50064c492cb596219c6",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "df8a059c98c4ac115d0094e5ba6b1cc187febc620785623283b273542d0629d0",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:12.743005+00:00"
+    },
+    {
+      "commodity": "Sweet Potato leaves",
+      "model_sha256": "d4a09fb94eef74be8e3bf22ae9238a965555a66954b98a838c7f0aa5681ddc95",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "a8b8f8f88ebe6c8a33077d9f458cb2d058833be7dad304b4173687149c96d039",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:13.068731+00:00"
+    },
+    {
+      "commodity": "Sweet potatoes",
+      "model_sha256": "af805ec029037c2108e5a67b258f318256aa90e36cf0cbadb7894c2620fa57cb",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "ae0bcf1007951a10feedcfbded425be3a3625c24717b1efb81e848a5ce190110",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:13.892904+00:00"
+    },
+    {
+      "commodity": "Taro",
+      "model_sha256": "b51e5dde1f51d1ef728b01ce97f4b2e8680212c34a5a13724ae3f759fb40275c",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "4c1f7bf67ea4081c1697bb18a7cd8cfcb26f282200a56271679ba380036d09c1",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:14.111040+00:00"
+    },
+    {
+      "commodity": "Tomatoes",
+      "model_sha256": "823bbabdb35d5dad76c3a644217b7d03af5b60c802584b3709307fe99dffba80",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "36c3af61141e796a31e817874e200312237b12a8c2193148bf973f7016597016",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:15.569839+00:00"
+    },
+    {
+      "commodity": "Water spinach",
+      "model_sha256": "8145d140eb81bd6d220ccaf34889bbf81c9045e7a17f81b5e64878bd4c5fb4fb",
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "source_checkpoint_sha256": "96c5694751c95057baecbbbe4dd73a78dcda3d815c39b95c1c1f0f8862ae66df",
+      "source_checkpoint_mtime_utc": "2026-03-18T10:22:15.824953+00:00"
+    }
+  ],
+  "skipped_models": [
+    {
+      "commodity": "Fish (fresh)",
+      "model_sha256": "c04d4ff0d49622e18e4112ee52bed90b33dc0e76021cb1108346d772dbc81f8c",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Fish (fresh) is 2019-06; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Garlic (large)",
+      "model_sha256": "359325cf89ecfa8dd2ef8eccc0a888cf6fe081e27df216840e72327f440f0f0c",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Garlic (large) is 2021-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Garlic (small)",
+      "model_sha256": "da1e94d51ef1193fed195185c59be65a3ac0ddf02c6aee477c0d368bbb95db37",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Garlic (small) is 2021-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Maize (white)",
+      "model_sha256": "292d2ac2ef2600b97aa99f11717d4e17cea7330d57270fe4179a9d5204f548ff",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Maize (white) is 2022-04; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Maize flour (white)",
+      "model_sha256": "b53805670be5d69cf26544caffb00f83f1a3870f2c8e78187202a1ca42f061aa",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Maize flour (white) is 2020-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Maize flour (yellow)",
+      "model_sha256": "94c2b298006bce708e24e2721e6a91614e0aca83e3154e5ed72fec552116e38a",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Maize flour (yellow) is 2020-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Meat (pork, with fat)",
+      "model_sha256": "6850b161417d768f062071ad88409088c07be76bd50a6aae60fd7e85f6ef4227",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Meat (pork, with fat) is 2021-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Oil (cooking)",
+      "model_sha256": "4587711658eec9115e0d0f77dae6e44f0ee9e84eb4e77744abb200cd65c8d128",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Oil (cooking) is 2021-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Rice (milled, superior)",
+      "model_sha256": "b459d4ef89fec6c0264aa9dba093ecf19e133ab9f2bd74d82d4b361f5c666438",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Rice (milled, superior) is 2020-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Rice (paddy)",
+      "model_sha256": "4c89c4fdb810d24d1d19f0bb92f5f820f59485f9254ebdd7f664b7b48ab153cb",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Rice (paddy) is 2013-03; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Rice (premium)",
+      "model_sha256": "93119d472738a17be85a1a90dc38ad4d4ab41317f4949ff5bfc0009daf7d0a6a",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Rice (premium) is 2021-01; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Sugar (brown)",
+      "model_sha256": "8f83ea9601c508910cc6e17c8bda5e75455fe2da9cea563b212b25baf70404db",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Sugar (brown) is 2021-02; current dataset maximum is 2026-06"
+    },
+    {
+      "commodity": "Sugar (white)",
+      "model_sha256": "b25a04876c81b052a331a15df0565117c8d1d632f578fdfcc979528c1fb7ff79",
+      "status": "skipped_stale_current_history",
+      "reason": "Latest observation for Sugar (white) is 2021-02; current dataset maximum is 2026-06"
+    }
+  ],
+  "forecasts": {
+    "Anchovies": {
+      "2026-07": 10.73,
+      "2026-08": 10.73,
+      "2026-09": 10.73,
+      "2026-10": 10.73,
+      "2026-11": 10.73,
+      "2026-12": 10.73,
+      "2027-01": 10.73,
+      "2027-02": 10.73,
+      "2027-03": 10.73,
+      "2027-04": 10.73,
+      "2027-05": 10.74,
+      "2027-06": 10.74,
+      "2027-07": 10.74,
+      "2027-08": 10.74,
+      "2027-09": 10.74,
+      "2027-10": 10.74,
+      "2027-11": 10.74,
+      "2027-12": 10.74
+    },
+    "Bananas (lakatan)": {
+      "2026-07": 8.28,
+      "2026-08": 8.28,
+      "2026-09": 8.28,
+      "2026-10": 8.28,
+      "2026-11": 8.28,
+      "2026-12": 8.28,
+      "2027-01": 8.28,
+      "2027-02": 8.28,
+      "2027-03": 8.28,
+      "2027-04": 8.28,
+      "2027-05": 8.28,
+      "2027-06": 8.28,
+      "2027-07": 8.28,
+      "2027-08": 8.28,
+      "2027-09": 8.28,
+      "2027-10": 8.28,
+      "2027-11": 8.28,
+      "2027-12": 8.28
+    },
+    "Bananas (latundan)": {
+      "2026-07": 12.46,
+      "2026-08": 12.46,
+      "2026-09": 12.45,
+      "2026-10": 12.45,
+      "2026-11": 12.45,
+      "2026-12": 12.45,
+      "2027-01": 12.45,
+      "2027-02": 12.46,
+      "2027-03": 12.46,
+      "2027-04": 12.46,
+      "2027-05": 12.46,
+      "2027-06": 12.46,
+      "2027-07": 12.45,
+      "2027-08": 12.45,
+      "2027-09": 12.45,
+      "2027-10": 12.45,
+      "2027-11": 12.45,
+      "2027-12": 12.45
+    },
+    "Bananas (saba)": {
+      "2026-07": 7.54,
+      "2026-08": 7.55,
+      "2026-09": 7.55,
+      "2026-10": 7.55,
+      "2026-11": 7.55,
+      "2026-12": 7.55,
+      "2027-01": 7.55,
+      "2027-02": 7.55,
+      "2027-03": 7.55,
+      "2027-04": 7.55,
+      "2027-05": 7.55,
+      "2027-06": 7.55,
+      "2027-07": 7.55,
+      "2027-08": 7.55,
+      "2027-09": 7.55,
+      "2027-10": 7.55,
+      "2027-11": 7.55,
+      "2027-12": 7.55
+    },
+    "Beans (green, fresh)": {
+      "2026-07": 5.49,
+      "2026-08": 5.49,
+      "2026-09": 5.49,
+      "2026-10": 5.49,
+      "2026-11": 5.49,
+      "2026-12": 5.49,
+      "2027-01": 5.49,
+      "2027-02": 5.49,
+      "2027-03": 5.49,
+      "2027-04": 5.49,
+      "2027-05": 5.49,
+      "2027-06": 5.49,
+      "2027-07": 5.5,
+      "2027-08": 5.5,
+      "2027-09": 5.5,
+      "2027-10": 5.5,
+      "2027-11": 5.49,
+      "2027-12": 5.49
+    },
+    "Beans (mung)": {
+      "2026-07": 19.62,
+      "2026-08": 19.62,
+      "2026-09": 19.62,
+      "2026-10": 19.62,
+      "2026-11": 19.62,
+      "2026-12": 19.62,
+      "2027-01": 19.62,
+      "2027-02": 19.62,
+      "2027-03": 19.62,
+      "2027-04": 19.62,
+      "2027-05": 19.62,
+      "2027-06": 19.62,
+      "2027-07": 19.62,
+      "2027-08": 19.62,
+      "2027-09": 19.62,
+      "2027-10": 19.62,
+      "2027-11": 19.62,
+      "2027-12": 19.62
+    },
+    "Beans (string)": {
+      "2026-07": 11.82,
+      "2026-08": 11.82,
+      "2026-09": 11.81,
+      "2026-10": 11.81,
+      "2026-11": 11.81,
+      "2026-12": 11.82,
+      "2027-01": 11.82,
+      "2027-02": 11.82,
+      "2027-03": 11.83,
+      "2027-04": 11.83,
+      "2027-05": 11.83,
+      "2027-06": 11.83,
+      "2027-07": 11.83,
+      "2027-08": 11.83,
+      "2027-09": 11.83,
+      "2027-10": 11.83,
+      "2027-11": 11.83,
+      "2027-12": 11.83
+    },
+    "Bitter melon": {
+      "2026-07": 8.12,
+      "2026-08": 8.12,
+      "2026-09": 8.12,
+      "2026-10": 8.12,
+      "2026-11": 8.12,
+      "2026-12": 8.12,
+      "2027-01": 8.12,
+      "2027-02": 8.12,
+      "2027-03": 8.12,
+      "2027-04": 8.12,
+      "2027-05": 8.12,
+      "2027-06": 8.12,
+      "2027-07": 8.12,
+      "2027-08": 8.12,
+      "2027-09": 8.12,
+      "2027-10": 8.12,
+      "2027-11": 8.12,
+      "2027-12": 8.12
+    },
+    "Bottle gourd": {
+      "2026-07": 7.43,
+      "2026-08": 7.43,
+      "2026-09": 7.43,
+      "2026-10": 7.43,
+      "2026-11": 7.43,
+      "2026-12": 7.43,
+      "2027-01": 7.44,
+      "2027-02": 7.44,
+      "2027-03": 7.45,
+      "2027-04": 7.45,
+      "2027-05": 7.45,
+      "2027-06": 7.45,
+      "2027-07": 7.45,
+      "2027-08": 7.45,
+      "2027-09": 7.45,
+      "2027-10": 7.45,
+      "2027-11": 7.45,
+      "2027-12": 7.45
+    },
+    "Cabbage": {
+      "2026-07": 36.86,
+      "2026-08": 36.86,
+      "2026-09": 36.86,
+      "2026-10": 36.86,
+      "2026-11": 36.86,
+      "2026-12": 36.86,
+      "2027-01": 36.86,
+      "2027-02": 36.86,
+      "2027-03": 36.86,
+      "2027-04": 36.86,
+      "2027-05": 36.86,
+      "2027-06": 36.86,
+      "2027-07": 36.86,
+      "2027-08": 36.86,
+      "2027-09": 36.86,
+      "2027-10": 36.86,
+      "2027-11": 36.86,
+      "2027-12": 36.86
+    },
+    "Cabbage (chinese)": {
+      "2026-07": 6.28,
+      "2026-08": 6.28,
+      "2026-09": 6.28,
+      "2026-10": 6.28,
+      "2026-11": 6.28,
+      "2026-12": 6.28,
+      "2027-01": 6.28,
+      "2027-02": 6.28,
+      "2027-03": 6.28,
+      "2027-04": 6.28,
+      "2027-05": 6.28,
+      "2027-06": 6.28,
+      "2027-07": 6.28,
+      "2027-08": 6.28,
+      "2027-09": 6.28,
+      "2027-10": 6.28,
+      "2027-11": 6.28,
+      "2027-12": 6.28
+    },
+    "Calamansi": {
+      "2026-07": 11.24,
+      "2026-08": 11.24,
+      "2026-09": 11.24,
+      "2026-10": 11.24,
+      "2026-11": 11.24,
+      "2026-12": 11.24,
+      "2027-01": 11.24,
+      "2027-02": 11.24,
+      "2027-03": 11.24,
+      "2027-04": 11.25,
+      "2027-05": 11.25,
+      "2027-06": 11.25,
+      "2027-07": 11.25,
+      "2027-08": 11.25,
+      "2027-09": 11.25,
+      "2027-10": 11.25,
+      "2027-11": 11.25,
+      "2027-12": 11.25
+    },
+    "Carrots": {
+      "2026-07": 42.46,
+      "2026-08": 42.46,
+      "2026-09": 42.46,
+      "2026-10": 42.46,
+      "2026-11": 42.46,
+      "2026-12": 42.46,
+      "2027-01": 42.46,
+      "2027-02": 42.46,
+      "2027-03": 42.46,
+      "2027-04": 42.46,
+      "2027-05": 42.46,
+      "2027-06": 42.46,
+      "2027-07": 42.46,
+      "2027-08": 42.46,
+      "2027-09": 42.46,
+      "2027-10": 42.46,
+      "2027-11": 42.46,
+      "2027-12": 42.46
+    },
+    "Choko": {
+      "2026-07": 13.4,
+      "2026-08": 13.4,
+      "2026-09": 13.4,
+      "2026-10": 13.4,
+      "2026-11": 13.4,
+      "2026-12": 13.4,
+      "2027-01": 13.4,
+      "2027-02": 13.41,
+      "2027-03": 13.41,
+      "2027-04": 13.41,
+      "2027-05": 13.41,
+      "2027-06": 13.41,
+      "2027-07": 13.41,
+      "2027-08": 13.41,
+      "2027-09": 13.41,
+      "2027-10": 13.41,
+      "2027-11": 13.41,
+      "2027-12": 13.41
+    },
+    "Coconut": {
+      "2026-07": 15.78,
+      "2026-08": 15.78,
+      "2026-09": 15.78,
+      "2026-10": 15.78,
+      "2026-11": 15.78,
+      "2026-12": 15.78,
+      "2027-01": 15.78,
+      "2027-02": 15.78,
+      "2027-03": 15.78,
+      "2027-04": 15.78,
+      "2027-05": 15.78,
+      "2027-06": 15.78,
+      "2027-07": 15.78,
+      "2027-08": 15.78,
+      "2027-09": 15.78,
+      "2027-10": 15.78,
+      "2027-11": 15.78,
+      "2027-12": 15.78
+    },
+    "Crab": {
+      "2026-07": 8.02,
+      "2026-08": 8.02,
+      "2026-09": 8.02,
+      "2026-10": 8.02,
+      "2026-11": 8.02,
+      "2026-12": 8.02,
+      "2027-01": 8.02,
+      "2027-02": 8.02,
+      "2027-03": 8.02,
+      "2027-04": 8.02,
+      "2027-05": 8.02,
+      "2027-06": 8.02,
+      "2027-07": 8.02,
+      "2027-08": 8.02,
+      "2027-09": 8.02,
+      "2027-10": 8.02,
+      "2027-11": 8.02,
+      "2027-12": 8.02
+    },
+    "Eggplants": {
+      "2026-07": 7.36,
+      "2026-08": 7.36,
+      "2026-09": 7.36,
+      "2026-10": 7.36,
+      "2026-11": 7.36,
+      "2026-12": 7.36,
+      "2027-01": 7.36,
+      "2027-02": 7.36,
+      "2027-03": 7.36,
+      "2027-04": 7.36,
+      "2027-05": 7.36,
+      "2027-06": 7.37,
+      "2027-07": 7.37,
+      "2027-08": 7.37,
+      "2027-09": 7.37,
+      "2027-10": 7.37,
+      "2027-11": 7.37,
+      "2027-12": 7.37
+    },
+    "Eggs": {
+      "2026-07": 7.08,
+      "2026-08": 7.08,
+      "2026-09": 7.08,
+      "2026-10": 7.08,
+      "2026-11": 7.08,
+      "2026-12": 7.08,
+      "2027-01": 7.08,
+      "2027-02": 7.08,
+      "2027-03": 7.08,
+      "2027-04": 7.08,
+      "2027-05": 7.08,
+      "2027-06": 7.08,
+      "2027-07": 7.08,
+      "2027-08": 7.08,
+      "2027-09": 7.08,
+      "2027-10": 7.08,
+      "2027-11": 7.08,
+      "2027-12": 7.08
+    },
+    "Eggs (duck)": {
+      "2026-07": 2.19,
+      "2026-08": 2.21,
+      "2026-09": 2.22,
+      "2026-10": 2.23,
+      "2026-11": 2.23,
+      "2026-12": 2.22,
+      "2027-01": 2.19,
+      "2027-02": 2.16,
+      "2027-03": 2.1,
+      "2027-04": 2.04,
+      "2027-05": 1.96,
+      "2027-06": 1.88,
+      "2027-07": 1.79,
+      "2027-08": 1.8,
+      "2027-09": 1.8,
+      "2027-10": 1.81,
+      "2027-11": 1.81,
+      "2027-12": 1.81
+    },
+    "Fish (frigate tuna)": {
+      "2026-07": 0.89,
+      "2026-08": 0.9,
+      "2026-09": 0.94,
+      "2026-10": 1.01,
+      "2026-11": 1.09,
+      "2026-12": 1.18,
+      "2027-01": 1.28,
+      "2027-02": 1.36,
+      "2027-03": 1.44,
+      "2027-04": 1.5,
+      "2027-05": 1.55,
+      "2027-06": 1.58,
+      "2027-07": 1.61,
+      "2027-08": 1.6,
+      "2027-09": 1.59,
+      "2027-10": 1.58,
+      "2027-11": 1.59,
+      "2027-12": 1.6
+    },
+    "Fish (mackerel, fresh)": {
+      "2026-07": 1.95,
+      "2026-08": 1.96,
+      "2026-09": 1.96,
+      "2026-10": 1.96,
+      "2026-11": 1.96,
+      "2026-12": 1.97,
+      "2027-01": 1.97,
+      "2027-02": 1.96,
+      "2027-03": 1.96,
+      "2027-04": 1.96,
+      "2027-05": 1.96,
+      "2027-06": 1.96,
+      "2027-07": 1.96,
+      "2027-08": 1.96,
+      "2027-09": 1.96,
+      "2027-10": 1.96,
+      "2027-11": 1.96,
+      "2027-12": 1.96
+    },
+    "Fish (milkfish)": {
+      "2026-07": 10.18,
+      "2026-08": 10.18,
+      "2026-09": 10.17,
+      "2026-10": 10.16,
+      "2026-11": 10.16,
+      "2026-12": 10.17,
+      "2027-01": 10.18,
+      "2027-02": 10.18,
+      "2027-03": 10.18,
+      "2027-04": 10.19,
+      "2027-05": 10.19,
+      "2027-06": 10.19,
+      "2027-07": 10.19,
+      "2027-08": 10.19,
+      "2027-09": 10.19,
+      "2027-10": 10.19,
+      "2027-11": 10.19,
+      "2027-12": 10.19
+    },
+    "Fish (redbelly yellowtail fusilier)": {
+      "2026-07": 5.05,
+      "2026-08": 5.05,
+      "2026-09": 5.05,
+      "2026-10": 5.06,
+      "2026-11": 5.06,
+      "2026-12": 5.06,
+      "2027-01": 5.07,
+      "2027-02": 5.07,
+      "2027-03": 5.08,
+      "2027-04": 5.08,
+      "2027-05": 5.08,
+      "2027-06": 5.08,
+      "2027-07": 5.08,
+      "2027-08": 5.09,
+      "2027-09": 5.09,
+      "2027-10": 5.09,
+      "2027-11": 5.08,
+      "2027-12": 5.08
+    },
+    "Fish (roundscad)": {
+      "2026-07": 11.64,
+      "2026-08": 11.64,
+      "2026-09": 11.64,
+      "2026-10": 11.64,
+      "2026-11": 11.64,
+      "2026-12": 11.64,
+      "2027-01": 11.65,
+      "2027-02": 11.65,
+      "2027-03": 11.65,
+      "2027-04": 11.65,
+      "2027-05": 11.65,
+      "2027-06": 11.65,
+      "2027-07": 11.65,
+      "2027-08": 11.65,
+      "2027-09": 11.65,
+      "2027-10": 11.65,
+      "2027-11": 11.65,
+      "2027-12": 11.65
+    },
+    "Fish (slipmouth)": {
+      "2026-07": 3.44,
+      "2026-08": 3.44,
+      "2026-09": 3.44,
+      "2026-10": 3.44,
+      "2026-11": 3.44,
+      "2026-12": 3.44,
+      "2027-01": 3.44,
+      "2027-02": 3.44,
+      "2027-03": 3.44,
+      "2027-04": 3.44,
+      "2027-05": 3.45,
+      "2027-06": 3.45,
+      "2027-07": 3.45,
+      "2027-08": 3.45,
+      "2027-09": 3.45,
+      "2027-10": 3.45,
+      "2027-11": 3.45,
+      "2027-12": 3.45
+    },
+    "Fish (threadfin bream)": {
+      "2026-07": 4.84,
+      "2026-08": 4.85,
+      "2026-09": 4.85,
+      "2026-10": 4.85,
+      "2026-11": 4.85,
+      "2026-12": 4.85,
+      "2027-01": 4.85,
+      "2027-02": 4.85,
+      "2027-03": 4.85,
+      "2027-04": 4.86,
+      "2027-05": 4.86,
+      "2027-06": 4.86,
+      "2027-07": 4.86,
+      "2027-08": 4.86,
+      "2027-09": 4.86,
+      "2027-10": 4.86,
+      "2027-11": 4.86,
+      "2027-12": 4.86
+    },
+    "Fish (tilapia)": {
+      "2026-07": 13.12,
+      "2026-08": 13.13,
+      "2026-09": 13.13,
+      "2026-10": 13.12,
+      "2026-11": 13.12,
+      "2026-12": 13.12,
+      "2027-01": 13.12,
+      "2027-02": 13.12,
+      "2027-03": 13.12,
+      "2027-04": 13.12,
+      "2027-05": 13.12,
+      "2027-06": 13.12,
+      "2027-07": 13.12,
+      "2027-08": 13.12,
+      "2027-09": 13.12,
+      "2027-10": 13.12,
+      "2027-11": 13.12,
+      "2027-12": 13.12
+    },
+    "Garlic": {
+      "2026-07": 21.63,
+      "2026-08": 21.63,
+      "2026-09": 21.63,
+      "2026-10": 21.63,
+      "2026-11": 21.63,
+      "2026-12": 21.63,
+      "2027-01": 21.63,
+      "2027-02": 21.63,
+      "2027-03": 21.63,
+      "2027-04": 21.63,
+      "2027-05": 21.63,
+      "2027-06": 21.63,
+      "2027-07": 21.63,
+      "2027-08": 21.63,
+      "2027-09": 21.63,
+      "2027-10": 21.63,
+      "2027-11": 21.63,
+      "2027-12": 21.63
+    },
+    "Ginger": {
+      "2026-07": 6.44,
+      "2026-08": 6.44,
+      "2026-09": 6.45,
+      "2026-10": 6.45,
+      "2026-11": 6.45,
+      "2026-12": 6.44,
+      "2027-01": 6.44,
+      "2027-02": 6.44,
+      "2027-03": 6.44,
+      "2027-04": 6.44,
+      "2027-05": 6.45,
+      "2027-06": 6.45,
+      "2027-07": 6.45,
+      "2027-08": 6.45,
+      "2027-09": 6.45,
+      "2027-10": 6.45,
+      "2027-11": 6.45,
+      "2027-12": 6.45
+    },
+    "Groundnuts (shelled)": {
+      "2026-07": 9.91,
+      "2026-08": 9.91,
+      "2026-09": 9.91,
+      "2026-10": 9.91,
+      "2026-11": 9.91,
+      "2026-12": 9.91,
+      "2027-01": 9.91,
+      "2027-02": 9.91,
+      "2027-03": 9.91,
+      "2027-04": 9.91,
+      "2027-05": 9.91,
+      "2027-06": 9.91,
+      "2027-07": 9.91,
+      "2027-08": 9.91,
+      "2027-09": 9.91,
+      "2027-10": 9.91,
+      "2027-11": 9.91,
+      "2027-12": 9.91
+    },
+    "Groundnuts (unshelled)": {
+      "2026-07": 4.45,
+      "2026-08": 4.46,
+      "2026-09": 4.46,
+      "2026-10": 4.46,
+      "2026-11": 4.46,
+      "2026-12": 4.46,
+      "2027-01": 4.46,
+      "2027-02": 4.46,
+      "2027-03": 4.46,
+      "2027-04": 4.47,
+      "2027-05": 4.47,
+      "2027-06": 4.47,
+      "2027-07": 4.47,
+      "2027-08": 4.47,
+      "2027-09": 4.47,
+      "2027-10": 4.47,
+      "2027-11": 4.46,
+      "2027-12": 4.46
+    },
+    "Maize (yellow)": {
+      "2026-07": 5.77,
+      "2026-08": 5.77,
+      "2026-09": 5.77,
+      "2026-10": 5.77,
+      "2026-11": 5.77,
+      "2026-12": 5.77,
+      "2027-01": 5.77,
+      "2027-02": 5.77,
+      "2027-03": 5.77,
+      "2027-04": 5.77,
+      "2027-05": 5.77,
+      "2027-06": 5.77,
+      "2027-07": 5.77,
+      "2027-08": 5.77,
+      "2027-09": 5.77,
+      "2027-10": 5.77,
+      "2027-11": 5.77,
+      "2027-12": 5.77
+    },
+    "Mandarins": {
+      "2026-07": 2.43,
+      "2026-08": 2.43,
+      "2026-09": 2.43,
+      "2026-10": 2.43,
+      "2026-11": 2.44,
+      "2026-12": 2.44,
+      "2027-01": 2.44,
+      "2027-02": 2.44,
+      "2027-03": 2.44,
+      "2027-04": 2.44,
+      "2027-05": 2.44,
+      "2027-06": 2.44,
+      "2027-07": 2.44,
+      "2027-08": 2.44,
+      "2027-09": 2.44,
+      "2027-10": 2.44,
+      "2027-11": 2.44,
+      "2027-12": 2.44
+    },
+    "Mangoes (carabao)": {
+      "2026-07": 6.62,
+      "2026-08": 6.62,
+      "2026-09": 6.61,
+      "2026-10": 6.61,
+      "2026-11": 6.61,
+      "2026-12": 6.61,
+      "2027-01": 6.61,
+      "2027-02": 6.62,
+      "2027-03": 6.62,
+      "2027-04": 6.62,
+      "2027-05": 6.62,
+      "2027-06": 6.62,
+      "2027-07": 6.62,
+      "2027-08": 6.62,
+      "2027-09": 6.62,
+      "2027-10": 6.62,
+      "2027-11": 6.62,
+      "2027-12": 6.62
+    },
+    "Mangoes (piko)": {
+      "2026-07": 0.26,
+      "2026-08": 0.27,
+      "2026-09": 0.28,
+      "2026-10": 0.29,
+      "2026-11": 0.3,
+      "2026-12": 0.3,
+      "2027-01": 0.3,
+      "2027-02": 0.3,
+      "2027-03": 0.3,
+      "2027-04": 0.31,
+      "2027-05": 0.31,
+      "2027-06": 0.31,
+      "2027-07": 0.32,
+      "2027-08": 0.32,
+      "2027-09": 0.32,
+      "2027-10": 0.32,
+      "2027-11": 0.32,
+      "2027-12": 0.32
+    },
+    "Meat (beef)": {
+      "2026-07": 12.09,
+      "2026-08": 12.09,
+      "2026-09": 12.09,
+      "2026-10": 12.08,
+      "2026-11": 12.08,
+      "2026-12": 12.09,
+      "2027-01": 12.1,
+      "2027-02": 12.1,
+      "2027-03": 12.11,
+      "2027-04": 12.11,
+      "2027-05": 12.11,
+      "2027-06": 12.11,
+      "2027-07": 12.11,
+      "2027-08": 12.11,
+      "2027-09": 12.11,
+      "2027-10": 12.11,
+      "2027-11": 12.11,
+      "2027-12": 12.11
+    },
+    "Meat (beef, chops with bones)": {
+      "2026-07": 39.84,
+      "2026-08": 39.84,
+      "2026-09": 39.84,
+      "2026-10": 39.84,
+      "2026-11": 39.84,
+      "2026-12": 39.84,
+      "2027-01": 39.84,
+      "2027-02": 39.84,
+      "2027-03": 39.84,
+      "2027-04": 39.84,
+      "2027-05": 39.84,
+      "2027-06": 39.84,
+      "2027-07": 39.84,
+      "2027-08": 39.84,
+      "2027-09": 39.84,
+      "2027-10": 39.84,
+      "2027-11": 39.84,
+      "2027-12": 39.84
+    },
+    "Meat (chicken, whole)": {
+      "2026-07": 35.24,
+      "2026-08": 35.24,
+      "2026-09": 35.24,
+      "2026-10": 35.24,
+      "2026-11": 35.24,
+      "2026-12": 35.24,
+      "2027-01": 35.24,
+      "2027-02": 35.24,
+      "2027-03": 35.24,
+      "2027-04": 35.24,
+      "2027-05": 35.24,
+      "2027-06": 35.24,
+      "2027-07": 35.24,
+      "2027-08": 35.24,
+      "2027-09": 35.24,
+      "2027-10": 35.24,
+      "2027-11": 35.24,
+      "2027-12": 35.24
+    },
+    "Meat (pork)": {
+      "2026-07": 50.83,
+      "2026-08": 50.83,
+      "2026-09": 50.83,
+      "2026-10": 50.83,
+      "2026-11": 50.83,
+      "2026-12": 50.83,
+      "2027-01": 50.83,
+      "2027-02": 50.83,
+      "2027-03": 50.83,
+      "2027-04": 50.83,
+      "2027-05": 50.83,
+      "2027-06": 50.83,
+      "2027-07": 50.83,
+      "2027-08": 50.83,
+      "2027-09": 50.83,
+      "2027-10": 50.83,
+      "2027-11": 50.83,
+      "2027-12": 50.83
+    },
+    "Meat (pork, hock)": {
+      "2026-07": 2.15,
+      "2026-08": 2.16,
+      "2026-09": 2.17,
+      "2026-10": 2.17,
+      "2026-11": 2.18,
+      "2026-12": 2.18,
+      "2027-01": 2.19,
+      "2027-02": 2.19,
+      "2027-03": 2.18,
+      "2027-04": 2.18,
+      "2027-05": 2.18,
+      "2027-06": 2.18,
+      "2027-07": 2.18,
+      "2027-08": 2.18,
+      "2027-09": 2.18,
+      "2027-10": 2.18,
+      "2027-11": 2.19,
+      "2027-12": 2.19
+    },
+    "Meat (pork, with bones)": {
+      "2026-07": 15.06,
+      "2026-08": 15.06,
+      "2026-09": 15.06,
+      "2026-10": 15.06,
+      "2026-11": 15.06,
+      "2026-12": 15.06,
+      "2027-01": 15.06,
+      "2027-02": 15.06,
+      "2027-03": 15.06,
+      "2027-04": 15.06,
+      "2027-05": 15.06,
+      "2027-06": 15.06,
+      "2027-07": 15.06,
+      "2027-08": 15.06,
+      "2027-09": 15.06,
+      "2027-10": 15.06,
+      "2027-11": 15.06,
+      "2027-12": 15.06
+    },
+    "Onions (red)": {
+      "2026-07": 42.52,
+      "2026-08": 42.52,
+      "2026-09": 42.52,
+      "2026-10": 42.52,
+      "2026-11": 42.52,
+      "2026-12": 42.52,
+      "2027-01": 42.52,
+      "2027-02": 42.52,
+      "2027-03": 42.52,
+      "2027-04": 42.52,
+      "2027-05": 42.52,
+      "2027-06": 42.52,
+      "2027-07": 42.52,
+      "2027-08": 42.52,
+      "2027-09": 42.52,
+      "2027-10": 42.52,
+      "2027-11": 42.52,
+      "2027-12": 42.52
+    },
+    "Onions (white)": {
+      "2026-07": 19.04,
+      "2026-08": 19.04,
+      "2026-09": 19.04,
+      "2026-10": 19.04,
+      "2026-11": 19.04,
+      "2026-12": 19.04,
+      "2027-01": 19.04,
+      "2027-02": 19.04,
+      "2027-03": 19.04,
+      "2027-04": 19.04,
+      "2027-05": 19.04,
+      "2027-06": 19.04,
+      "2027-07": 19.04,
+      "2027-08": 19.04,
+      "2027-09": 19.04,
+      "2027-10": 19.04,
+      "2027-11": 19.04,
+      "2027-12": 19.04
+    },
+    "Papaya": {
+      "2026-07": 2.13,
+      "2026-08": 2.12,
+      "2026-09": 2.12,
+      "2026-10": 2.11,
+      "2026-11": 2.11,
+      "2026-12": 2.11,
+      "2027-01": 2.1,
+      "2027-02": 2.1,
+      "2027-03": 2.1,
+      "2027-04": 2.09,
+      "2027-05": 2.09,
+      "2027-06": 2.09,
+      "2027-07": 2.09,
+      "2027-08": 2.09,
+      "2027-09": 2.09,
+      "2027-10": 2.09,
+      "2027-11": 2.09,
+      "2027-12": 2.09
+    },
+    "Pineapples": {
+      "2026-07": 3.31,
+      "2026-08": 3.31,
+      "2026-09": 3.31,
+      "2026-10": 3.31,
+      "2026-11": 3.32,
+      "2026-12": 3.33,
+      "2027-01": 3.34,
+      "2027-02": 3.36,
+      "2027-03": 3.37,
+      "2027-04": 3.39,
+      "2027-05": 3.4,
+      "2027-06": 3.41,
+      "2027-07": 3.41,
+      "2027-08": 3.41,
+      "2027-09": 3.41,
+      "2027-10": 3.41,
+      "2027-11": 3.4,
+      "2027-12": 3.4
+    },
+    "Potatoes (Irish)": {
+      "2026-07": 45.87,
+      "2026-08": 45.87,
+      "2026-09": 45.87,
+      "2026-10": 45.87,
+      "2026-11": 45.87,
+      "2026-12": 45.87,
+      "2027-01": 45.87,
+      "2027-02": 45.87,
+      "2027-03": 45.87,
+      "2027-04": 45.87,
+      "2027-05": 45.87,
+      "2027-06": 45.87,
+      "2027-07": 45.87,
+      "2027-08": 45.87,
+      "2027-09": 45.87,
+      "2027-10": 45.87,
+      "2027-11": 45.87,
+      "2027-12": 45.87
+    },
+    "Rice (regular, milled)": {
+      "2026-07": 32.84,
+      "2026-08": 32.84,
+      "2026-09": 32.84,
+      "2026-10": 32.84,
+      "2026-11": 32.84,
+      "2026-12": 32.84,
+      "2027-01": 32.84,
+      "2027-02": 32.84,
+      "2027-03": 32.84,
+      "2027-04": 32.84,
+      "2027-05": 32.84,
+      "2027-06": 32.84,
+      "2027-07": 32.84,
+      "2027-08": 32.84,
+      "2027-09": 32.84,
+      "2027-10": 32.84,
+      "2027-11": 32.84,
+      "2027-12": 32.84
+    },
+    "Rice (special)": {
+      "2026-07": 10.29,
+      "2026-08": 10.29,
+      "2026-09": 10.29,
+      "2026-10": 10.29,
+      "2026-11": 10.29,
+      "2026-12": 10.29,
+      "2027-01": 10.29,
+      "2027-02": 10.29,
+      "2027-03": 10.29,
+      "2027-04": 10.29,
+      "2027-05": 10.29,
+      "2027-06": 10.29,
+      "2027-07": 10.29,
+      "2027-08": 10.29,
+      "2027-09": 10.29,
+      "2027-10": 10.29,
+      "2027-11": 10.29,
+      "2027-12": 10.29
+    },
+    "Rice (well milled)": {
+      "2026-07": 13.85,
+      "2026-08": 13.85,
+      "2026-09": 13.85,
+      "2026-10": 13.85,
+      "2026-11": 13.85,
+      "2026-12": 13.85,
+      "2027-01": 13.85,
+      "2027-02": 13.85,
+      "2027-03": 13.85,
+      "2027-04": 13.85,
+      "2027-05": 13.85,
+      "2027-06": 13.85,
+      "2027-07": 13.85,
+      "2027-08": 13.85,
+      "2027-09": 13.85,
+      "2027-10": 13.85,
+      "2027-11": 13.85,
+      "2027-12": 13.85
+    },
+    "Semolina (white)": {
+      "2026-07": 3.1,
+      "2026-08": 3.1,
+      "2026-09": 3.1,
+      "2026-10": 3.1,
+      "2026-11": 3.1,
+      "2026-12": 3.1,
+      "2027-01": 3.1,
+      "2027-02": 3.1,
+      "2027-03": 3.1,
+      "2027-04": 3.1,
+      "2027-05": 3.1,
+      "2027-06": 3.1,
+      "2027-07": 3.1,
+      "2027-08": 3.1,
+      "2027-09": 3.1,
+      "2027-10": 3.1,
+      "2027-11": 3.1,
+      "2027-12": 3.1
+    },
+    "Semolina (yellow)": {
+      "2026-07": 1.51,
+      "2026-08": 1.51,
+      "2026-09": 1.56,
+      "2026-10": 1.63,
+      "2026-11": 1.74,
+      "2026-12": 1.86,
+      "2027-01": 1.98,
+      "2027-02": 2.09,
+      "2027-03": 2.18,
+      "2027-04": 2.26,
+      "2027-05": 2.32,
+      "2027-06": 2.36,
+      "2027-07": 2.4,
+      "2027-08": 2.39,
+      "2027-09": 2.39,
+      "2027-10": 2.39,
+      "2027-11": 2.39,
+      "2027-12": 2.39
+    },
+    "Shrimp (endeavor)": {
+      "2026-07": 5.21,
+      "2026-08": 5.21,
+      "2026-09": 5.21,
+      "2026-10": 5.21,
+      "2026-11": 5.21,
+      "2026-12": 5.21,
+      "2027-01": 5.21,
+      "2027-02": 5.21,
+      "2027-03": 5.21,
+      "2027-04": 5.21,
+      "2027-05": 5.21,
+      "2027-06": 5.21,
+      "2027-07": 5.21,
+      "2027-08": 5.21,
+      "2027-09": 5.21,
+      "2027-10": 5.21,
+      "2027-11": 5.21,
+      "2027-12": 5.21
+    },
+    "Shrimp (tiger)": {
+      "2026-07": 9.84,
+      "2026-08": 9.84,
+      "2026-09": 9.84,
+      "2026-10": 9.84,
+      "2026-11": 9.84,
+      "2026-12": 9.84,
+      "2027-01": 9.84,
+      "2027-02": 9.84,
+      "2027-03": 9.84,
+      "2027-04": 9.84,
+      "2027-05": 9.84,
+      "2027-06": 9.84,
+      "2027-07": 9.83,
+      "2027-08": 9.83,
+      "2027-09": 9.82,
+      "2027-10": 9.82,
+      "2027-11": 9.82,
+      "2027-12": 9.82
+    },
+    "Squashes": {
+      "2026-07": 12.18,
+      "2026-08": 12.18,
+      "2026-09": 12.17,
+      "2026-10": 12.17,
+      "2026-11": 12.18,
+      "2026-12": 12.18,
+      "2027-01": 12.18,
+      "2027-02": 12.18,
+      "2027-03": 12.18,
+      "2027-04": 12.18,
+      "2027-05": 12.18,
+      "2027-06": 12.18,
+      "2027-07": 12.18,
+      "2027-08": 12.18,
+      "2027-09": 12.18,
+      "2027-10": 12.18,
+      "2027-11": 12.18,
+      "2027-12": 12.18
+    },
+    "Sweet Potato leaves": {
+      "2026-07": 3.74,
+      "2026-08": 3.75,
+      "2026-09": 3.76,
+      "2026-10": 3.76,
+      "2026-11": 3.76,
+      "2026-12": 3.76,
+      "2027-01": 3.76,
+      "2027-02": 3.77,
+      "2027-03": 3.77,
+      "2027-04": 3.77,
+      "2027-05": 3.77,
+      "2027-06": 3.77,
+      "2027-07": 3.77,
+      "2027-08": 3.78,
+      "2027-09": 3.78,
+      "2027-10": 3.78,
+      "2027-11": 3.78,
+      "2027-12": 3.77
+    },
+    "Sweet potatoes": {
+      "2026-07": 27.39,
+      "2026-08": 27.39,
+      "2026-09": 27.39,
+      "2026-10": 27.39,
+      "2026-11": 27.39,
+      "2026-12": 27.39,
+      "2027-01": 27.39,
+      "2027-02": 27.39,
+      "2027-03": 27.39,
+      "2027-04": 27.39,
+      "2027-05": 27.39,
+      "2027-06": 27.39,
+      "2027-07": 27.39,
+      "2027-08": 27.39,
+      "2027-09": 27.39,
+      "2027-10": 27.39,
+      "2027-11": 27.39,
+      "2027-12": 27.39
+    },
+    "Taro": {
+      "2026-07": 1.11,
+      "2026-08": 1.1,
+      "2026-09": 1.11,
+      "2026-10": 1.17,
+      "2026-11": 1.26,
+      "2026-12": 1.38,
+      "2027-01": 1.49,
+      "2027-02": 1.61,
+      "2027-03": 1.7,
+      "2027-04": 1.77,
+      "2027-05": 1.82,
+      "2027-06": 1.86,
+      "2027-07": 1.89,
+      "2027-08": 1.88,
+      "2027-09": 1.86,
+      "2027-10": 1.86,
+      "2027-11": 1.86,
+      "2027-12": 1.88
+    },
+    "Tomatoes": {
+      "2026-07": 44.55,
+      "2026-08": 44.55,
+      "2026-09": 44.55,
+      "2026-10": 44.55,
+      "2026-11": 44.55,
+      "2026-12": 44.55,
+      "2027-01": 44.55,
+      "2027-02": 44.55,
+      "2027-03": 44.55,
+      "2027-04": 44.55,
+      "2027-05": 44.55,
+      "2027-06": 44.55,
+      "2027-07": 44.55,
+      "2027-08": 44.55,
+      "2027-09": 44.55,
+      "2027-10": 44.55,
+      "2027-11": 44.55,
+      "2027-12": 44.55
+    },
+    "Water spinach": {
+      "2026-07": 3.98,
+      "2026-08": 3.98,
+      "2026-09": 3.99,
+      "2026-10": 3.99,
+      "2026-11": 4.0,
+      "2026-12": 4.01,
+      "2027-01": 4.02,
+      "2027-02": 4.03,
+      "2027-03": 4.04,
+      "2027-04": 4.05,
+      "2027-05": 4.06,
+      "2027-06": 4.07,
+      "2027-07": 4.08,
+      "2027-08": 4.08,
+      "2027-09": 4.08,
+      "2027-10": 4.08,
+      "2027-11": 4.07,
+      "2027-12": 4.07
+    }
+  }
+}

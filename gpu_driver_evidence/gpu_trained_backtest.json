@@ -1,0 +1,44 @@
+{
+  "schema": "ph-food-price-gpu-trained-backtest-v1",
+  "generated_at": "2026-07-20T09:02:27.087169+00:00",
+  "device": {
+    "name": "AMD Radeon RX 6600",
+    "torch": "2.4.1+cpu",
+    "trained_on": "privateuseone:0",
+    "trained_on_gpu": true
+  },
+  "training": {
+    "pooled_windows": 6462,
+    "series": 65,
+    "epochs": 120,
+    "seconds": 2.85
+  },
+  "backtest": {
+    "training_cutoff": "2026-01",
+    "horizon": [
+      "2026-02",
+      "2026-06"
+    ],
+    "series_scored": 59,
+    "gpu_delta_mlp": {
+      "mape": 5.9476,
+      "mae": 7.3396,
+      "rmse": 11.5849,
+      "r2": 0.991599,
+      "n": 295
+    },
+    "naive_persistence": {
+      "mape": 7.411,
+      "mae": 8.1408,
+      "rmse": 14.0434,
+      "r2": 0.987655,
+      "n": 295
+    }
+  },
+  "publication_gate": {
+    "status": "passed_out_of_time_naive_baseline",
+    "beats_naive": true,
+    "requirements": "model<naive on MAPE and MAE, >=10 series, >=30 points"
+  },
+  "honesty_note": "The GPU-trained model is compared to the exact same naive baseline and gate the LSTM failed. This receipt reports the real disposition; forecasts stay local unless the gate passes."
+}

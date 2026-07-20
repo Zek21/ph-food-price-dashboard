@@ -1,0 +1,98 @@
+{
+  "schema": "amd-rx6600-ml-library-matrix-v1",
+  "generated_at": "2026-07-20T08:51:36.675798+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "gpu": "AMD Radeon RX 6600"
+  },
+  "rows": [
+    {
+      "library": "PyTorch (torch-directml)",
+      "version": "2.4.1+cpu",
+      "gpu_device": "AMD Radeon RX 6600",
+      "gpu_supported": "yes",
+      "mode": "train+infer",
+      "evidence": "2048x2048 matmul 11.38 ms/it on privateuseone:0; MLP trained to loss<1e-3 on GPU (see pytorch_directml_proof.json)",
+      "note": "General autograd/Linear/Conv/optimizer run on the AMD GPU."
+    },
+    {
+      "library": "torchvision/CNN (Conv2d)",
+      "version": "2.4.1+cpu",
+      "gpu_supported": "yes",
+      "mode": "train+infer",
+      "evidence": "Conv2d output [8, 16, 64, 64] on privateuseone:0",
+      "note": "Convolutional nets run on the AMD GPU via DirectML."
+    },
+    {
+      "library": "torch nn.LSTM",
+      "version": "2.4.1+cpu",
+      "gpu_supported": "no",
+      "mode": "cpu-fallback-fails",
+      "evidence": "NotImplementedError: aten::_thnn_fused_lstm_cell not on DML",
+      "note": "Fused LSTM cell unimplemented on torch-directml; use MatMul-based models (MLP/TCN/Transformer) for GPU training."
+    },
+    {
+      "library": "scikit-learn MLP -> ONNX Runtime DirectML",
+      "version": "1.24.4",
+      "gpu_supported": "yes",
+      "mode": "infer",
+      "evidence": "node providers {'DmlExecutionProvider': 4}",
+      "note": "Classic sklearn neural nets accelerate on the AMD GPU once exported to ONNX (Gemm/MatMul run on DmlExecutionProvider)."
+    },
+    {
+      "library": "scikit-learn RandomForest -> ONNX DirectML",
+      "version": "1.24.4",
+      "gpu_supported": "cpu-op",
+      "mode": "infer",
+      "evidence": "node providers {'CPUExecutionProvider': 1}",
+      "note": "TreeEnsemble op is not implemented on DirectML; tree models stay on the CPU EP even inside a DML session (expected)."
+    },
+    {
+      "library": "ONNX Runtime (DirectML EP)",
+      "version": "1.24.4",
+      "gpu_device": "AMD Radeon RX 6600",
+      "gpu_supported": "yes",
+      "mode": "infer",
+      "evidence": "available_providers=['DmlExecutionProvider', 'CPUExecutionProvider']",
+      "note": "Any model exported to ONNX (incl. the project LSTM) runs GPU inference; see benchmark_current.json for per-node placement."
+    },
+    {
+      "library": "LightGBM",
+      "version": "4.7.0",
+      "gpu_supported": "no",
+      "mode": "train+infer (CPU)",
+      "evidence": "device_type=gpu -> GPU Tree Learner was not enabled in this build.",
+      "note": "pip wheel is CPU-only; AMD GPU needs an OpenCL-enabled build."
+    },
+    {
+      "library": "XGBoost",
+      "version": "3.3.0",
+      "gpu_supported": "no",
+      "mode": "train+infer (CPU)",
+      "evidence": "requested device=cuda -> booster actually used 'cpu' (build USE_CUDA=True)",
+      "note": "XGBoost GPU is CUDA/NVIDIA only (or ROCm on Linux). On this AMD host it prints 'No visible GPU' and falls back to CPU."
+    },
+    {
+      "library": "scikit-learn (native)",
+      "version": "1.9.0",
+      "gpu_supported": "no",
+      "mode": "train+infer (CPU)",
+      "note": "No native GPU backend; export to ONNX for AMD GPU inference."
+    },
+    {
+      "library": "TensorFlow (DirectML plugin)",
+      "version": "2.10.1",
+      "gpu_device": "AMD Radeon RX 6600",
+      "gpu_supported": "yes",
+      "mode": "train+infer",
+      "evidence": "Keras loss 12.0682->2.4750 on /job:localhost/replica:0/task:0/device:GPU:0",
+      "note": "TF 2.10 + tensorflow-directml-plugin trains on the AMD GPU (requires Python<=3.10 and numpy<2)."
+    }
+  ],
+  "updated_at": "2026-07-20T08:57:44.561640+00:00",
+  "interpreters": {
+    "3.12.13": true,
+    "3.13.7": true,
+    "3.10.20": true
+  }
+}

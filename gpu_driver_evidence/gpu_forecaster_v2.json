@@ -1,0 +1,124 @@
+{
+  "schema": "ph-food-price-gpu-forecaster-v2",
+  "generated_at": "2026-07-20T16:55:27.152553+00:00",
+  "device": {
+    "name": "AMD Radeon RX 6600",
+    "torch": "2.4.1+cpu",
+    "trained_on_gpu": true
+  },
+  "method": {
+    "direct_multi_horizon": 18,
+    "target": "log-return vs persistence",
+    "loss": "horizon-weighted Huber(delta=0.05)",
+    "recursion": false
+  },
+  "primary_gate": {
+    "cutoff": "2026-01",
+    "horizon_months": 5,
+    "v2": {
+      "mape": 3.5137,
+      "mae": 4.4298,
+      "rmse": 6.9337,
+      "r2": 0.996991,
+      "n": 295
+    },
+    "naive_persistence": {
+      "mape": 7.411,
+      "mae": 8.1408,
+      "rmse": 14.0434,
+      "r2": 0.987655,
+      "n": 295
+    },
+    "beats_naive": true
+  },
+  "multi_origin_stability": {
+    "train_cutoff": "2025-06",
+    "origins_tested": 8,
+    "origins_beating_naive": 8,
+    "pooled_v2": {
+      "mape": 4.6643,
+      "mae": 5.9457,
+      "rmse": 10.2727,
+      "r2": 0.993246,
+      "n": 2360
+    },
+    "pooled_naive": {
+      "mape": 6.6982,
+      "mae": 8.3515,
+      "rmse": 14.5678,
+      "r2": 0.986417,
+      "n": 2360
+    },
+    "per_origin": [
+      {
+        "origin": "2025-06",
+        "n": 295,
+        "model_mape": 3.3359,
+        "naive_mape": 5.8697,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-07",
+        "n": 295,
+        "model_mape": 4.6413,
+        "naive_mape": 7.1133,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-08",
+        "n": 295,
+        "model_mape": 4.6685,
+        "naive_mape": 5.803,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-09",
+        "n": 295,
+        "model_mape": 4.9146,
+        "naive_mape": 5.8044,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-10",
+        "n": 295,
+        "model_mape": 5.0032,
+        "naive_mape": 6.2184,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-11",
+        "n": 295,
+        "model_mape": 4.8244,
+        "naive_mape": 6.2414,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2025-12",
+        "n": 295,
+        "model_mape": 5.368,
+        "naive_mape": 9.1246,
+        "model_beats_naive": true
+      },
+      {
+        "origin": "2026-01",
+        "n": 295,
+        "model_mape": 4.5583,
+        "naive_mape": 7.411,
+        "model_beats_naive": true
+      }
+    ]
+  },
+  "forward": {
+    "anchor": "2026-06",
+    "horizon": [
+      "2026-07",
+      "2027-12"
+    ],
+    "commodities": 59
+  },
+  "train_seconds": {
+    "gate": 4.01,
+    "stability": 3.67,
+    "forward": 3.63
+  }
+}

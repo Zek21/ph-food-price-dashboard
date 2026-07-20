@@ -1,0 +1,26 @@
+# Real ML on an AMD Radeon RX 6600 (Windows, DirectML) — see AMD_ML_LIBRARIES.md
+#
+# torch-directml and the TensorFlow DirectML plugin have no Python 3.13 wheels,
+# so three interpreters are used (fetch standalone builds with `uv`, no admin):
+#
+#   uv python install 3.12 3.10
+#
+# --- .venv-torch-dml  (Python 3.12) : PyTorch trains/infers on the AMD GPU ---
+#   uv venv --python 3.12 .venv-torch-dml
+#   uv pip install --python .venv-torch-dml/Scripts/python.exe torch-directml pandas
+torch-directml==0.2.5.dev240914   # pulls torch==2.4.1, torchvision==0.19.1
+#
+# --- .venv-directml   (Python 3.13) : ONNX Runtime DirectML + classic ML ------
+#   uv venv --python 3.13 .venv-directml
+#   uv pip install --python .venv-directml/Scripts/python.exe \
+#       onnxruntime-directml onnx skl2onnx onnxconverter-common \
+#       scikit-learn pandas numpy lightgbm xgboost
+onnxruntime-directml>=1.24.4
+skl2onnx>=1.20.0
+#
+# --- .venv-tf-dml     (Python 3.10) : TensorFlow trains on the AMD GPU --------
+#   uv venv --python 3.10 .venv-tf-dml
+#   uv pip install --python .venv-tf-dml/Scripts/python.exe \
+#       "tensorflow-cpu==2.10.*" tensorflow-directml-plugin "numpy==1.23.5"
+# tensorflow-cpu==2.10.1
+# tensorflow-directml-plugin
