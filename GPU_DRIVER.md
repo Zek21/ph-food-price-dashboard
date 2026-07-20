@@ -24,6 +24,30 @@ python -m venv .venv-directml
 .\.venv-directml\Scripts\python.exe gpu_forecast_driver.py run-all
 ```
 
+The interpreter path is part of the execution contract. An inherited or active
+virtual environment may contain ordinary `onnxruntime` with only CPU/Azure
+providers. The driver now fails before prediction and names the pinned
+`.venv-directml` interpreter when that mismatch is detected.
+
+## Out-of-time publication gate
+
+Run the validation gate independently with:
+
+```powershell
+.\.venv-directml\Scripts\python.exe gpu_forecast_driver.py validate
+```
+
+The gate infers the historical training cutoff from the SHA-256-bound legacy
+forecast artifact, rolls each eligible exported graph forward only after that
+cutoff, and compares it with a last-observation persistence forecast. Public
+prediction use requires the model to beat the naive baseline on both aggregate
+MAPE and MAE with the minimum model/sample counts recorded in the receipt.
+
+`predict` and `run-all` execute this gate automatically. They may still write
+local experimental predictions for diagnosis, but every prediction receipt
+contains a typed `publication_gate`. A failed or missing validation gate means
+the values remain withheld.
+
 Generated ONNX graphs stay under `.onnx_models/`. Reproducible JSON receipts are
 written to `gpu_driver_evidence/`. Do not publish model bundles or prediction
 receipts until their licensing, units, and validation gates pass.

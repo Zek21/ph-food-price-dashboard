@@ -61,6 +61,17 @@ def _ort():
     return ort
 
 
+def _directml_unavailable_message() -> str:
+    expected = ROOT / ".venv-directml" / "Scripts" / "python.exe"
+    detail = "DirectML was requested but DmlExecutionProvider is unavailable."
+    if expected.exists() and Path(os.sys.executable).resolve() != expected.resolve():
+        return (
+            f"{detail} Current interpreter: {Path(os.sys.executable).resolve()}. "
+            f"Use the project-pinned interpreter: {expected.resolve()}"
+        )
+    return f"{detail} Install requirements-gpu.txt in the active isolated environment."
+
+
 def probe() -> dict:
     """Return the runtime's observed provider truth without assuming GPU use."""
     ort = _ort()
@@ -248,12 +259,13 @@ def _metadata(session) -> dict:
 
 
 def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
-                         *, horizon: int = 18, prefer_gpu: bool = True) -> dict:
+                         *, horizon: int = 18, prefer_gpu: bool = True,
+                         validation: dict | None = None) -> dict:
     monthly, data_summary = _load_monthly(data_path)
     current_latest = monthly["date"].max()
     available = probe()
     if prefer_gpu and not available["directml_available"]:
-        raise RuntimeError("DirectML was requested but DmlExecutionProvider is unavailable")
+        raise RuntimeError(_directml_unavailable_message())
     forecasts = {}
     model_receipts = []
     skipped_models = []
@@ -330,12 +342,249 @@ def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
                 "Forecasts are experimental decision support, not financial advice."
             ),
         },
+        "publication_gate": (
+            validation.get("publication_gate", {})
+            if validation is not None
+            else {
+                "status": "withheld_validation_missing",
+                "passed": False,
+                "reason": "No out-of-time naive-baseline validation receipt was supplied.",
+            }
+        ),
         "model_count": len(model_receipts),
         "skipped_model_count": len(skipped_models),
         "forecast_point_count": sum(len(values) for values in forecasts.values()),
         "models": model_receipts,
         "skipped_models": skipped_models,
         "forecasts": forecasts,
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    return result
+
+
+def _regression_metrics(actual: list[float], predicted: list[float]) -> dict:
+    """Return transparent aggregate regression metrics for one proof population."""
+    if not actual or len(actual) != len(predicted):
+        return {}
+    y = np.asarray(actual, dtype=np.float64)
+    p = np.asarray(predicted, dtype=np.float64)
+    nonzero = np.abs(y) > 1e-12
+    mape = float(np.mean(np.abs((y[nonzero] - p[nonzero]) / y[nonzero])) * 100)
+    mae = float(np.mean(np.abs(y - p)))
+    rmse = float(np.sqrt(np.mean((y - p) ** 2)))
+    denominator = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = None if denominator <= 0 else float(1 - np.sum((y - p) ** 2) / denominator)
+    return {
+        "mape": round(mape, 4),
+        "mae": round(mae, 4),
+        "rmse": round(rmse, 4),
+        "r2": None if r2 is None else round(r2, 6),
+        "n": int(len(y)),
+    }
+
+
+def _infer_training_cutoff(prediction_artifact: Path) -> dict:
+    """Infer the last model-known month from the first dated historical forecast.
+
+    The legacy training artifact was produced with forecasts beginning one month
+    after its data cutoff.  The artifact hash and timestamps make this inference
+    auditable instead of relying on a filename or remembered date.
+    """
+    document = json.loads(prediction_artifact.read_text(encoding="utf-8"))
+    forecasts = document.get("forecasts") or {}
+    first_dates = []
+    for values in forecasts.values():
+        if isinstance(values, dict) and values:
+            first_dates.append(min(values))
+    if not first_dates:
+        raise ValueError("Prediction artifact has no dated forecasts")
+    forecast_start = min(first_dates)
+    cutoff = pd.Period(forecast_start, freq="M") - 1
+    return {
+        "prediction_artifact": str(prediction_artifact),
+        "prediction_artifact_sha256": _sha256(prediction_artifact),
+        "prediction_artifact_mtime_utc": datetime.fromtimestamp(
+            prediction_artifact.stat().st_mtime, tz=timezone.utc
+        ).isoformat(),
+        "forecast_start": forecast_start,
+        "training_cutoff": str(cutoff),
+        "inference": "training cutoff is the month immediately before the earliest stored forecast",
+    }
+
+
+def _publication_gate(model_metrics: dict, baseline_metrics: dict,
+                      *, model_count: int, minimum_models: int = 10,
+                      minimum_points: int = 30) -> dict:
+    reasons = []
+    if model_count < minimum_models:
+        reasons.append(f"eligible_models={model_count} below minimum={minimum_models}")
+    if int(model_metrics.get("n", 0)) < minimum_points:
+        reasons.append(
+            f"validation_points={model_metrics.get('n', 0)} below minimum={minimum_points}"
+        )
+    if not model_metrics or not baseline_metrics:
+        reasons.append("model or baseline metrics are missing")
+    else:
+        if model_metrics["mape"] >= baseline_metrics["mape"]:
+            reasons.append(
+                f"model MAPE {model_metrics['mape']} did not beat naive MAPE {baseline_metrics['mape']}"
+            )
+        if model_metrics["mae"] >= baseline_metrics["mae"]:
+            reasons.append(
+                f"model MAE {model_metrics['mae']} did not beat naive MAE {baseline_metrics['mae']}"
+            )
+    passed = not reasons
+    return {
+        "status": "passed_out_of_time_naive_baseline" if passed else "withheld_failed_validation",
+        "passed": passed,
+        "requirements": {
+            "minimum_models": minimum_models,
+            "minimum_points": minimum_points,
+            "model_mape_lt_naive": True,
+            "model_mae_lt_naive": True,
+        },
+        "reasons": reasons,
+    }
+
+
+def validate_models(data_path: Path, model_dir: Path, output_path: Path,
+                    *, prediction_artifact: Path | None = None) -> dict:
+    """Backtest the exported graphs after their historical training cutoff.
+
+    Each commodity is seeded only with observations at or before the inferred
+    cutoff.  Model forecasts and a persistence forecast are then rolled forward
+    without peeking at later actuals.  This receipt gates publication; it does
+    not change or delete generated local predictions.
+    """
+    prediction_artifact = prediction_artifact or ROOT / "lstm_predictions.json"
+    cutoff_proof = _infer_training_cutoff(prediction_artifact)
+    cutoff_period = pd.Period(cutoff_proof["training_cutoff"], freq="M")
+    monthly, data_summary = _load_monthly(data_path)
+    data_max_period = monthly["date"].max().to_period("M")
+    if data_max_period <= cutoff_period:
+        raise ValueError(
+            f"Dataset maximum {data_max_period} is not after training cutoff {cutoff_period}"
+        )
+
+    year_min = int(monthly["year"].min())
+    year_span = max(int(monthly["year"].max() - monthly["year"].min()), 1)
+    all_actual: list[float] = []
+    all_model: list[float] = []
+    all_naive: list[float] = []
+    model_receipts = []
+    skipped = []
+
+    for model_path in sorted(model_dir.glob("lstm_*.onnx")):
+        session = _session(model_path, prefer_gpu=False)
+        meta = _metadata(session)
+        commodity = meta.get("commodity")
+        if not commodity:
+            skipped.append({"model": str(model_path), "reason": "commodity metadata missing"})
+            continue
+        scaler_mean = float(json.loads(meta["scaler_mean"])[0])
+        scaler_scale = float(json.loads(meta["scaler_scale"])[0])
+        rows = monthly[monthly["commodity"] == commodity].copy()
+        averages = (
+            rows.groupby("date", observed=True).agg(price=("price", "mean")).reset_index()
+            .sort_values("date")
+        )
+        averages["period"] = averages["date"].dt.to_period("M")
+        before = averages[averages["period"] <= cutoff_period]
+        after = averages[
+            (averages["period"] > cutoff_period) & (averages["period"] <= data_max_period)
+        ]
+        required_seed = pd.period_range(end=cutoff_period, periods=SEQUENCE_LENGTH, freq="M")
+        seed_rows = before[before["period"].isin(required_seed)].sort_values("period")
+        if list(seed_rows["period"]) != list(required_seed):
+            skipped.append({
+                "commodity": commodity,
+                "model_sha256": _sha256(model_path),
+                "reason": f"missing consecutive {SEQUENCE_LENGTH}-month seed ending {cutoff_period}",
+            })
+            continue
+        expected_after = pd.period_range(
+            start=cutoff_period + 1, end=data_max_period, freq="M"
+        )
+        after = after[after["period"].isin(expected_after)].sort_values("period")
+        if list(after["period"]) != list(expected_after):
+            skipped.append({
+                "commodity": commodity,
+                "model_sha256": _sha256(model_path),
+                "reason": f"missing one or more out-of-time months through {data_max_period}",
+            })
+            continue
+
+        known_rows = rows[rows["date"].dt.to_period("M") <= cutoff_period]
+        region_enc = float(known_rows["region_enc"].mode().iloc[0])
+        pt_enc = float(known_rows["pt_enc"].mode().iloc[0])
+        prices = seed_rows["price"].to_numpy(dtype=np.float64)
+        normalized = (prices - scaler_mean) / scaler_scale
+        naive_value = float(prices[-1])
+        commodity_actual: list[float] = []
+        commodity_model: list[float] = []
+        commodity_naive: list[float] = []
+        target_scaled = str(meta.get("target_scaled", "false")).lower() == "true"
+        input_name = session.get_inputs()[0].name
+
+        for row in after.itertuples(index=False):
+            target_date = row.period.to_timestamp()
+            context = {
+                "year_min": year_min,
+                "year_span": year_span,
+                "region_enc": region_enc,
+                "pt_enc": pt_enc,
+            }
+            model_input = _window(normalized, target_date, context)[None, :, :]
+            raw_prediction = float(session.run(None, {input_name: model_input})[0][0])
+            prediction = raw_prediction * scaler_scale + scaler_mean if target_scaled else raw_prediction
+            prediction = max(0.0, prediction)
+            recent_average = float(np.mean(prices[-SEQUENCE_LENGTH:]))
+            if prediction > recent_average * 5:
+                prediction = recent_average * 1.5
+            actual = float(row.price)
+            commodity_actual.append(actual)
+            commodity_model.append(prediction)
+            commodity_naive.append(naive_value)
+            prices = np.append(prices, prediction)
+            normalized = np.append(normalized, (prediction - scaler_mean) / scaler_scale)
+
+        model_receipts.append({
+            "commodity": commodity,
+            "model_sha256": _sha256(model_path),
+            "source_checkpoint_sha256": meta.get("source_checkpoint_sha256"),
+            "providers": session.get_providers(),
+            "target_scaled": target_scaled,
+            "model": _regression_metrics(commodity_actual, commodity_model),
+            "naive_persistence": _regression_metrics(commodity_actual, commodity_naive),
+        })
+        all_actual.extend(commodity_actual)
+        all_model.extend(commodity_model)
+        all_naive.extend(commodity_naive)
+
+    model_metrics = _regression_metrics(all_actual, all_model)
+    naive_metrics = _regression_metrics(all_actual, all_naive)
+    gate = _publication_gate(model_metrics, naive_metrics, model_count=len(model_receipts))
+    result = {
+        "schema": "ph-food-price-out-of-time-naive-baseline-v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "data": data_summary,
+        "cutoff_proof": cutoff_proof,
+        "validation_start": str(cutoff_period + 1),
+        "validation_end": str(data_max_period),
+        "execution_provider": CPU_PROVIDER,
+        "eligible_model_count": len(model_receipts),
+        "skipped_model_count": len(skipped),
+        "model": model_metrics,
+        "naive_persistence": naive_metrics,
+        "publication_gate": gate,
+        "models": model_receipts,
+        "skipped_models": skipped,
+        "claim_boundary": (
+            "This is a recursive out-of-time backtest from the historical forecast origin. "
+            "It compares the exported graphs with a last-observation persistence forecast; "
+            "it does not prove future accuracy or suitability for financial decisions."
+        ),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
@@ -468,7 +717,9 @@ def _write_json(path: Path, value: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("probe", "export", "benchmark", "predict", "run-all"))
+    parser.add_argument(
+        "command", choices=("probe", "export", "benchmark", "validate", "predict", "run-all")
+    )
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--checkpoints", type=Path, default=DEFAULT_CHECKPOINTS)
     parser.add_argument("--models", type=Path, default=DEFAULT_MODELS)
@@ -491,13 +742,21 @@ def main() -> int:
             model_path, args.data, args.evidence / "benchmark_current.json",
             iterations=args.iterations,
         )
+    elif args.command == "validate":
+        result = validate_models(
+            args.data, args.models, args.evidence / "validation_current.json"
+        )
     elif args.command == "predict":
+        validation_result = validate_models(
+            args.data, args.models, args.evidence / "validation_current.json"
+        )
         result = generate_predictions(
             args.data,
             args.models,
             args.evidence / ("predictions_cpu.json" if args.cpu else "predictions_current.json"),
             horizon=args.horizon,
             prefer_gpu=not args.cpu,
+            validation=validation_result,
         )
     else:
         export_result = export_models(args.checkpoints, args.models)
@@ -509,9 +768,12 @@ def main() -> int:
             model_path, args.data, args.evidence / "benchmark_current.json",
             iterations=args.iterations,
         )
+        validation_result = validate_models(
+            args.data, args.models, args.evidence / "validation_current.json"
+        )
         prediction_result = generate_predictions(
             args.data, args.models, args.evidence / "predictions_current.json",
-            horizon=args.horizon, prefer_gpu=True,
+            horizon=args.horizon, prefer_gpu=True, validation=validation_result,
         )
         result = {
             "exported_models": export_result["exported_count"],
@@ -519,6 +781,7 @@ def main() -> int:
             "prediction_models": prediction_result["model_count"],
             "skipped_prediction_models": prediction_result["skipped_model_count"],
             "forecast_points": prediction_result["forecast_point_count"],
+            "prediction_publication_gate": validation_result["publication_gate"],
             "evidence_dir": str(args.evidence.resolve()),
         }
     print(json.dumps(result, indent=2))
