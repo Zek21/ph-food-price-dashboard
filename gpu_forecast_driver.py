@@ -113,7 +113,7 @@ def export_models(checkpoint_dir: Path, model_dir: Path) -> dict:
     try:
         import onnx
         import torch
-        from lstm_model import PriceLSTM
+        from lstm_architecture import PriceLSTM
     except ImportError as exc:
         raise RuntimeError("Export requires PyTorch and ONNX in the current environment") from exc
 
@@ -150,6 +150,16 @@ def export_models(checkpoint_dir: Path, model_dir: Path) -> dict:
                     checkpoint_path.stat().st_mtime, tz=timezone.utc
                 ).isoformat(),
             }
+            for key in (
+                "target_scaled", "training_cutoff", "internal_validation_start",
+                "internal_validation_end", "scaler_fit_end", "training_contract",
+                "unit", "currency", "seed",
+            ):
+                if key in checkpoint:
+                    value = checkpoint[key]
+                    if isinstance(value, bool):
+                        value = "true" if value else "false"
+                    metadata[key] = str(value)
             del graph.metadata_props[:]
             for key, value in metadata.items():
                 item = graph.metadata_props.add()
@@ -177,7 +187,7 @@ def export_models(checkpoint_dir: Path, model_dir: Path) -> dict:
 
 def _load_monthly(data_path: Path) -> tuple[pd.DataFrame, dict]:
     raw = pd.read_csv(data_path)
-    required = {"date", "price", "commodity", "admin1", "pricetype"}
+    required = {"date", "price", "commodity", "admin1", "pricetype", "unit", "currency"}
     missing = sorted(required - set(raw.columns))
     if missing:
         raise ValueError(f"WFP data is missing required columns: {missing}")
@@ -203,6 +213,9 @@ def _load_monthly(data_path: Path) -> tuple[pd.DataFrame, dict]:
         "commodities": int(raw["commodity"].nunique()),
         "regions": int(raw["admin1"].nunique()),
         "price_types": int(raw["pricetype"].nunique()),
+        "units": sorted(raw["unit"].dropna().astype(str).unique().tolist()),
+        "currencies": sorted(raw["currency"].dropna().astype(str).unique().tolist()),
+        "mixed_unit_commodities": int((raw.groupby("commodity", observed=True)["unit"].nunique() != 1).sum()),
         "min_date": raw["date"].min().date().isoformat(),
         "max_date": raw["date"].max().date().isoformat(),
         "sha256": _sha256(data_path),
@@ -242,7 +255,9 @@ def _seed_for_commodity(monthly: pd.DataFrame, commodity: str, scaler_mean: floa
 def _window(normalized: np.ndarray, next_date: pd.Timestamp, context: dict) -> np.ndarray:
     window = np.zeros((SEQUENCE_LENGTH, FEATURE_COUNT), dtype=np.float32)
     for index in range(SEQUENCE_LENGTH):
-        shifted = next_date - pd.DateOffset(months=SEQUENCE_LENGTH - 1 - index)
+        # A target at month T must consume features from T-12 through T-1.
+        # Never inject target-month calendar features into the input window.
+        shifted = next_date - pd.DateOffset(months=SEQUENCE_LENGTH - index)
         window[index] = (
             normalized[-(SEQUENCE_LENGTH - index)],
             math.sin(2 * math.pi * shifted.month / 12),
@@ -298,7 +313,9 @@ def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
         for step in range(1, horizon + 1):
             next_date = context["last_date"] + pd.DateOffset(months=step)
             model_input = _window(normalized, next_date, context)[None, :, :]
-            prediction = float(session.run(None, {session.get_inputs()[0].name: model_input})[0][0])
+            raw_prediction = float(session.run(None, {session.get_inputs()[0].name: model_input})[0][0])
+            target_scaled = str(meta.get("target_scaled", "false")).lower() == "true"
+            prediction = raw_prediction * scaler_scale + scaler_mean if target_scaled else raw_prediction
             prediction = max(0.0, prediction)
             recent_average = float(np.mean(prices[-SEQUENCE_LENGTH:]))
             if prediction > recent_average * 5:
@@ -314,6 +331,11 @@ def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
                 "providers": session.get_providers(),
                 "source_checkpoint_sha256": meta.get("source_checkpoint_sha256"),
                 "source_checkpoint_mtime_utc": meta.get("source_checkpoint_mtime_utc"),
+                "target_scaled": str(meta.get("target_scaled", "false")).lower() == "true",
+                "training_cutoff": meta.get("training_cutoff"),
+                "training_contract": meta.get("training_contract"),
+                "unit": meta.get("unit"),
+                "currency": meta.get("currency"),
             }
         )
     result = {
@@ -458,7 +480,27 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
     not change or delete generated local predictions.
     """
     prediction_artifact = prediction_artifact or ROOT / "lstm_predictions.json"
-    cutoff_proof = _infer_training_cutoff(prediction_artifact)
+    metadata_cutoffs = []
+    metadata_contracts = set()
+    for candidate in sorted(model_dir.glob("lstm_*.onnx")):
+        candidate_meta = _metadata(_session(candidate, prefer_gpu=False))
+        if candidate_meta.get("training_cutoff"):
+            metadata_cutoffs.append(candidate_meta["training_cutoff"])
+        if candidate_meta.get("training_contract"):
+            metadata_contracts.add(candidate_meta["training_contract"])
+    if metadata_cutoffs:
+        unique_cutoffs = sorted(set(metadata_cutoffs))
+        if len(unique_cutoffs) != 1:
+            raise ValueError(f"ONNX models disagree on training_cutoff: {unique_cutoffs}")
+        cutoff_proof = {
+            "source": "onnx_model_metadata",
+            "training_cutoff": unique_cutoffs[0],
+            "model_count_with_cutoff": len(metadata_cutoffs),
+            "training_contracts": sorted(metadata_contracts),
+            "inference": "explicit checkpoint metadata; final test months were not used for fit or early stopping",
+        }
+    else:
+        cutoff_proof = _infer_training_cutoff(prediction_artifact)
     cutoff_period = pd.Period(cutoff_proof["training_cutoff"], freq="M")
     monthly, data_summary = _load_monthly(data_path)
     data_max_period = monthly["date"].max().to_period("M")
