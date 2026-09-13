@@ -31,6 +31,12 @@ FEATURE_COUNT = 6
 SEQUENCE_LENGTH = 12
 DML_PROVIDER = "DmlExecutionProvider"
 CPU_PROVIDER = "CPUExecutionProvider"
+# Publication-gate significance settings.  Fixed so two runs over one validation
+# receipt produce byte-identical confidence intervals and the gate stays auditable.
+BOOTSTRAP_RESAMPLES = 20000
+BOOTSTRAP_SEED = 20260912
+MAX_COMMODITY_MAE_RATIO = 3.0
+MAX_COMMODITY_LOSS_FRACTION = 0.5
 
 
 def _sha256(path: Path) -> str:
@@ -151,7 +157,7 @@ def export_models(checkpoint_dir: Path, model_dir: Path) -> dict:
                 ).isoformat(),
             }
             for key in (
-                "target_scaled", "training_cutoff", "internal_validation_start",
+                "target_scaled", "target_mode", "residual_scale", "training_cutoff", "internal_validation_start",
                 "internal_validation_end", "scaler_fit_end", "training_contract",
                 "unit", "currency", "seed",
             ):
@@ -273,6 +279,18 @@ def _metadata(session) -> dict:
     return session.get_modelmeta().custom_metadata_map
 
 
+def _decode_prediction(raw_prediction: float, normalized_last: float, scaler_mean: float,
+                       scaler_scale: float, meta: dict) -> float:
+    """Decode an ONNX output according to the checkpoint target contract."""
+    target_mode = str(meta.get("target_mode", "")).lower()
+    if target_mode == "scaled_delta_from_last":
+        residual_scale = float(meta.get("residual_scale", 1.0))
+        scaled_level = float(normalized_last) + residual_scale * float(raw_prediction)
+        return scaled_level * scaler_scale + scaler_mean
+    target_scaled = str(meta.get("target_scaled", "false")).lower() == "true"
+    return raw_prediction * scaler_scale + scaler_mean if target_scaled else raw_prediction
+
+
 def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
                          *, horizon: int = 18, prefer_gpu: bool = True,
                          validation: dict | None = None) -> dict:
@@ -314,8 +332,9 @@ def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
             next_date = context["last_date"] + pd.DateOffset(months=step)
             model_input = _window(normalized, next_date, context)[None, :, :]
             raw_prediction = float(session.run(None, {session.get_inputs()[0].name: model_input})[0][0])
-            target_scaled = str(meta.get("target_scaled", "false")).lower() == "true"
-            prediction = raw_prediction * scaler_scale + scaler_mean if target_scaled else raw_prediction
+            prediction = _decode_prediction(
+                raw_prediction, normalized[-1], scaler_mean, scaler_scale, meta
+            )
             prediction = max(0.0, prediction)
             recent_average = float(np.mean(prices[-SEQUENCE_LENGTH:]))
             if prediction > recent_average * 5:
@@ -332,6 +351,8 @@ def generate_predictions(data_path: Path, model_dir: Path, output_path: Path,
                 "source_checkpoint_sha256": meta.get("source_checkpoint_sha256"),
                 "source_checkpoint_mtime_utc": meta.get("source_checkpoint_mtime_utc"),
                 "target_scaled": str(meta.get("target_scaled", "false")).lower() == "true",
+                "target_mode": meta.get("target_mode", "absolute"),
+                "residual_scale": float(meta.get("residual_scale", 1.0)),
                 "training_cutoff": meta.get("training_cutoff"),
                 "training_contract": meta.get("training_contract"),
                 "unit": meta.get("unit"),
@@ -435,9 +456,109 @@ def _infer_training_cutoff(prediction_artifact: Path) -> dict:
     }
 
 
+def _paired_metric_diagnostics(per_commodity: list[dict], *, metric: str,
+                               resamples: int = BOOTSTRAP_RESAMPLES,
+                               seed: int = BOOTSTRAP_SEED) -> dict:
+    """Cluster-bootstrap the model-minus-persistence gap the aggregate gate reads.
+
+    The aggregate comparison alone cannot tell a real improvement from sampling
+    noise: with a handful of months per commodity, a fraction-of-a-percent gap in
+    either direction is routinely produced by chance.  Points inside one commodity
+    share a model, a scaler and a seed window, so they are not independent draws --
+    the bootstrap therefore resamples COMMODITIES and recomputes the n-weighted mean
+    difference, which reproduces the aggregate metric exactly because the aggregate
+    is itself the point-count-weighted mean of the per-commodity values.
+    """
+    pairs = []
+    for record in per_commodity or []:
+        model = record.get("model") or {}
+        naive = record.get("naive_persistence") or {}
+        count = int(model.get("n") or 0)
+        if count <= 0 or model.get(metric) is None or naive.get(metric) is None:
+            continue
+        pairs.append((float(model[metric]) - float(naive[metric]), float(count)))
+    if len(pairs) < 2:
+        return {"evaluated": False,
+                "reason": f"fewer than two per-commodity {metric} pairs available"}
+
+    diffs = np.asarray([pair[0] for pair in pairs], dtype=np.float64)
+    weights = np.asarray([pair[1] for pair in pairs], dtype=np.float64)
+    observed = float(np.sum(diffs * weights) / np.sum(weights))
+
+    rng = np.random.default_rng(seed)
+    index = rng.integers(0, len(diffs), size=(int(resamples), len(diffs)))
+    resampled_diffs = diffs[index]
+    resampled_weights = weights[index]
+    draws = ((resampled_diffs * resampled_weights).sum(axis=1)
+             / resampled_weights.sum(axis=1))
+    low = float(np.percentile(draws, 2.5))
+    high = float(np.percentile(draws, 97.5))
+
+    if high < 0:
+        verdict = "model_significantly_better"
+    elif low > 0:
+        verdict = "model_significantly_worse"
+    else:
+        verdict = "indistinguishable_from_persistence"
+    return {
+        "evaluated": True,
+        "metric": metric,
+        "commodities": len(pairs),
+        "weighted_mean_difference": round(observed, 6),
+        "median_difference": round(float(np.median(diffs)), 6),
+        "ci95": [round(low, 6), round(high, 6)],
+        "bootstrap_resamples": int(resamples),
+        "bootstrap_seed": int(seed),
+        "cluster_unit": "commodity",
+        "model_better_commodities": int((diffs < 0).sum()),
+        "model_worse_commodities": int((diffs > 0).sum()),
+        "tied_commodities": int((diffs == 0).sum()),
+        "verdict": verdict,
+        "sign_convention": "negative difference means the model beat persistence",
+    }
+
+
+def _commodity_regression_outliers(per_commodity: list[dict], *,
+                                   ratio_cap: float = MAX_COMMODITY_MAE_RATIO) -> dict:
+    """Find commodities the aggregate can hide behind its own averaging.
+
+    A mean over dozens of commodities absorbs a single catastrophic series, so a
+    model that is many times worse than persistence on one commodity can still
+    clear an aggregate threshold.  The ratio is unit-free, but a near-zero
+    persistence error makes it meaningless, so those commodities are excluded and
+    counted rather than reported as infinite blow-ups.
+    """
+    flagged, degenerate = [], 0
+    for record in per_commodity or []:
+        model_mae = (record.get("model") or {}).get("mae")
+        naive_mae = (record.get("naive_persistence") or {}).get("mae")
+        if model_mae is None or naive_mae is None:
+            continue
+        if float(naive_mae) <= 1e-12:
+            degenerate += 1
+            continue
+        ratio = float(model_mae) / float(naive_mae)
+        if ratio > ratio_cap:
+            flagged.append({
+                "commodity": record.get("commodity", ""),
+                "model_mae": round(float(model_mae), 4),
+                "naive_mae": round(float(naive_mae), 4),
+                "ratio": round(ratio, 3),
+            })
+    flagged.sort(key=lambda item: item["ratio"], reverse=True)
+    return {
+        "ratio_cap": ratio_cap,
+        "flagged": flagged,
+        "excluded_zero_persistence_error": degenerate,
+    }
+
+
 def _publication_gate(model_metrics: dict, baseline_metrics: dict,
                       *, model_count: int, minimum_models: int = 10,
-                      minimum_points: int = 30) -> dict:
+                      minimum_points: int = 30,
+                      per_commodity: list[dict] | None = None,
+                      maximum_loss_fraction: float = MAX_COMMODITY_LOSS_FRACTION,
+                      maximum_commodity_mae_ratio: float = MAX_COMMODITY_MAE_RATIO) -> dict:
     reasons = []
     if model_count < minimum_models:
         reasons.append(f"eligible_models={model_count} below minimum={minimum_models}")
@@ -456,6 +577,57 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
             reasons.append(
                 f"model MAE {model_metrics['mae']} did not beat naive MAE {baseline_metrics['mae']}"
             )
+
+    # An aggregate win is necessary but not sufficient: it must also be larger than
+    # the noise of the window it was measured on, and it must not be an average that
+    # conceals a commodity the model handles far worse than doing nothing.
+    significance = {
+        metric: _paired_metric_diagnostics(per_commodity, metric=metric)
+        for metric in ("mape", "mae")
+    }
+    outliers = _commodity_regression_outliers(
+        per_commodity, ratio_cap=maximum_commodity_mae_ratio)
+
+    if not per_commodity:
+        reasons.append(
+            "per-commodity receipts were not supplied, so paired significance and "
+            "per-commodity regressions could not be evaluated"
+        )
+    else:
+        for metric, diagnostics in significance.items():
+            if not diagnostics.get("evaluated"):
+                reasons.append(
+                    f"paired {metric.upper()} significance unevaluated: "
+                    f"{diagnostics.get('reason')}"
+                )
+            elif diagnostics["verdict"] != "model_significantly_better":
+                low, high = diagnostics["ci95"]
+                reasons.append(
+                    f"paired {metric.upper()} difference {diagnostics['weighted_mean_difference']:+} "
+                    f"has 95% CI [{low:+}, {high:+}] which does not exclude zero, so the "
+                    f"result is {diagnostics['verdict']}"
+                )
+        if outliers["flagged"]:
+            worst = outliers["flagged"][0]
+            reasons.append(
+                f"{len(outliers['flagged'])} commodity/commodities exceed the "
+                f"{maximum_commodity_mae_ratio}x persistence MAE cap, worst "
+                f"{worst['commodity']} at {worst['ratio']}x "
+                f"({worst['model_mae']} vs {worst['naive_mae']})"
+            )
+        evaluated = significance["mae"]
+        if evaluated.get("evaluated"):
+            comparable = (evaluated["model_better_commodities"]
+                          + evaluated["model_worse_commodities"]
+                          + evaluated["tied_commodities"])
+            losing = evaluated["model_worse_commodities"] + evaluated["tied_commodities"]
+            fraction = losing / comparable if comparable else 1.0
+            if fraction > maximum_loss_fraction:
+                reasons.append(
+                    f"model failed to beat persistence on {losing}/{comparable} commodities "
+                    f"({fraction:.3f}) above the {maximum_loss_fraction} cap"
+                )
+
     passed = not reasons
     return {
         "status": "passed_out_of_time_naive_baseline" if passed else "withheld_failed_validation",
@@ -465,7 +637,12 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
             "minimum_points": minimum_points,
             "model_mape_lt_naive": True,
             "model_mae_lt_naive": True,
+            "paired_difference_ci95_excludes_zero": True,
+            "maximum_commodity_mae_ratio": maximum_commodity_mae_ratio,
+            "maximum_loss_fraction": maximum_loss_fraction,
         },
+        "paired_significance": significance,
+        "per_commodity_guard": outliers,
         "reasons": reasons,
     }
 
@@ -579,7 +756,9 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
             }
             model_input = _window(normalized, target_date, context)[None, :, :]
             raw_prediction = float(session.run(None, {input_name: model_input})[0][0])
-            prediction = raw_prediction * scaler_scale + scaler_mean if target_scaled else raw_prediction
+            prediction = _decode_prediction(
+                raw_prediction, normalized[-1], scaler_mean, scaler_scale, meta
+            )
             prediction = max(0.0, prediction)
             recent_average = float(np.mean(prices[-SEQUENCE_LENGTH:]))
             if prediction > recent_average * 5:
@@ -597,6 +776,8 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
             "source_checkpoint_sha256": meta.get("source_checkpoint_sha256"),
             "providers": session.get_providers(),
             "target_scaled": target_scaled,
+            "target_mode": meta.get("target_mode", "absolute"),
+            "residual_scale": float(meta.get("residual_scale", 1.0)),
             "model": _regression_metrics(commodity_actual, commodity_model),
             "naive_persistence": _regression_metrics(commodity_actual, commodity_naive),
         })
@@ -606,7 +787,9 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
 
     model_metrics = _regression_metrics(all_actual, all_model)
     naive_metrics = _regression_metrics(all_actual, all_naive)
-    gate = _publication_gate(model_metrics, naive_metrics, model_count=len(model_receipts))
+    gate = _publication_gate(model_metrics, naive_metrics,
+                             model_count=len(model_receipts),
+                             per_commodity=model_receipts)
     result = {
         "schema": "ph-food-price-out-of-time-naive-baseline-v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),

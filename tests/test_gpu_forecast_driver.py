@@ -68,3 +68,32 @@ def test_seed_rejects_series_older_than_dataset_latest():
         assert "current dataset maximum is 2026-06" in str(exc)
     else:
         raise AssertionError("stale commodity histories must not be projected as current")
+
+
+def test_residual_decoder_is_anchored_to_last_observation():
+    meta = {"target_scaled": "true", "target_mode": "scaled_delta_from_last"}
+    prediction = driver._decode_prediction(
+        raw_prediction=0.0, normalized_last=1.5, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert prediction == 16.0
+    moved = driver._decode_prediction(
+        raw_prediction=-0.25, normalized_last=1.5, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert moved == 15.0
+
+
+def test_absolute_scaled_decoder_remains_backward_compatible():
+    meta = {"target_scaled": "true"}
+    assert driver._decode_prediction(0.5, 99.0, 10.0, 4.0, meta) == 12.0
+
+
+def test_residual_decoder_applies_internal_validation_scale():
+    meta = {
+        "target_scaled": "true",
+        "target_mode": "scaled_delta_from_last",
+        "residual_scale": "0.5",
+    }
+    prediction = driver._decode_prediction(
+        raw_prediction=0.5, normalized_last=1.0, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert prediction == 15.0

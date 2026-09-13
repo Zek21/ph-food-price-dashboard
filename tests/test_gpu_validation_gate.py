@@ -15,11 +15,31 @@ def test_regression_metrics_are_exact_for_simple_population():
     }
 
 
+def _uniform_receipts(count: int, *, model_mape: float, model_mae: float,
+                      naive_mape: float, naive_mae: float, points: int = 4):
+    """Per-commodity receipts whose paired differences are identical.
+
+    The aggregate check and the paired significance check read different things, so
+    a gate exercise now has to supply both.  Identical differences keep the bootstrap
+    deterministic, which is what makes this assertion stable.
+    """
+    return [
+        {
+            "commodity": f"Commodity {index}",
+            "model": {"mape": model_mape, "mae": model_mae, "n": points},
+            "naive_persistence": {"mape": naive_mape, "mae": naive_mae, "n": points},
+        }
+        for index in range(count)
+    ]
+
+
 def test_publication_gate_requires_model_to_beat_naive_on_mape_and_mae():
     passed = driver._publication_gate(
         {"mape": 8.0, "mae": 3.0, "n": 40},
         {"mape": 10.0, "mae": 4.0, "n": 40},
         model_count=12,
+        per_commodity=_uniform_receipts(
+            12, model_mape=8.0, model_mae=3.0, naive_mape=10.0, naive_mae=4.0),
     )
     assert passed["passed"] is True
     assert passed["status"] == "passed_out_of_time_naive_baseline"
@@ -28,6 +48,8 @@ def test_publication_gate_requires_model_to_beat_naive_on_mape_and_mae():
         {"mape": 8.0, "mae": 5.0, "n": 40},
         {"mape": 10.0, "mae": 4.0, "n": 40},
         model_count=12,
+        per_commodity=_uniform_receipts(
+            12, model_mape=8.0, model_mae=5.0, naive_mape=10.0, naive_mae=4.0),
     )
     assert failed["passed"] is False
     assert any("did not beat naive MAE" in reason for reason in failed["reasons"])

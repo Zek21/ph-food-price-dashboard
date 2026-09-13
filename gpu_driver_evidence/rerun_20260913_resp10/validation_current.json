@@ -1,0 +1,1686 @@
+{
+  "schema": "ph-food-price-out-of-time-naive-baseline-v1",
+  "generated_at": "2026-09-13T06:21:36.299799+00:00",
+  "data": {
+    "rows": 236252,
+    "commodities": 73,
+    "regions": 17,
+    "price_types": 3,
+    "units": [
+      "750 ML",
+      "KG",
+      "Unit"
+    ],
+    "currencies": [
+      "PHP"
+    ],
+    "mixed_unit_commodities": 0,
+    "min_date": "2000-01-15",
+    "max_date": "2026-06-15",
+    "sha256": "9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124"
+  },
+  "cutoff_proof": {
+    "source": "onnx_model_metadata",
+    "training_cutoff": "2026-03",
+    "model_count_with_cutoff": 59,
+    "training_contracts": [
+      "commodity-monthly-series_train-only-scaler_scaled-target_oot-v1"
+    ],
+    "inference": "explicit checkpoint metadata; final test months were not used for fit or early stopping"
+  },
+  "validation_start": "2026-04",
+  "validation_end": "2026-06",
+  "execution_provider": "CPUExecutionProvider",
+  "eligible_model_count": 59,
+  "skipped_model_count": 0,
+  "model": {
+    "mape": 7.2264,
+    "mae": 8.5919,
+    "rmse": 12.031,
+    "r2": 0.990964,
+    "n": 177
+  },
+  "naive_persistence": {
+    "mape": 4.3018,
+    "mae": 5.1679,
+    "rmse": 8.0748,
+    "r2": 0.99593,
+    "n": 177
+  },
+  "publication_gate": {
+    "status": "withheld_failed_validation",
+    "passed": false,
+    "requirements": {
+      "minimum_models": 10,
+      "minimum_points": 30,
+      "model_mape_lt_naive": true,
+      "model_mae_lt_naive": true,
+      "paired_difference_ci95_excludes_zero": true,
+      "maximum_commodity_mae_ratio": 3.0,
+      "maximum_loss_fraction": 0.5
+    },
+    "paired_significance": {
+      "mape": {
+        "evaluated": true,
+        "metric": "mape",
+        "commodities": 59,
+        "weighted_mean_difference": 2.924646,
+        "median_difference": 1.2139,
+        "ci95": [
+          1.432562,
+          4.435314
+        ],
+        "bootstrap_resamples": 20000,
+        "bootstrap_seed": 20260912,
+        "cluster_unit": "commodity",
+        "model_better_commodities": 14,
+        "model_worse_commodities": 45,
+        "tied_commodities": 0,
+        "verdict": "model_significantly_worse",
+        "sign_convention": "negative difference means the model beat persistence"
+      },
+      "mae": {
+        "evaluated": true,
+        "metric": "mae",
+        "commodities": 59,
+        "weighted_mean_difference": 3.423924,
+        "median_difference": 1.3634,
+        "ci95": [
+          1.594583,
+          5.296231
+        ],
+        "bootstrap_resamples": 20000,
+        "bootstrap_seed": 20260912,
+        "cluster_unit": "commodity",
+        "model_better_commodities": 14,
+        "model_worse_commodities": 45,
+        "tied_commodities": 0,
+        "verdict": "model_significantly_worse",
+        "sign_convention": "negative difference means the model beat persistence"
+      }
+    },
+    "per_commodity_guard": {
+      "ratio_cap": 3.0,
+      "flagged": [
+        {
+          "commodity": "Fish (threadfin bream)",
+          "model_mae": 12.2136,
+          "naive_mae": 0.3592,
+          "ratio": 34.002
+        },
+        {
+          "commodity": "Ginger",
+          "model_mae": 18.6957,
+          "naive_mae": 1.9168,
+          "ratio": 9.754
+        },
+        {
+          "commodity": "Taro",
+          "model_mae": 13.7176,
+          "naive_mae": 1.8133,
+          "ratio": 7.565
+        },
+        {
+          "commodity": "Anchovies",
+          "model_mae": 16.5521,
+          "naive_mae": 2.4901,
+          "ratio": 6.647
+        },
+        {
+          "commodity": "Beans (mung)",
+          "model_mae": 11.7895,
+          "naive_mae": 2.0161,
+          "ratio": 5.848
+        },
+        {
+          "commodity": "Calamansi",
+          "model_mae": 18.7127,
+          "naive_mae": 3.3475,
+          "ratio": 5.59
+        },
+        {
+          "commodity": "Squashes",
+          "model_mae": 9.6283,
+          "naive_mae": 1.8482,
+          "ratio": 5.21
+        },
+        {
+          "commodity": "Meat (beef, chops with bones)",
+          "model_mae": 19.9075,
+          "naive_mae": 3.8493,
+          "ratio": 5.172
+        },
+        {
+          "commodity": "Crab",
+          "model_mae": 35.7546,
+          "naive_mae": 7.6679,
+          "ratio": 4.663
+        },
+        {
+          "commodity": "Rice (well milled)",
+          "model_mae": 9.5007,
+          "naive_mae": 2.0381,
+          "ratio": 4.662
+        },
+        {
+          "commodity": "Mandarins",
+          "model_mae": 8.827,
+          "naive_mae": 2.1848,
+          "ratio": 4.04
+        },
+        {
+          "commodity": "Bananas (saba)",
+          "model_mae": 12.7264,
+          "naive_mae": 3.2069,
+          "ratio": 3.968
+        },
+        {
+          "commodity": "Pineapples",
+          "model_mae": 9.4165,
+          "naive_mae": 2.4014,
+          "ratio": 3.921
+        },
+        {
+          "commodity": "Rice (special)",
+          "model_mae": 6.1591,
+          "naive_mae": 1.8098,
+          "ratio": 3.403
+        },
+        {
+          "commodity": "Potatoes (Irish)",
+          "model_mae": 14.489,
+          "naive_mae": 4.7703,
+          "ratio": 3.037
+        }
+      ],
+      "excluded_zero_persistence_error": 0
+    },
+    "reasons": [
+      "model MAPE 7.2264 did not beat naive MAPE 4.3018",
+      "model MAE 8.5919 did not beat naive MAE 5.1679",
+      "paired MAPE difference +2.924646 has 95% CI [+1.432562, +4.435314] which does not exclude zero, so the result is model_significantly_worse",
+      "paired MAE difference +3.423924 has 95% CI [+1.594583, +5.296231] which does not exclude zero, so the result is model_significantly_worse",
+      "15 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 34.002x (12.2136 vs 0.3592)",
+      "model failed to beat persistence on 45/59 commodities (0.763) above the 0.5 cap"
+    ]
+  },
+  "models": [
+    {
+      "commodity": "Anchovies",
+      "model_sha256": "8e792ed51c256f2a02bf7955465cfa27cf699f89420010a2471f7f33cb52abfa",
+      "source_checkpoint_sha256": "bad5078c38ab5283025bb7b8c493c9448e0bca40e48573eec534a3e61e57baa2",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 9.4617,
+        "mae": 16.5521,
+        "rmse": 16.6799,
+        "r2": -68.289556,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.4321,
+        "mae": 2.4901,
+        "rmse": 2.6955,
+        "r2": -0.809577,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Bananas (lakatan)",
+      "model_sha256": "fc6a66f8e2d5cdf5d8b00836bf82b6b37034206d9f53062e2122528d3a927dd1",
+      "source_checkpoint_sha256": "38e713e63c15c394d225290ff55975f2717a9da0f5d5e9d12bc252b93227f1ee",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.0515,
+        "mae": 1.8376,
+        "rmse": 1.9071,
+        "r2": -8.929682,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 0.6995,
+        "mae": 0.6274,
+        "rmse": 0.713,
+        "r2": -0.387752,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Bananas (latundan)",
+      "model_sha256": "9fbe5c8412ded8d5549c9e9acd4838af578537ca0e892883be14910069d781e0",
+      "source_checkpoint_sha256": "e461544d087d4c40529b02f0ceaf755c81a5c653e70d8d932b5698e86930910e",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.2688,
+        "mae": 4.8091,
+        "rmse": 4.8119,
+        "r2": -867.041415,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.3315,
+        "mae": 1.9379,
+        "rmse": 1.9447,
+        "r2": -140.785306,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Bananas (saba)",
+      "model_sha256": "cbeb7cf41a547c5cb2a160cbd68196c4899ac1b68c548d4e583ac14d691d8c68",
+      "source_checkpoint_sha256": "190dcbbe28df0e61608d2c03dd62844859487c8c2fa7780485017ebbaad76386",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 25.8447,
+        "mae": 12.7264,
+        "rmse": 12.7404,
+        "r2": -463.123854,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 6.5017,
+        "mae": 3.2069,
+        "rmse": 3.2609,
+        "r2": -29.405493,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Beans (green, fresh)",
+      "model_sha256": "ccd0098c0a1f8335dfed7d30cdca3d952a3dc66608c4026939fecbf25c76bdea",
+      "source_checkpoint_sha256": "91fd97ef94d255287c5dce20b8ca58d426c710c65325dd1c4c57cbba88d74413",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 5.2405,
+        "mae": 6.9024,
+        "rmse": 7.04,
+        "r2": 0.113398,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 6.1193,
+        "mae": 7.9703,
+        "rmse": 8.0857,
+        "r2": -0.169564,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Beans (mung)",
+      "model_sha256": "6d2fe7f9be4c612387fe0a94e04e1c6bd5f128b3354a69612e19aa8fac0da686",
+      "source_checkpoint_sha256": "bc46305d6184d0e95157116604b7865b264fda84b16f4a5d16a01c71251f8d7f",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 9.5231,
+        "mae": 11.7895,
+        "rmse": 11.8009,
+        "r2": -1442.019473,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.6281,
+        "mae": 2.0161,
+        "rmse": 2.0399,
+        "r2": -42.119697,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Beans (string)",
+      "model_sha256": "4cbe5cf5a6cb32554d776ba94513ad86a5366cdecb111e7db5e3d59fff8a4899",
+      "source_checkpoint_sha256": "5f2f83fd314f7ec7d1160332427b6f766ddf939d458146a0053da2b5650b5e30",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.4313,
+        "mae": 2.5361,
+        "rmse": 4.0107,
+        "r2": -0.200686,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 12.5266,
+        "mae": 12.3702,
+        "rmse": 12.9004,
+        "r2": -11.422326,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Bitter melon",
+      "model_sha256": "f09213227b254510a7b6e85ac9871089da336f9c329e493be48c6237cb9a361c",
+      "source_checkpoint_sha256": "187927ef9674c25505b2b44772de865dc101330af6b684ce4b7bd8900e90ea04",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 6.3806,
+        "mae": 6.822,
+        "rmse": 6.9261,
+        "r2": -30.928533,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 6.7889,
+        "mae": 7.259,
+        "rmse": 7.3618,
+        "r2": -35.072069,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Bottle gourd",
+      "model_sha256": "a61cb44c088f1932c4fadf1be27e2dec437446ada2c2fb9576ab744a67983700",
+      "source_checkpoint_sha256": "f065cddf87c049558c22526239454a215fbf7e12b69ec46f4e14548296144dde",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 0.6424,
+        "mae": 0.3158,
+        "rmse": 0.346,
+        "r2": -3.091534,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.3766,
+        "mae": 1.1665,
+        "rmse": 1.179,
+        "r2": -46.504868,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Cabbage",
+      "model_sha256": "e46fbc03d7f47dc433db9854c53146c1ff04e1938171396ba0f528ef943b4db4",
+      "source_checkpoint_sha256": "edb1e2d2d69a330f2274ea3e115490b1f3b30f9a4ff00dba4b4ed1a28e1f7368",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 14.665,
+        "mae": 12.0206,
+        "rmse": 12.1673,
+        "r2": -43.137497,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 8.0329,
+        "mae": 6.5668,
+        "rmse": 6.8174,
+        "r2": -12.856671,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Cabbage (chinese)",
+      "model_sha256": "80cd59230953e5b10bedcd2183554ad7a7bf77a20934c5292af8ed5b2a5ee246",
+      "source_checkpoint_sha256": "0f7ebe9f9b114474140ff54dd351dcab1984cf3b5ab42b97d6f9eb24e3ab0b61",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.5215,
+        "mae": 7.5796,
+        "rmse": 8.4781,
+        "r2": -0.301962,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 7.6945,
+        "mae": 7.4003,
+        "rmse": 8.7314,
+        "r2": -0.380932,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Calamansi",
+      "model_sha256": "8171af72271b804ffd0da7f3e6607a69724bf023dd9c731ffc873ebed88256b7",
+      "source_checkpoint_sha256": "54590c53f1811ea502150e786e6f1dba53e48d853d7fcf6cb4bf7d3a86b886bd",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 18.113,
+        "mae": 18.7127,
+        "rmse": 18.9463,
+        "r2": -38.964541,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.1801,
+        "mae": 3.3475,
+        "rmse": 4.2875,
+        "r2": -1.046592,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Carrots",
+      "model_sha256": "86b775ee77af685f48c22926f141106838ca275743dacc436ec3aa531e3ae4a7",
+      "source_checkpoint_sha256": "b870df3b601fcf4735a76fb7af10ab4394d60d77b8661bc32b023cc690d76b0d",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 25.3066,
+        "mae": 40.1615,
+        "rmse": 41.715,
+        "r2": -34.375651,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 16.1429,
+        "mae": 25.6143,
+        "rmse": 26.5572,
+        "r2": -13.33785,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Choko",
+      "model_sha256": "1577fa6d7c8101590209d0501b43aa4ac1987fd220c80fa40a3633013c7860d1",
+      "source_checkpoint_sha256": "8ad1160039e1722ded2929ea9bfbeef06a8621d1ffd4d1be2368770faddd4d82",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.9626,
+        "mae": 5.3375,
+        "rmse": 7.5227,
+        "r2": -0.566646,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 9.6647,
+        "mae": 5.7354,
+        "rmse": 7.9599,
+        "r2": -0.754034,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Coconut",
+      "model_sha256": "445cb0e0e506e65fc5aa366271cbbc87b0fd54ddabd5c214d136aec9dd920476",
+      "source_checkpoint_sha256": "4681788bb22d6969ae4907bdb573f7c299309e20c27a841b76c274a29893cdd7",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.9096,
+        "mae": 0.6666,
+        "rmse": 0.6855,
+        "r2": -12.743708,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.5659,
+        "mae": 0.5469,
+        "rmse": 0.5773,
+        "r2": -8.746307,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Crab",
+      "model_sha256": "8a96d01cccbe91245b6a878dfc4c65ad429df3ff811d22bc075ce4aa3217c3bf",
+      "source_checkpoint_sha256": "1007eca7f02d5b805d4f764d5d6d2aa4b0ca9b5862d1441751d973e8f8b62320",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.8119,
+        "mae": 35.7546,
+        "rmse": 35.8755,
+        "r2": -145.110574,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.8856,
+        "mae": 7.6679,
+        "rmse": 8.2223,
+        "r2": -6.674893,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Eggplants",
+      "model_sha256": "7d6090b5d605dffb97fc9e2f4e28eb16ca101c9cfb90133f51ed416b93b41cee",
+      "source_checkpoint_sha256": "2bfeeaa40ba988a00bc195f5cca8cc9e7206c02bb5d99af779518b183f25e9be",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 7.2675,
+        "mae": 6.0765,
+        "rmse": 6.7961,
+        "r2": -23.88322,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 8.4441,
+        "mae": 7.0469,
+        "rmse": 7.1774,
+        "r2": -26.753683,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Eggs",
+      "model_sha256": "611f0251364c15add632f1bdc6dd39e84d6747fa89d77accc852398c5ebcefdd",
+      "source_checkpoint_sha256": "d22f3d6c940d5cb73b1c0eba57030545dcf96ca696c00a3ddee77bb03d6ed4ce",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.1317,
+        "mae": 0.1936,
+        "rmse": 0.2019,
+        "r2": -6.711817,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.0679,
+        "mae": 0.0967,
+        "rmse": 0.1161,
+        "r2": -1.548387,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Eggs (duck)",
+      "model_sha256": "204d732123fee60fb3aeae9ed2b85ad5695047ee469764b917cc0a5c1ed961ac",
+      "source_checkpoint_sha256": "96ec9997e130c0406ab58c7aef7fd57598128c0c5823c0938b8ee8b5bedda8d5",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.6404,
+        "mae": 0.3112,
+        "rmse": 0.3427,
+        "r2": -6.744975,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.4265,
+        "mae": 0.1662,
+        "rmse": 0.195,
+        "r2": -1.50861,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (frigate tuna)",
+      "model_sha256": "b434fc60bda66beaaeb88a51396a5c1ab70bcdd2233f66cf102082000c93907a",
+      "source_checkpoint_sha256": "78b040066eb02459df90b13e4ce381e144d94dbc60734a507e2a5773fc696c55",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 3.5661,
+        "mae": 8.0086,
+        "rmse": 8.8505,
+        "r2": -3.948851,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.9329,
+        "mae": 6.4593,
+        "rmse": 7.5863,
+        "r2": -2.635985,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (mackerel, fresh)",
+      "model_sha256": "4082202b602725b02fe0483dc181ba27894e005c21443c472189468aa94c3aac",
+      "source_checkpoint_sha256": "e21c1295d2e93bbf97b1551779e54d1aec1de207d09ff5b733d0af6d52e22eea",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.2806,
+        "mae": 23.1764,
+        "rmse": 23.26,
+        "r2": -121.398503,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 6.0858,
+        "mae": 17.0068,
+        "rmse": 17.1363,
+        "r2": -65.433868,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (milkfish)",
+      "model_sha256": "5fe30bf753135a9d6004fb3c7323780fa83c5d471e4b75b133a1541f72e97760",
+      "source_checkpoint_sha256": "048d7104fd7212479f4f57d3f5fa2831204af027ef13a1a13a8c176b7dd55ec5",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.2935,
+        "mae": 3.1182,
+        "rmse": 3.7471,
+        "r2": -0.368664,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.1497,
+        "mae": 2.7626,
+        "rmse": 3.218,
+        "r2": -0.009438,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (redbelly yellowtail fusilier)",
+      "model_sha256": "213706e8b2eaaab6e3eb212f5d5f154e7c46a82707a15b76aafd5400d0127a4a",
+      "source_checkpoint_sha256": "7f65d83d30208bea4bb58aa0ba45a9d7ed7312436ed06e2c7c0034e1fe828204",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.8455,
+        "mae": 6.2404,
+        "rmse": 7.305,
+        "r2": -0.765258,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.4052,
+        "mae": 4.7797,
+        "rmse": 5.5939,
+        "r2": -0.035139,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (roundscad)",
+      "model_sha256": "3f3a51d45bb6c25ae0f8ef5d5d0b2ef8aa8d320211b97d7a817460f6c049ceeb",
+      "source_checkpoint_sha256": "bc0887d4ed3d22516b9a4c84872cd2a1d8b8fbda184f445a6e1fc6082d9c567d",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.0349,
+        "mae": 2.4042,
+        "rmse": 3.0166,
+        "r2": -0.394534,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.7459,
+        "mae": 6.4041,
+        "rmse": 6.8948,
+        "r2": -6.285184,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (slipmouth)",
+      "model_sha256": "2a720491162ebf043590c0c80d21a9d01fd28a226aca2a875609b5a80a90457d",
+      "source_checkpoint_sha256": "9f12cbd160a37311a98066d385af1e8702d925af0a4184d4d4f73ad9ff79f772",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.0072,
+        "mae": 5.2158,
+        "rmse": 5.2475,
+        "r2": -87.232803,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.0065,
+        "mae": 5.214,
+        "rmse": 5.2439,
+        "r2": -87.112553,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (threadfin bream)",
+      "model_sha256": "a3fdecbe6711878de39922485d49ace44c37c40cd044d89585c256e956615f60",
+      "source_checkpoint_sha256": "2ccf90f3da1576b59b7813451784ae23b35bbc892b1098cde9610dad5be056f8",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 3.8112,
+        "mae": 12.2136,
+        "rmse": 12.2224,
+        "r2": -731.687393,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 0.1122,
+        "mae": 0.3592,
+        "rmse": 0.4911,
+        "r2": -0.183082,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Fish (tilapia)",
+      "model_sha256": "0324bf14c59b08d0da942eec9304f4e37a6bf04f84bb447b64607b785fae128d",
+      "source_checkpoint_sha256": "1c40ebf0b0ad6df467068589cbd512518d9d85de5c8513eb6a84ad33140b80be",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 0.4667,
+        "mae": 0.8535,
+        "rmse": 0.9733,
+        "r2": -0.917646,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 0.3973,
+        "mae": 0.7259,
+        "rmse": 0.7809,
+        "r2": -0.234498,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Garlic",
+      "model_sha256": "c4d401ef24f30fd52d2268f10dd74d4d8186e831190810c374c7d7052c08d9dd",
+      "source_checkpoint_sha256": "4b8189360f681171a70ca7b0af6a33ede80277efc33e368dc45e84ade0ff950a",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 0.4036,
+        "mae": 0.6877,
+        "rmse": 0.7032,
+        "r2": 0.738668,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.1018,
+        "mae": 1.8696,
+        "rmse": 2.321,
+        "r2": -1.847384,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Ginger",
+      "model_sha256": "2dfd7a85c79c77e286b4b8e67caad861806544abe051854b90d7ad67faae2fbe",
+      "source_checkpoint_sha256": "cba93bed8340e9a2d6d7fdd1f040202ef9f9f1d9bc3bf44c1608d8ecf9e7f52b",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 12.8409,
+        "mae": 18.6957,
+        "rmse": 18.7858,
+        "r2": -107.966837,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.3053,
+        "mae": 1.9168,
+        "rmse": 2.4501,
+        "r2": -0.853494,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Groundnuts (shelled)",
+      "model_sha256": "66269868aee74082a3ba8649b0a4fa32eee43283919edffd8fc82baedeaaab73",
+      "source_checkpoint_sha256": "4331049b753513a0899805421a52555c50c72f476a9f29f2ef35ef4f1c7e2d81",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.8158,
+        "mae": 2.2493,
+        "rmse": 2.2725,
+        "r2": -33.022627,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 0.795,
+        "mae": 0.9856,
+        "rmse": 1.0598,
+        "r2": -6.400292,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Groundnuts (unshelled)",
+      "model_sha256": "382ff4254f994d3feb683d8f1ee795b120549a07973a1e630aee8fff72ead1ed",
+      "source_checkpoint_sha256": "faf3a928e8f1d176a05a7ba33bf0dd769e0672e3bddced628935a1451f40304b",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.6215,
+        "mae": 3.0821,
+        "rmse": 3.103,
+        "r2": -86.307416,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.9013,
+        "mae": 2.2351,
+        "rmse": 2.2597,
+        "r2": -45.299453,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Maize (yellow)",
+      "model_sha256": "86456075fee2704968c2ea5000125b47eff053846e2069edba2fae311ad453d3",
+      "source_checkpoint_sha256": "8cf92f42e4b5516433bb28b52a57939fadaeefd277c3f8a1df19d8a9cc87ddb1",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.841,
+        "mae": 0.695,
+        "rmse": 0.853,
+        "r2": -1.309534,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.7992,
+        "mae": 1.054,
+        "rmse": 1.1941,
+        "r2": -3.526009,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Mandarins",
+      "model_sha256": "8c5b7ac4b549d31c1d56b4f8eead04f73ba23951d5cc6f252c8c3a86c1cde244",
+      "source_checkpoint_sha256": "97a22bbc144981a0c6abc97a58cecfc1667bb8c3112d16f2f01105ba0198c03e",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 11.3295,
+        "mae": 8.827,
+        "rmse": 8.9194,
+        "r2": -46.143137,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.7832,
+        "mae": 2.1848,
+        "rmse": 2.5418,
+        "r2": -2.828517,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Mangoes (carabao)",
+      "model_sha256": "01afff5dbc672c36884e98aad96c0f47c7292e389382cf55d26e519addb88a23",
+      "source_checkpoint_sha256": "0d1cc722e5f6fea282a6ebce256512f7e61b750cdc44a32254a00ddced62a4a6",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.5326,
+        "mae": 3.7436,
+        "rmse": 3.8459,
+        "r2": 0.680315,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 13.3436,
+        "mae": 19.2154,
+        "rmse": 20.3838,
+        "r2": -7.980556,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Mangoes (piko)",
+      "model_sha256": "4a6b643a9a98560e6d1dabd1d40db44a5ebc3b757960211646d983be9eebb2e1",
+      "source_checkpoint_sha256": "20f29479e4f1b16fb433ff9cbe91520e896fc3abc1852900e74e48449555e7c3",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 9.1175,
+        "mae": 11.2279,
+        "rmse": 12.4838,
+        "r2": -1.839477,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 20.3245,
+        "mae": 25.2908,
+        "rmse": 26.3536,
+        "r2": -11.653864,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (beef)",
+      "model_sha256": "cd991c8d498be02d8301bdddecd7bd2f91b5f6e037f56ef4cd4aecc77dba82d1",
+      "source_checkpoint_sha256": "f1c504cd5e98687106a14ed3f5c09bd32b1458f3ead5a809af59dd1ece1ca1e3",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 0.8853,
+        "mae": 3.9822,
+        "rmse": 4.1037,
+        "r2": -4.0495,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.0912,
+        "mae": 4.9112,
+        "rmse": 5.2397,
+        "r2": -7.23232,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (beef, chops with bones)",
+      "model_sha256": "3afd37956aca5ab1fd12b8d52860eff15d5a825290f8e52ee0bd06592f148fbc",
+      "source_checkpoint_sha256": "c36f389810953e7cf742e30fffedb1754b1201fa9eff3d2fb8bec20d6b8b2234",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 5.2713,
+        "mae": 19.9075,
+        "rmse": 19.9091,
+        "r2": -8539.55513,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.0192,
+        "mae": 3.8493,
+        "rmse": 3.8553,
+        "r2": -319.26501,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (chicken, whole)",
+      "model_sha256": "996e129a640a8ac82679ef853c6b8f54b360c4aec46bd152a409e2321806b3bb",
+      "source_checkpoint_sha256": "1fae7cd3b478bdb27a968ec1a31c58a05a42c281cabbc5de1172a7bcc40f93bf",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.4558,
+        "mae": 3.121,
+        "rmse": 3.1274,
+        "r2": -496.18618,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 0.8198,
+        "mae": 1.7576,
+        "rmse": 1.7632,
+        "r2": -157.03041,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (pork)",
+      "model_sha256": "da45ac5926047f9d91d54663fdab6080fe7ab837c8c45b88b422906a5235bb1d",
+      "source_checkpoint_sha256": "159a15e716779fcde9fbbc737382e6db0ec6bf9ba25f9c05ea9c1731f8f20ab4",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.6546,
+        "mae": 8.9141,
+        "rmse": 8.9523,
+        "r2": -35.722877,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.0634,
+        "mae": 3.5787,
+        "rmse": 3.8716,
+        "r2": -5.868293,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (pork, hock)",
+      "model_sha256": "b25bb9260d3260ab88814522bc3f8686ccd536cb1d3c5034318009074529e238",
+      "source_checkpoint_sha256": "9db108371004791a0e4b67997eaca32c4fa974a7d34378b085fbda4fd27c8f76",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.1993,
+        "mae": 3.4527,
+        "rmse": 4.0875,
+        "r2": -0.641577,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.1756,
+        "mae": 3.3433,
+        "rmse": 3.8268,
+        "r2": -0.438809,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Meat (pork, with bones)",
+      "model_sha256": "d7efd01379ab30fec967bc531b5549c22c711789c0f71187e024fa9012e308ed",
+      "source_checkpoint_sha256": "239307c7447bf76714a30f452b341fe27b9f8d8df084806edec4262612481538",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 1.4296,
+        "mae": 4.3711,
+        "rmse": 4.4096,
+        "r2": -20.880493,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.1753,
+        "mae": 3.5978,
+        "rmse": 3.7193,
+        "r2": -14.565581,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Onions (red)",
+      "model_sha256": "0b68378d6114e1586d9f2d25d8016b97e9cdd874a5e670d987698d45fd5474ad",
+      "source_checkpoint_sha256": "b6b528b34408977d252a00e872f5357fb4548b2f3796b681b1df4bb083cd343f",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.6655,
+        "mae": 11.7805,
+        "rmse": 11.8669,
+        "r2": -3.609096,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 14.7752,
+        "mae": 19.9626,
+        "rmse": 20.7137,
+        "r2": -13.042894,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Onions (white)",
+      "model_sha256": "0cf41f8902e2e9e40e32254b751dee97fbefff2d9835164d2e9fe5685126934c",
+      "source_checkpoint_sha256": "d77811bdb5d2d22d75cec21ddac819b1b0f8efd8fe71004a01f957cac9f09410",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.57,
+        "mae": 11.5927,
+        "rmse": 11.7185,
+        "r2": -964.227915,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 8.0084,
+        "mae": 10.8328,
+        "rmse": 10.8393,
+        "r2": -824.827861,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Papaya",
+      "model_sha256": "dd42cb3befadb5f327ba590f447b65918c79dcd9d586004670ce7b47bfef7e44",
+      "source_checkpoint_sha256": "f4ca8d347a2ca6d51b222abe78fc0900194ba9b62fa23655c1dbcb14c5e9dae6",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 4.2384,
+        "mae": 1.7588,
+        "rmse": 1.7646,
+        "r2": -150.977313,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.3387,
+        "mae": 1.3856,
+        "rmse": 1.3929,
+        "r2": -93.694996,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Pineapples",
+      "model_sha256": "91e65db21d2e8cfe3e09d6cd137e6dbfafca6be7c0a190c956df9e429566c83e",
+      "source_checkpoint_sha256": "5c768720446d2987fba677e405a549a63e59d8118e7b0150d624f17c674832d8",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 10.8151,
+        "mae": 9.4165,
+        "rmse": 9.4202,
+        "r2": -1340.885521,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.7574,
+        "mae": 2.4014,
+        "rmse": 2.4151,
+        "r2": -87.198011,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Potatoes (Irish)",
+      "model_sha256": "7af51c135ef758f273f9487a767edfde864dceaa0a43c68f1471bfef9076af9f",
+      "source_checkpoint_sha256": "6e09ff3b3e27fa90d5d9ee10b9b79f45712b17b6dcf59b644598a86492193e8d",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 11.7858,
+        "mae": 14.489,
+        "rmse": 14.5485,
+        "r2": -97.246102,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.8905,
+        "mae": 4.7703,
+        "rmse": 4.991,
+        "r2": -10.562689,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Rice (regular, milled)",
+      "model_sha256": "51c943ebc7fd79160433931653ad9d7af0f87eac34f1ecf4294b808351009ab2",
+      "source_checkpoint_sha256": "3d78284c47b018c97b90f32a11547877e9ca2b5f5efbb43ce9524a0418e1e5a1",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 14.5339,
+        "mae": 7.344,
+        "rmse": 7.3827,
+        "r2": -144.422648,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 6.1132,
+        "mae": 3.0926,
+        "rmse": 3.1526,
+        "r2": -25.517464,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Rice (special)",
+      "model_sha256": "0e207b6f968dffcfeebabc3edc5bb2a7c706069397229964577ed414ead1c4ba",
+      "source_checkpoint_sha256": "ec1027e16f50ab62c7d10c08540600b7460dae697b329b041ed0a90133716228",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 9.7499,
+        "mae": 6.1591,
+        "rmse": 6.2094,
+        "r2": -68.271177,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.8552,
+        "mae": 1.8098,
+        "rmse": 1.9575,
+        "r2": -5.884295,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Rice (well milled)",
+      "model_sha256": "7d44f89b08b44f2453788537f8f03d23c815904f3ea1f9fd4580ce20fda5da22",
+      "source_checkpoint_sha256": "61e5974390dd72c6f7b8a1b0f2f4985ab6ac4aa13850401e80bcc5e6abcc39c2",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 16.7945,
+        "mae": 9.5007,
+        "rmse": 9.5421,
+        "r2": -114.297703,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.5832,
+        "mae": 2.0381,
+        "rmse": 2.2234,
+        "r2": -5.259886,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Semolina (white)",
+      "model_sha256": "b97222831551805890c2b6a8141fc7fd4df798ebc537ea266e3f8f587b5deb69",
+      "source_checkpoint_sha256": "b8d28a4f187ff04d8acb1b91b52ea41c229146e5396174ec3bb7ec084d2fd74b",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 15.4646,
+        "mae": 7.3655,
+        "rmse": 7.5377,
+        "r2": -20.889039,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 11.7152,
+        "mae": 5.5936,
+        "rmse": 5.821,
+        "r2": -12.05384,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Semolina (yellow)",
+      "model_sha256": "797b1add927c8353c0dda18acdb6bd0e28bf4068beab75790fcd1eefbb3f5735",
+      "source_checkpoint_sha256": "12a19139994ccfcb32d379b1de34739ba34c190fd7fce85a30801675c91c0031",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 6.8428,
+        "mae": 2.5032,
+        "rmse": 2.5646,
+        "r2": -20.782125,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 4.7806,
+        "mae": 1.7512,
+        "rmse": 1.8354,
+        "r2": -10.156437,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Shrimp (endeavor)",
+      "model_sha256": "5994bd44c94a25a239d36bc60a050f180e98358d57d234b8268690025a3f4b0d",
+      "source_checkpoint_sha256": "e54abb8b5560680714378f4a910b47dd30352cf0f2e4f809d93edae52f242be2",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.8222,
+        "mae": 12.5617,
+        "rmse": 12.6831,
+        "r2": -4.521204,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.088,
+        "mae": 4.8358,
+        "rmse": 5.4425,
+        "r2": -0.016687,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Shrimp (tiger)",
+      "model_sha256": "b69c8da3a8260751749e11e297323bf1219069d7a1dd77b626a601927c9d87f0",
+      "source_checkpoint_sha256": "57680a904cf20250ed937afb4ce404602b0baaeacb723dec97ca2bb17713f479",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 3.9666,
+        "mae": 24.1589,
+        "rmse": 26.0343,
+        "r2": -74.924004,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 1.5595,
+        "mae": 9.4976,
+        "rmse": 9.9565,
+        "r2": -10.104593,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Squashes",
+      "model_sha256": "92f603c33520b8d9a8abdadc9bb8d62d6033396699b6b399b183f78459a678cf",
+      "source_checkpoint_sha256": "ecb89ca4a1bb04163b6f9328a0e1393a74ef7c7cdd6ffd51de62b1279843aa1c",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 17.0881,
+        "mae": 9.6283,
+        "rmse": 9.844,
+        "r2": -20.652204,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.213,
+        "mae": 1.8482,
+        "rmse": 2.4186,
+        "r2": -0.307092,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Sweet Potato leaves",
+      "model_sha256": "c5a4d714218f52de7aa8429423c210c59158824fc93e3c1a759078972aaba92f",
+      "source_checkpoint_sha256": "6d50a5f5702febe10cf389e3c3a0b3eae89f343a6b0ac2dc5d2c4b31de742738",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.8706,
+        "mae": 5.0218,
+        "rmse": 5.309,
+        "r2": -7.02088,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.3355,
+        "mae": 1.8652,
+        "rmse": 1.934,
+        "r2": -0.064357,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Sweet potatoes",
+      "model_sha256": "8b9a8dd6bb0cf8fca8e56cfc0b65544567ac7fdf8f041eac15d63cb790eb62ae",
+      "source_checkpoint_sha256": "edb92b7868d52f58010a3c3455c59c0e6780ca45b41dc9e106a3e3f4ece998cf",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 2.0629,
+        "mae": 1.5173,
+        "rmse": 2.2896,
+        "r2": -0.394265,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.2058,
+        "mae": 2.3386,
+        "rmse": 3.0379,
+        "r2": -1.454554,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Taro",
+      "model_sha256": "dc8a6c6f660a018a46cea423a7bad8e015a9e14f3bdf05d85c05d5a028fc4acf",
+      "source_checkpoint_sha256": "4f3e3f9fe9ccee1ffabd85c44992f26ca18d8e1da4b2a26ad9ae0b87e79dbb5c",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 19.3365,
+        "mae": 13.7176,
+        "rmse": 13.7631,
+        "r2": -152.270531,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 2.5837,
+        "mae": 1.8133,
+        "rmse": 2.127,
+        "r2": -2.660598,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Tomatoes",
+      "model_sha256": "e45c13b3e0de9e58e69cbe1bebd76ff94b9f4b5a1fa31d7b41c6970ffeaf9440",
+      "source_checkpoint_sha256": "d8a06f0de46b76fbb5b4d5b608315b66ab4e62163851aefae0bc1203b357ae35",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 10.4439,
+        "mae": 7.9181,
+        "rmse": 7.9278,
+        "r2": -1481.196118,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 5.6961,
+        "mae": 4.3185,
+        "rmse": 4.3234,
+        "r2": -439.799864,
+        "n": 3
+      }
+    },
+    {
+      "commodity": "Water spinach",
+      "model_sha256": "8703ced3f96ba93ea9dff0546cfec1dcd01f84dfe9948eb34feb30666fb3a622",
+      "source_checkpoint_sha256": "af42ec58b12f340692035a97ee50afb3eba6e27455b36558237845d29c3ade21",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "target_scaled": true,
+      "target_mode": "absolute",
+      "residual_scale": 1.0,
+      "model": {
+        "mape": 8.4306,
+        "mae": 5.1925,
+        "rmse": 5.2542,
+        "r2": -37.350728,
+        "n": 3
+      },
+      "naive_persistence": {
+        "mape": 3.2637,
+        "mae": 2.0176,
+        "rmse": 2.1888,
+        "r2": -5.655062,
+        "n": 3
+      }
+    }
+  ],
+  "skipped_models": [],
+  "claim_boundary": "This is a recursive out-of-time backtest from the historical forecast origin. It compares the exported graphs with a last-observation persistence forecast; it does not prove future accuracy or suitability for financial decisions."
+}
