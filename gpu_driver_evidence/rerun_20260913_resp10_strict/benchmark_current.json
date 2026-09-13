@@ -1,0 +1,256 @@
+{
+  "schema": "ph-food-price-directml-benchmark-v1",
+  "generated_at": "2026-09-13T09:24:24.012961+00:00",
+  "model": {
+    "commodity": "Rice (regular, milled)",
+    "path": "D:\\ML\\Website\\.onnx_models_release_20260911\\lstm_Rice_(regular,_milled).onnx",
+    "bytes": 845429,
+    "sha256": "51c943ebc7fd79160433931653ad9d7af0f87eac34f1ecf4294b808351009ab2",
+    "input_shape": [
+      "batch",
+      12,
+      6
+    ]
+  },
+  "data": {
+    "rows": 236252,
+    "commodities": 73,
+    "regions": 17,
+    "price_types": 3,
+    "units": [
+      "750 ML",
+      "KG",
+      "Unit"
+    ],
+    "currencies": [
+      "PHP"
+    ],
+    "mixed_unit_commodities": 0,
+    "min_date": "2000-01-15",
+    "max_date": "2026-06-15",
+    "sha256": "9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124"
+  },
+  "runtime": {
+    "python": "3.13.7",
+    "onnxruntime": "1.24.4",
+    "available_providers": [
+      "DmlExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "directml_available": true,
+    "device_id": 0,
+    "truth_note": "DirectML availability proves a usable provider. Per-node profiling is required before claiming DirectML device placement for a specific model graph."
+  },
+  "sessions": {
+    "gpu": [
+      "DmlExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "cpu": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "profile": {
+    "node_events": 18,
+    "by_provider": {
+      "DmlExecutionProvider": 15,
+      "CPUExecutionProvider": 3
+    },
+    "operations": {
+      "Shape": 1,
+      "Gather": 2,
+      "Unsqueeze": 1,
+      "Concat": 1,
+      "ConstantOfShape": 1,
+      "Slice": 2,
+      "Transpose": 2,
+      "LSTM": 2,
+      "Squeeze": 3,
+      "Gemm": 2,
+      "Relu": 1
+    },
+    "nodes": [
+      {
+        "name": "/lstm/Shape_kernel_time",
+        "op_name": "Shape",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 2987
+      },
+      {
+        "name": "/lstm/Gather_kernel_time",
+        "op_name": "Gather",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 18
+      },
+      {
+        "name": "/lstm/Unsqueeze_kernel_time",
+        "op_name": "Unsqueeze",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 20
+      },
+      {
+        "name": "/lstm/Concat_kernel_time",
+        "op_name": "Concat",
+        "provider": "CPUExecutionProvider",
+        "duration_us": 798
+      },
+      {
+        "name": "/lstm/ConstantOfShape_kernel_time",
+        "op_name": "ConstantOfShape",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 13045
+      },
+      {
+        "name": "/lstm/Slice_3_kernel_time",
+        "op_name": "Slice",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 7380
+      },
+      {
+        "name": "/lstm/Slice_1_kernel_time",
+        "op_name": "Slice",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 820
+      },
+      {
+        "name": "/lstm/Transpose_kernel_time",
+        "op_name": "Transpose",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 6293
+      },
+      {
+        "name": "/lstm/LSTM_kernel_time",
+        "op_name": "LSTM",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 48398
+      },
+      {
+        "name": "/lstm/Squeeze_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 801
+      },
+      {
+        "name": "/lstm/LSTM_1_kernel_time",
+        "op_name": "LSTM",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 9277
+      },
+      {
+        "name": "/lstm/Squeeze_1_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 42
+      },
+      {
+        "name": "/lstm/Transpose_1_kernel_time",
+        "op_name": "Transpose",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 119
+      },
+      {
+        "name": "/Gather_kernel_time",
+        "op_name": "Gather",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 991
+      },
+      {
+        "name": "/head/head.0/Gemm_kernel_time",
+        "op_name": "Gemm",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 2159
+      },
+      {
+        "name": "/head/head.1/Relu_kernel_time",
+        "op_name": "Relu",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 3359
+      },
+      {
+        "name": "/head/head.3/Gemm_kernel_time",
+        "op_name": "Gemm",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 951
+      },
+      {
+        "name": "/Squeeze_kernel_time",
+        "op_name": "Squeeze",
+        "provider": "DmlExecutionProvider",
+        "duration_us": 53
+      }
+    ]
+  },
+  "native_gpu_verified": true,
+  "native_gpu_verification": {
+    "criterion": "At least one LSTM node must be profiled and every profiled LSTM node must be placed on DmlExecutionProvider.",
+    "profiled_lstm_nodes": 2,
+    "directml_lstm_nodes": 2,
+    "directml_node_events": 15,
+    "verified": true
+  },
+  "iterations_per_batch": 30,
+  "warmup_iterations": 10,
+  "results": [
+    {
+      "batch_size": 1,
+      "gpu_directml": {
+        "median_ms": 0.9609,
+        "p95_ms": 1.2401,
+        "throughput_items_s": 1040.69
+      },
+      "cpu": {
+        "median_ms": 0.1624,
+        "p95_ms": 0.2305,
+        "throughput_items_s": 6157.64
+      },
+      "gpu_speedup_vs_cpu": 0.169,
+      "max_abs_output_difference": 1.2e-07
+    },
+    {
+      "batch_size": 8,
+      "gpu_directml": {
+        "median_ms": 19.8455,
+        "p95_ms": 21.6958,
+        "throughput_items_s": 403.11
+      },
+      "cpu": {
+        "median_ms": 0.2828,
+        "p95_ms": 2.2334,
+        "throughput_items_s": 28288.54
+      },
+      "gpu_speedup_vs_cpu": 0.014,
+      "max_abs_output_difference": 2.4e-07
+    },
+    {
+      "batch_size": 32,
+      "gpu_directml": {
+        "median_ms": 19.0447,
+        "p95_ms": 24.8144,
+        "throughput_items_s": 1680.26
+      },
+      "cpu": {
+        "median_ms": 0.4725,
+        "p95_ms": 0.7997,
+        "throughput_items_s": 67724.87
+      },
+      "gpu_speedup_vs_cpu": 0.025,
+      "max_abs_output_difference": 2.4e-07
+    },
+    {
+      "batch_size": 128,
+      "gpu_directml": {
+        "median_ms": 19.8053,
+        "p95_ms": 21.4574,
+        "throughput_items_s": 6462.93
+      },
+      "cpu": {
+        "median_ms": 1.5541,
+        "p95_ms": 3.4893,
+        "throughput_items_s": 82360.13
+      },
+      "gpu_speedup_vs_cpu": 0.078,
+      "max_abs_output_difference": 1.2e-07
+    }
+  ],
+  "claim_boundary": "This measures warmed ONNX LSTM inference on one real project graph. It does not measure training, end-to-end CSV processing, every Python operation, or other GPUs."
+}

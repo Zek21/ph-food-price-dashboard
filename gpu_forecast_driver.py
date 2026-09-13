@@ -848,6 +848,28 @@ def _profile_placement(session, model_input: np.ndarray) -> dict:
     }
 
 
+def _native_gpu_verification(placement: dict) -> dict:
+    """Require the model's actual LSTM operators, not just any node, to run on DirectML."""
+    lstm_nodes = [
+        node for node in placement.get("nodes", []) if node.get("op_name") == "LSTM"
+    ]
+    dml_lstm_nodes = [
+        node for node in lstm_nodes if node.get("provider") == DML_PROVIDER
+    ]
+    directml_node_events = int(placement.get("by_provider", {}).get(DML_PROVIDER, 0))
+    verified = bool(lstm_nodes) and len(dml_lstm_nodes) == len(lstm_nodes)
+    return {
+        "criterion": (
+            "At least one LSTM node must be profiled and every profiled LSTM node must "
+            "be placed on DmlExecutionProvider."
+        ),
+        "profiled_lstm_nodes": len(lstm_nodes),
+        "directml_lstm_nodes": len(dml_lstm_nodes),
+        "directml_node_events": directml_node_events,
+        "verified": verified,
+    }
+
+
 def benchmark(model_path: Path, data_path: Path, output_path: Path, *,
               batch_sizes: tuple[int, ...] = (1, 8, 32, 128), iterations: int = 100) -> dict:
     runtime = probe()
@@ -868,9 +890,13 @@ def benchmark(model_path: Path, data_path: Path, output_path: Path, *,
     next_date = context["last_date"] + pd.DateOffset(months=1)
     base = _window(normalized, next_date, context)[None, :, :]
     placement = _profile_placement(profile_session, base)
-    native_gpu_ops = placement["by_provider"].get(DML_PROVIDER, 0)
-    if native_gpu_ops <= 0:
-        raise RuntimeError("DirectML session bound, but profiling found zero DirectML node events")
+    gpu_verification = _native_gpu_verification(placement)
+    if not gpu_verification["verified"]:
+        raise RuntimeError(
+            "DirectML session bound, but LSTM placement proof failed: "
+            f"{gpu_verification['directml_lstm_nodes']}/"
+            f"{gpu_verification['profiled_lstm_nodes']} profiled LSTM nodes ran on DirectML"
+        )
 
     gpu = _session(model_path, prefer_gpu=True)
     cpu = _session(model_path, prefer_gpu=False)
@@ -921,7 +947,8 @@ def benchmark(model_path: Path, data_path: Path, output_path: Path, *,
         "runtime": runtime,
         "sessions": {"gpu": gpu.get_providers(), "cpu": cpu.get_providers()},
         "profile": placement,
-        "native_gpu_verified": native_gpu_ops > 0,
+        "native_gpu_verified": gpu_verification["verified"],
+        "native_gpu_verification": gpu_verification,
         "iterations_per_batch": iterations,
         "warmup_iterations": 10,
         "results": rows,

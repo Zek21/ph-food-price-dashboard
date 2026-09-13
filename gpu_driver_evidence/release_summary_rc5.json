@@ -1,0 +1,43 @@
+{
+  "schema": "ph-food-price-gpu-driver-release-summary-v1",
+  "release": "gpu-driver-v1.0.0-rc5",
+  "base_tag": "gpu-driver-v1.0.0-rc4",
+  "base_commit": "9eeda76268e78366dff15b2de90ef0c12d01791c",
+  "machine": "ZEKE",
+  "gpu": "AMD Radeon RX 6600",
+  "tests": {
+    "release_selection": "29 passed, 7 skipped",
+    "directml_driver_focused": "11 passed"
+  },
+  "native_gpu": {
+    "verified": true,
+    "criterion": "At least one LSTM node is profiled and every profiled LSTM node is placed on DmlExecutionProvider.",
+    "profiled_node_events": 18,
+    "directml_node_events": 15,
+    "cpu_node_events": 3,
+    "profiled_lstm_nodes": 2,
+    "directml_lstm_nodes": 2,
+    "benchmark_sha256": "fc60f74a9414213a1dcb50125c93494db913554a53a7c02ebd11fdc17e4ced1c",
+    "model_sha256": "51c943ebc7fd79160433931653ad9d7af0f87eac34f1ecf4294b808351009ab2",
+    "performance_claim": "No acceleration claim: CPU median latency was lower at all tested batch sizes."
+  },
+  "validation": {
+    "status": "withheld_failed_validation",
+    "model_count": 59,
+    "points": 177,
+    "model_mape": 7.2264,
+    "persistence_mape": 4.3018,
+    "model_mae": 8.5919,
+    "persistence_mae": 5.1679,
+    "model_better_commodities": 14,
+    "model_worse_commodities": 45,
+    "validation_sha256": "e674a6a7c244389bb8a76ea87d6f5afb98e19bb3c348f89d98ca645f005af334"
+  },
+  "predictions": {
+    "forecast_points": 1062,
+    "publication": "withheld",
+    "release_asset": false,
+    "local_receipt_sha256": "3eece032ed656199750dc15c7da45b70988f695297e2701603a81d1d95d56e2f"
+  },
+  "claim_boundary": "Native DirectML placement is verified for both profiled LSTM operators in the exact benchmark graph. This is not GPU-only execution, training-on-GPU, or a forecast-accuracy claim."
+}

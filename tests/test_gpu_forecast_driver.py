@@ -97,3 +97,36 @@ def test_residual_decoder_applies_internal_validation_scale():
         raw_prediction=0.5, normalized_last=1.0, scaler_mean=10.0, scaler_scale=4.0, meta=meta
     )
     assert prediction == 15.0
+
+
+
+def test_native_gpu_verification_requires_lstm_operator_placement():
+    placement = {
+        "by_provider": {driver.DML_PROVIDER: 2, driver.CPU_PROVIDER: 1},
+        "nodes": [
+            {"op_name": "LSTM", "provider": driver.DML_PROVIDER},
+            {"op_name": "Relu", "provider": driver.DML_PROVIDER},
+            {"op_name": "Gather", "provider": driver.CPU_PROVIDER},
+        ],
+    }
+    proof = driver._native_gpu_verification(placement)
+    assert proof["verified"] is True
+    assert proof["profiled_lstm_nodes"] == 1
+    assert proof["directml_lstm_nodes"] == 1
+
+
+def test_native_gpu_verification_rejects_lstm_cpu_fallback():
+    placement = {
+        "by_provider": {driver.DML_PROVIDER: 4, driver.CPU_PROVIDER: 1},
+        "nodes": [
+            {"op_name": "Shape", "provider": driver.DML_PROVIDER},
+            {"op_name": "Relu", "provider": driver.DML_PROVIDER},
+            {"op_name": "Gemm", "provider": driver.DML_PROVIDER},
+            {"op_name": "Squeeze", "provider": driver.DML_PROVIDER},
+            {"op_name": "LSTM", "provider": driver.CPU_PROVIDER},
+        ],
+    }
+    proof = driver._native_gpu_verification(placement)
+    assert proof["verified"] is False
+    assert proof["profiled_lstm_nodes"] == 1
+    assert proof["directml_lstm_nodes"] == 0
