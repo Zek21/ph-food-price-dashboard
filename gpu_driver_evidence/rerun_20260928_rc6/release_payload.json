@@ -44,6 +44,8 @@
     "tests/test_gpu_gate_paired_significance.py",
     "tests/test_gpu_validation_gate.py",
     "SHA256SUMS-rc6.txt",
-    "gpu_driver_evidence/rerun_20260928_rc6/release_payload.json"
+    "gpu_driver_evidence/rerun_20260928_rc6/release_payload.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/codex_doer_report.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/publication_after.json"
   ]
 }

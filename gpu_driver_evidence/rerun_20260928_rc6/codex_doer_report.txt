@@ -1,0 +1,97 @@
+AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS
+Agent-driven rc6 continuation on ZEKE, 2026-09-28 Asia/Manila. No Gemini or delegated agents used.
+
+VERIFIED - Rollback/identity captured before the first task mutation:
+  rollback_identity_20260928T062736583.json, SHA256 4512dd0846d76e46896c96791b32a4ca53fa47901b4cdaf1603300267f8cbb92
+  Base HEAD 1a5130fb8b127b43ac9e46255947f4b4ddca084d; branch release/gpu-driver-v1.0.0-rc6.
+  Receipt contains branch/status/remotes/tags and hashes of all tracked files.
+  The first gh release lookup hit a sandbox socket denial. Elevated read-only lookup succeeded;
+  github_identity_before.json preserves the existing public release. No live auth/network blocker remained.
+
+VERIFIED AC1 - Real project ONNX LSTM native DirectML placement:
+  2/2 profiled LSTM events on DmlExecutionProvider; 15/18 total events on DirectML; 3 on CPU.
+  AMD Radeon RX 6600; driver 32.0.21030.2001; Python 3.13.7; ONNX Runtime 1.24.4.
+  Per-node names, operations and providers are retained in benchmark_current.json.
+  Batch-1 medians: DirectML 1.0352 ms, CPU 0.1740 ms. CPU faster at all four batches.
+  No GPU-only, GPU-speedup, or PyTorch GPU-training claim.
+
+VERIFIED AC2 - Fresh leakage-safe validation and unchanged authoritative publication gate:
+  59 models, 177 April-June 2026 out-of-time points; explicit training cutoff 2026-03.
+  Model/persistence MAPE 3.9927/4.3018; MAE 5.1355/5.1679.
+  MAPE CI [-0.758292,+0.099301]; MAE CI [-0.684032,+0.651491].
+  Fish (threadfin bream) MAE ratio 16.174 exceeds unchanged 3.0 cap.
+  Gate is withheld_failed_validation. This failed forecast gate is not a release-code test failure.
+
+VERIFIED AC3 - Generated and independently reopened only the private current artifact:
+  D:\ML\AR20260720_private_20260928_rc6\predictions_current.json
+  59 model receipts, 59 forecast maps, 18 points each, 1062 points, zero skipped models.
+  SHA256 09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58.
+  Public private_prediction_audit.json contains counts/hashes/gate metadata and no forecast values.
+
+VERIFIED AC4 - Independently recomputed carried-forward six-origin diagnostic/alignment:
+  354/354 count matches; 354/354 naive-MAE pairs within 1%; 3717 pooled points.
+  Pooled MAE persistence 10.3057, AR(1) 10.6965, LSTM 10.1478.
+  Pooled MAPE persistence 8.1550, AR(1) 8.8216, LSTM 8.1006.
+  Supportive only, overlapping horizons; not the publication gate. No retraining/reselection.
+
+VERIFIED AC5 - Focused 85 passed, 24 skipped, 1 warning; full repo 228 passed, 24 skipped, 1 warning.
+  Initial focused run: 41 passed, 24 skipped, 9 temporary-folder permission errors (retained).
+  Initial full run: 226 passed, 24 skipped, 1 hard-coded checkout-name failure (retained).
+  Fixed test to resolve its actual script directory; added an exact current rc6 gate regression test.
+  No production gate or model code changed. Final full suite took 153.56 seconds.
+  OPEN coverage: 24 tests require absent historical receipts. They remain explicitly skipped.
+  PyTorch scalar-conversion warning is retained. No test failures are hidden.
+
+VERIFIED AC6 - Fresh RELEASE_NOTES_RC6.md, GPU_DRIVER_RC6_REPRODUCIBILITY.md,
+  INVESTOR_CAMPAIGN_RC6.md, release_truth_manifest.json and SHA256SUMS-rc6.txt agree.
+  build_release_receipts.py generated the docs/claims from fresh receipts and passed-test logs.
+  SHA256SUMS hashes payload bytes; excludes itself and release_payload.json to avoid self-reference.
+
+VERIFIED AC7 (current ticket payload) - No current forward artifact in Git index, staged changes,
+  public evidence directory, allowlisted ZIP or release assets. All ZIP member bytes checked.
+  Legacy GPU/LSTM forward sections also removed at the new branch tip in three tracked JSON files.
+  OPEN global-history boundary: original public tag/source archives and unrelated classical dashboard
+  forecasts remain. No claim is made that every historical/public repo file is forecast-free.
+  No history rewrite, unrelated worktree mutation, other-agent process mutation or credential output.
+
+VERIFIED AC8 - Commit 4db677732592256071158d91f81d81463b847306 pushed and independently read back
+  from origin/release/gpu-driver-v1.0.0-rc6. Existing rc6 release refreshed and published as prerelease:
+  https://github.com/Zek21/ph-food-price-dashboard/releases/tag/gpu-driver-v1.0.0-rc6
+  All initial 12 uploaded asset digests match local SHA256; release body readback matches notes plus
+  audited commit link. publication_after.json preserves that independent API/ref readback.
+  Existing public annotated tag 50f77fcd35cda0b3e6ee903506991de7502ce7d1 remains at base 1a5130f;
+  it was not force-moved. Release notes explicitly identify its source archive as historical.
+
+VERIFIED AC9 - Readbacks after mutations covered git status/log, file hashes, remote refs and release
+  state. This report and publication_after.json are archived in a follow-up evidence commit and
+  included in the final checksum list and release bundle. Final push/upload is independently checked.
+
+EXACT REPRODUCTION COMMANDS (cwd D:\ML\Website-rc6; PYTHONDONTWRITEBYTECODE=1):
+  D:\ML\Website\.venv-directml\Scripts\python.exe gpu_forecast_driver.py benchmark --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --model "D:\ML\Website\.onnx_models_oot_202603\lstm_Rice_(regular,_milled).onnx" --evidence gpu_driver_evidence/rerun_20260928_rc6 --iterations 100
+    exit 0; benchmark_current.json and benchmark_stdout/stderr.txt.
+  D:\ML\Website\.venv-directml\Scripts\python.exe gpu_forecast_driver.py validate --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --models D:\ML\Website\.onnx_models_oot_202603 --evidence gpu_driver_evidence/rerun_20260928_rc6
+    exit 0; validation_current.json; authoritative gate passed=false.
+  D:\ML\Website\.venv-directml\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py predictions
+    exit 0; hashes validated inputs; driver generate_predictions writes only private path; reopens/checks counts.
+  D:\ML\env\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py diagnostic
+    exit 0; recomputed 354 aligned pairs and pooled metrics; source hashes preserved.
+  D:\ML\env\Scripts\python.exe -m pytest -q -ra -p no:cacheprovider --basetemp D:\ML\Website-rc6\.pytest_rc6_focused_20260928_0638 tests/test_gpu_forecast_driver.py tests/test_gpu_validation_gate.py tests/test_gpu_gate_paired_significance.py tests/test_gpu_window_alignment.py tests/test_gpu_forecaster_v2_leakage.py tests/test_per_commodity_eligibility.py tests/test_per_commodity_fallback_selector.py tests/test_regional_aggregation_raises_snr.py tests/test_rolling_origin_backtest.py tests/test_lstm_release_train.py tests/test_daily_update.py
+    exit 0; 85 passed, 24 skipped, 1 warning in 10.25s.
+  D:\ML\env\Scripts\python.exe -m pytest -q -ra -p no:cacheprovider --basetemp D:\ML\Website-rc6\.pytest_rc6_broad_final_20260928_0640 tests
+    exit 0; 228 passed, 24 skipped, 1 warning in 153.56s.
+  D:\ML\env\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/build_release_receipts.py
+    exit 0; docs/manifest/checksums/allowlist generated without private prediction values.
+  git diff --cached --check -- . ':!gpu_driver_evidence/rerun_20260928_rc6/*.txt'
+    exit 0. Unfiltered check reports trailing whitespace in retained raw pytest failure output only.
+  git commit -m "release: refresh rc6 native DirectML proof and private forecast audit"
+    exit 0; 4db677732592256071158d91f81d81463b847306; clean status afterward.
+  git push origin HEAD:refs/heads/release/gpu-driver-v1.0.0-rc6
+    exit 0; remote branch independently matched committed HEAD.
+  gh release upload gpu-driver-v1.0.0-rc6 RELEASE_NOTES_RC6.md GPU_DRIVER_RC6_REPRODUCIBILITY.md INVESTOR_CAMPAIGN_RC6.md SHA256SUMS-rc6.txt gpu_driver_evidence/release_summary_rc6.json gpu_driver_evidence/rc6-audit-20260928.zip gpu_driver_evidence/rerun_20260928_rc6/benchmark_current.json gpu_driver_evidence/rerun_20260928_rc6/validation_current.json gpu_driver_evidence/rerun_20260928_rc6/harness_alignment.json gpu_driver_evidence/rerun_20260928_rc6/private_prediction_audit.json gpu_driver_evidence/rerun_20260928_rc6/release_truth_manifest.json gpu_driver_evidence/rerun_20260928_rc6/release_payload.json --clobber
+    exit 0; all 12 live asset digests matched.
+  gh release edit gpu-driver-v1.0.0-rc6 --title "GPU Driver v1.0.0-rc6 - native DirectML proof, forecasts withheld" --notes-file C:\Users\exzil\AppData\Local\Temp\AR20260720_rc6_release_body_20260928.txt
+    exit 0; body independently read back; isDraft=false, isPrerelease=true.
+  gh release view gpu-driver-v1.0.0-rc6 --json tagName,targetCommitish,isDraft,isPrerelease,url,assets,body
+    exit 0; saved in publication_after.json.
+  git ls-remote origin refs/heads/release/gpu-driver-v1.0.0-rc6 refs/tags/gpu-driver-v1.0.0-rc6 'refs/tags/gpu-driver-v1.0.0-rc6^{}'
+    exit 0; branch matches audit commit, published tag unchanged.
