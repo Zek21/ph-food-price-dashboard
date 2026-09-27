@@ -40,3 +40,5 @@ gpu_driver_evidence/*.zip
 .onnx_models_*/
 gpu_driver_evidence/predictions_current.json
 gpu_driver_evidence/**/predictions_current.json
+.pytest_cache/
+.pytest_rc6_*/

@@ -1,5 +1,6 @@
 {
-  "schema": "skynet.ar20260720.harness-alignment.v1",
+  "generated_at": "2026-09-27T22:31:24.623017+00:00",
+  "method": "Recomputed from the carried-forward six-origin receipts; no retraining or origin reselection.",
   "pairs": 354,
   "origins": [
     "2024-12",
@@ -9,13 +10,29 @@
     "2025-12",
     "2026-03"
   ],
+  "points": 3717,
   "point_count_matches": 354,
-  "point_count_match_fraction": 1.0,
-  "median_abs_naive_mae_diff": 2.5303449999292127e-05,
   "within_1pct_naive_mae": 354,
-  "within_1pct_fraction": 1.0,
+  "median_abs_naive_mae_diff": 2.5303449999292127e-05,
   "max_abs_naive_mae_diff": 5.000000000165983e-05,
-  "source_ar1": "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json",
-  "source_validation_dir": "gpu_driver_evidence/rolling_origin_20260912",
-  "verdict": "aligned"
+  "pooled": {
+    "naive_mae": 10.305705946217918,
+    "ar1_mae": 10.696542033030347,
+    "lstm_mae": 10.147793704600483,
+    "naive_mape": 8.154967186953188,
+    "ar1_mape": 8.821579150579662,
+    "lstm_mape": 8.100557869249394
+  },
+  "source_hashes": {
+    "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json": "24abc102b170ca1c9f1ddd9ad8a8b65fefb3b0e5561f6f67ba788fd6fd9f2153",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202412.json": "4bb905d71e7b485538f971ee1d27ee535f4ccb9367e5f872235c612a8a8b7319",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202503.json": "e8828951287a0a916ab9eaf22d8fb36f016766b5e49748d4d58e1bd91b8f4232",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202506.json": "de9b00b9882467bdf9c0995d0899b51094f40507df6aea763e1c479344a0e5cd",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202509.json": "16de17699a899693f6c469932fd491b116a5a3f2b7cfa3055c86262b92b5b83b",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202512.json": "5c2b0940ceedd364a38e24cd7e5cea95d2bebb7f467e680a81597bb6f0ab09ae",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202603.json": "e209ebe9cc3c8a2d2b9aa341445c5edd230556d1685877b320b38b187eeca516"
+  },
+  "verdict": "aligned",
+  "publication_gate": false,
+  "claim_boundary": "Supportive only: overlapping horizons; current validation_current.json remains the publication gate."
 }

@@ -36,6 +36,25 @@ ROOT = Path(__file__).resolve().parent.parent
 LIVE_VALIDATION = ROOT / "gpu_driver_evidence" / "rerun_20260912" / "validation_current.json"
 
 
+def test_rc6_current_receipt_reproduces_the_authoritative_withheld_gate():
+    """Exercise the shipped rc6 receipt even when older optional receipts are absent."""
+    path = ROOT / "gpu_driver_evidence" / "rerun_20260928_rc6" / "validation_current.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    assert document["cutoff_proof"]["training_cutoff"] < document["validation_start"]
+    assert document["eligible_model_count"] == len(document["models"]) == 59
+    assert document["model"]["n"] == document["naive_persistence"]["n"] == 177
+    gate = driver._publication_gate(
+        document["model"], document["naive_persistence"],
+        model_count=len(document["models"]), per_commodity=document["models"])
+    assert gate == document["publication_gate"]
+    assert gate["passed"] is False
+    for metric in ("mae", "mape"):
+        low, high = gate["paired_significance"][metric]["ci95"]
+        assert low < 0 < high
+    assert gate["requirements"]["maximum_commodity_mae_ratio"] == 3.0
+    assert len(gate["per_commodity_guard"]["flagged"]) == 1
+
+
 def _live_models() -> list[dict]:
     if not LIVE_VALIDATION.is_file():
         pytest.skip("rerun_20260912 validation receipt not present")

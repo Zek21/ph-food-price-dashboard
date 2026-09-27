@@ -1,0 +1,10 @@
+{
+  "checksum_entries_verified": 40,
+  "allowlist_files_verified": 42,
+  "current_forward_artifact_tracked": false,
+  "current_forward_values_in_release_payload": false,
+  "legacy_gpu_lstm_values_at_new_tip": false,
+  "historical_public_git_and_classical_forecasts_remain": true,
+  "gate_status": "withheld_failed_validation",
+  "scope": "The current 59-model rerun values are absent from the public payload and Git index. Legacy GPU/LSTM forward sections were removed from the new branch tip. Existing published Git history/tag archives and unrelated classical dashboard forecasts are not rewritten; this is not a claim that the entire historical repository contains no forecasts."
+}

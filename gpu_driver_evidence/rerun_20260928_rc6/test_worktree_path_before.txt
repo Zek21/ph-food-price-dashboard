@@ -1,0 +1,20 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________ TestConfiguration.test_base_dir_is_website __________________
+
+self = <tests.test_daily_update.TestConfiguration object at 0x00000212753B48D0>
+
+    def test_base_dir_is_website(self):
+        """BASE_DIR should point to the Website directory."""
+        du = _import_daily_update()
+>       assert du.BASE_DIR.name == "Website"
+E       AssertionError: assert 'Website-rc6' == 'Website'
+E         
+E         - Website
+E         + Website-rc6
+E         ?        ++++
+
+tests\test_daily_update.py:409: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_daily_update.py::TestConfiguration::test_base_dir_is_website
+1 failed, 33 deselected in 0.90s

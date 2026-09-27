@@ -1,0 +1,476 @@
+{
+  "ticket": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "captured_at": "2026-09-28T06:27:38.1973465+08:00",
+  "host": "ZEKE",
+  "cwd": "D:\\ML\\Website-rc6",
+  "head": "1a5130fb8b127b43ac9e46255947f4b4ddca084d",
+  "branch": "release/gpu-driver-v1.0.0-rc6",
+  "status": [
+    "warning: could not open directory '.pytest_cache/': Permission denied"
+  ],
+  "remotes": [
+    "origin\thttps://github.com/Zek21/ph-food-price-dashboard.git (fetch)",
+    "origin\thttps://github.com/Zek21/ph-food-price-dashboard.git (push)"
+  ],
+  "tags": [
+    "c8a6bd558cb9a16f1611e74f74d7968c503ca94f refs/tags/gpu-driver-v1.0.0-rc1",
+    "8d5ea167ae8b6c26ed85d7d9ea254982a27215f5 refs/tags/gpu-driver-v1.0.0-rc2",
+    "739394c45b4d7b4e0edeea05d8df462e989c5b89 refs/tags/gpu-driver-v1.0.0-rc3",
+    "fecc5b4beb16a2a0f09ac764a2ce975c2fcd57f7 refs/tags/gpu-driver-v1.0.0-rc4",
+    "9a98f828d6ec4e91e415b4f8f8cbfbb36f648d84 refs/tags/gpu-driver-v1.0.0-rc5",
+    "50f77fcd35cda0b3e6ee903506991de7502ce7d1 refs/tags/gpu-driver-v1.0.0-rc6"
+  ],
+  "rc6_tag": [
+    "tag gpu-driver-v1.0.0-rc6",
+    "Tagger:     Exzil Salazar Calanza <Zek21@users.noreply.github.com>",
+    "TaggerDate: Mon Sep 28 06:01:20 2026 +0800",
+    "",
+    "GPU Driver v1.0.0-rc6: strict DirectML proof, forecasts withheld",
+    "",
+    "commit 1a5130fb8b127b43ac9e46255947f4b4ddca084d",
+    "Author:     Exzil Salazar Calanza <Zek21@users.noreply.github.com>",
+    "AuthorDate: Mon Sep 28 06:00:03 2026 +0800",
+    "Commit:     Exzil Salazar Calanza <Zek21@users.noreply.github.com>",
+    "CommitDate: Mon Sep 28 06:01:08 2026 +0800",
+    "",
+    "    release: rc6 strict DirectML proof and withheld forecast receipts"
+  ],
+  "releases": [
+    "Post \"https://api.github.com/graphql\": dial tcp 20.205.243.168:443: connectex: An attempt was made to access a socket in a way forbidden by its access permissions."
+  ],
+  "release_query_exit": 1,
+  "tracked_file_hashes": [
+    {
+      "path": ".github/copilot-instructions.md",
+      "sha256": "84a9e050febc4b30f33db982bb5a5d07ff568044971d173138574b8db2990f5a"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "6bbc0ef5adf7de78a030da23cc8b90f4b841093c53ccb33aeb7c3e6f872d81fc"
+    },
+    {
+      "path": ".last_data_hash",
+      "sha256": "3a768f34ecb3e988059beb6e9df562253558db20a375881a971ba64bfb1c83b2"
+    },
+    {
+      "path": "AMD_ML_LIBRARIES.md",
+      "sha256": "db7f4a737e315d4b4c1697bde07ff06aae78b426d47d8b00788f152aa16293bb"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "88b1b040a53701e7b8e9c64e41987a4b5c5c4f06f2bdf774176eaad8ce42fa51"
+    },
+    {
+      "path": "ENHANCEMENTS.md",
+      "sha256": "5be843b8e2efc7e629a0497b168b6053823257ec70916ff31f54209915658bee"
+    },
+    {
+      "path": "GPU_DRIVER.md",
+      "sha256": "21d8dd7ca7dfc2a7145af4ec60a72918047f5520c4ccf88c5a5447e55145a88b"
+    },
+    {
+      "path": "GPU_DRIVER_RC6_REPRODUCIBILITY.md",
+      "sha256": "2238416dccd9ff2bbef1cc6e0e89af227201493eebd434bfbef870452647f5be"
+    },
+    {
+      "path": "IMPLEMENTATION_SUMMARY.md",
+      "sha256": "d2d385e530802f223d66f36491f9f35dec81c86ff2d4e89c499c701c07312850"
+    },
+    {
+      "path": "IMPLEMENTATION_SUMMARY_FIXES.md",
+      "sha256": "604a06da0d96714c785217879ea5bf8dc37fd7593ad0face4a66b4e67783635d"
+    },
+    {
+      "path": "INVESTOR_CAMPAIGN_RC6.md",
+      "sha256": "12d4aa3b053f536599eb54ab62825ce31778190d4e9830e0d2d4745dd8e621f6"
+    },
+    {
+      "path": "PROPOSAL_DIRECTML_INTERPRETER_AND_BASELINE_GATE_2026_07_20.md",
+      "sha256": "7995a058d77963b0de228f3aaabb348d56766c2122382920ba2d65710945ac7c"
+    },
+    {
+      "path": "QUICK_START.md",
+      "sha256": "619972569692d657b04a34b74fe00350c08c8e931932da0fb500bcf0eed9e928"
+    },
+    {
+      "path": "README.md",
+      "sha256": "9000c63353a1449ccf90a0526df22928337faef3543be077f5e9f08a31db7f81"
+    },
+    {
+      "path": "README_ENHANCED.md",
+      "sha256": "89f59973e86a6b9412ad7afe5bdf6748276fcb8b4f568c5c8cc967423ba446a0"
+    },
+    {
+      "path": "RELEASE_NOTES_GPU_DRIVER_V1.0.0.md",
+      "sha256": "28c301eb29f6c3845e2ee83e9f3c9d16a390c0e42ce71174e77ffe5f158585e2"
+    },
+    {
+      "path": "RELEASE_NOTES_GPU_DRIVER_V1.0.0_RC2.md",
+      "sha256": "b2c9deaaabd476d092687012768e606f021f95f968fdb51dba701d62a2077da6"
+    },
+    {
+      "path": "RELEASE_NOTES_RC6.md",
+      "sha256": "ccfa4e614dcb18353fcf8dcbeb068f53b3ecfe30fd808f9219e00fbe195279ed"
+    },
+    {
+      "path": "SHA256SUMS-rc6.txt",
+      "sha256": "0dcba48de61fdd3def8f60efb573d0033be499dc27506df5e5522ebaa14291d7"
+    },
+    {
+      "path": "TROUBLESHOOTING.md",
+      "sha256": "9af87eddb6f05534b09cc41a672214e2eccdc1c10a3a46a4b88276fd058449e6"
+    },
+    {
+      "path": "alerts.json",
+      "sha256": "6d84fe8e04a9dae6119dd3a3e1582bfbd95e9437fa3b48d5d24e422ba07c29c2"
+    },
+    {
+      "path": "api_server.py",
+      "sha256": "b6ccea1f5f0b728e5cd9fc58d36b6699607a9c99db3f8005cfc38f3a75429267"
+    },
+    {
+      "path": "blog_amd_gpu_section.html",
+      "sha256": "07c23a544cf3cc0bacb05f30b7bc5e758e30d79cc96eab1a8492a12f716b3522"
+    },
+    {
+      "path": "build_dashboard.py",
+      "sha256": "228d4aaa306019bbf60dc4f61a13ded933bdbde32d6caf1c17611d83d6f2c36d"
+    },
+    {
+      "path": "climate_scenarios.json",
+      "sha256": "7ab548d225996a8626d538d6e2e5f0fa4edf49364a19da131468ac74f5b42dc7"
+    },
+    {
+      "path": "climate_scenarios.py",
+      "sha256": "091cdc7d2aad022f5f48800771de02af27ae80e7d6d0e99eee2138f0744ec45d"
+    },
+    {
+      "path": "comparison.html",
+      "sha256": "db881b2d919ab1c80943b7029e80312c2e92da95b363b2ad6e9bfed4cffef0a3"
+    },
+    {
+      "path": "comparison_enhanced.html",
+      "sha256": "b7ca9771c0a3ec87a9000b9afa3e0136ca1b84bcca23ff237d23e8a037a2b237"
+    },
+    {
+      "path": "comparison_original_backup.html",
+      "sha256": "b528bae64893051d5574a3ee5220fbef34f17aa1737e0705c0901bd6d0e8fd04"
+    },
+    {
+      "path": "daily_update.py",
+      "sha256": "89b92e70b42b557ac444eddfd228f05c48d47942c99cd8a81fb5545fc55e6e17"
+    },
+    {
+      "path": "dashboard.html",
+      "sha256": "e33b64908fa2f4f117cbb77b88135411b9dfee89d648d105f2c1f6786e028cf9"
+    },
+    {
+      "path": "dashboard_data.json",
+      "sha256": "da4c45c9a515651737b4002b9c47b599e1679753b9a69956f0d09483d61751f6"
+    },
+    {
+      "path": "dashboard_enhanced.html",
+      "sha256": "f421335b97965d71c8138e82f921f92f9b132d829e73ad750ec1b887ea25caf1"
+    },
+    {
+      "path": "dashboard_original_backup.html",
+      "sha256": "e33b64908fa2f4f117cbb77b88135411b9dfee89d648d105f2c1f6786e028cf9"
+    },
+    {
+      "path": "data_quality.html",
+      "sha256": "ffa35e8c8003ac6a0d87327b173c1f06902e9d8e5e434989ff66239a4415ddcd"
+    },
+    {
+      "path": "early_warning.html",
+      "sha256": "34474f2a09089e8de6d38cd06df02e2a5050168551d2bf4b2908d8fffa911c7e"
+    },
+    {
+      "path": "early_warning.py",
+      "sha256": "19ad0c4a49136ae90de054bfc9521c217ccb4b83f63e8a98d7dd5a81bd92b574"
+    },
+    {
+      "path": "ensemble_model.py",
+      "sha256": "71901257e50e6e31c60869fad454f16919eac48d0e608e20ffde91d3ecb5a5f6"
+    },
+    {
+      "path": "exogenous_features.py",
+      "sha256": "866384d24ed60a3375339fdbc08d387e3c9cd7185f426ec4e9cf94020d61ac73"
+    },
+    {
+      "path": "gpu_driver_evidence/PUBLIC_CLAIM_REVIEW_BRIEF.md",
+      "sha256": "06321fa1d9c8b94441fe182d4882eb8c9fd43cc553149850aa8672964ce896b8"
+    },
+    {
+      "path": "gpu_driver_evidence/advisor_consult_20260721.md",
+      "sha256": "4baaa7087ac4813a4b8b2570aad735c59a409dd5945929f2f85a17d9ac5231b1"
+    },
+    {
+      "path": "gpu_driver_evidence/amd_rx6600_ml_matrix.json",
+      "sha256": "21de46aee7540c411f4b714b03fac1d32606a66687a0514c0bbf204118e33cd1"
+    },
+    {
+      "path": "gpu_driver_evidence/benchmark_current.json",
+      "sha256": "00074ac4f6e5e455bd62cff635f2ece1f60dec9902d2077f86115044ba325f06"
+    },
+    {
+      "path": "gpu_driver_evidence/benchmark_latency.svg",
+      "sha256": "6dca079f52eae33a7a7efdb05e78e253bb801eb409eac4539e4bd56bad2e8780"
+    },
+    {
+      "path": "gpu_driver_evidence/export_manifest.json",
+      "sha256": "cd1924c9589835ea97f6e9d9842a8a626c13b9f54b6136380fbddeeb468f7cb4"
+    },
+    {
+      "path": "gpu_driver_evidence/forecast_mape_comparison.svg",
+      "sha256": "793866d036a42926d609ce028b77a63ad67df01284dfff5e44eb49e7de9b9b36"
+    },
+    {
+      "path": "gpu_driver_evidence/gpu_forecaster_v2.json",
+      "sha256": "3154084faa8a4a8774b63c8764877cc08b0fdd3c7e82644aea026351788a4a01"
+    },
+    {
+      "path": "gpu_driver_evidence/gpu_trained_backtest.json",
+      "sha256": "eb5d3cbdccd6d69679c1ea61403932b9147b957fe6e288f95d85630dd903ad88"
+    },
+    {
+      "path": "gpu_driver_evidence/per_commodity_selector_holdout_20260914.json",
+      "sha256": "ecab490cf499593dc2f5351d7c672a2edf508616846a3adccb98c7e01e015899"
+    },
+    {
+      "path": "gpu_driver_evidence/pytorch_directml_proof.json",
+      "sha256": "636b0472ae549cd49c6fe808a3233dc56f1901ca73abd450b82b843bf1623009"
+    },
+    {
+      "path": "gpu_driver_evidence/pytorch_gpu_speedup.svg",
+      "sha256": "68ebab03eab041167e56f2f3d330e54e1d6746bd118eaeacaa76271a318a44a4"
+    },
+    {
+      "path": "gpu_driver_evidence/release_summary_rc6.json",
+      "sha256": "16a3835f6a9865a825f7eac602889336ddccc383650f49b0ae74c88406522134"
+    },
+    {
+      "path": "gpu_driver_evidence/rerun_20260922_chatgpt/release_truth_manifest.json",
+      "sha256": "1e6208f721eb444c40883d2a8394d5ea8471f37198161a00069941c4881614a0"
+    },
+    {
+      "path": "gpu_driver_evidence/rerun_20260928_rc6/benchmark_current.json",
+      "sha256": "47d82e96c15c8c6c988d2ea668de1c4b9d310db81283571c925ed40740a20e76"
+    },
+    {
+      "path": "gpu_driver_evidence/rerun_20260928_rc6/harness_alignment.json",
+      "sha256": "9ed4073c766b23fe86f63282a2c97001238b2d2bad2ccfee0b35d803e7a4fab3"
+    },
+    {
+      "path": "gpu_driver_evidence/rerun_20260928_rc6/validation_current.json",
+      "sha256": "2ebe70e2e3a4b47fa5f8b158200bd48a3ad79070b437ba15d859cc98459e89a1"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json",
+      "sha256": "24abc102b170ca1c9f1ddd9ad8a8b65fefb3b0e5561f6f67ba788fd6fd9f2153"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202412.json",
+      "sha256": "4bb905d71e7b485538f971ee1d27ee535f4ccb9367e5f872235c612a8a8b7319"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202503.json",
+      "sha256": "e8828951287a0a916ab9eaf22d8fb36f016766b5e49748d4d58e1bd91b8f4232"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202506.json",
+      "sha256": "de9b00b9882467bdf9c0995d0899b51094f40507df6aea763e1c479344a0e5cd"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202509.json",
+      "sha256": "16de17699a899693f6c469932fd491b116a5a3f2b7cfa3055c86262b92b5b83b"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202512.json",
+      "sha256": "5c2b0940ceedd364a38e24cd7e5cea95d2bebb7f467e680a81597bb6f0ab09ae"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/validation_202603.json",
+      "sha256": "e209ebe9cc3c8a2d2b9aa341445c5edd230556d1685877b320b38b187eeca516"
+    },
+    {
+      "path": "gpu_driver_evidence/rolling_origin_verdict_claude_opus_5_20260913.json",
+      "sha256": "91b5992bdedee469362d4adcc9b7034a8fa70b3647f73c946bfe7223b86ca595"
+    },
+    {
+      "path": "gpu_driver_evidence/validation_current.json",
+      "sha256": "41c16d438d69b63e56e6fb99db55a1548694ddccc8e6c67b1a822ca7d27c09bd"
+    },
+    {
+      "path": "gpu_forecast_driver.py",
+      "sha256": "703531d9a49efa0dc2b9d3f06f6202dfab4970ecc7e4767234fbbc3be97bfa10"
+    },
+    {
+      "path": "gpu_forecaster_v2.py",
+      "sha256": "92ab09f17dfc94fccb9c8c68eec3148c324094c0f4afb0f2adefc92c7bd1cc8f"
+    },
+    {
+      "path": "gpu_forward_predictions.json",
+      "sha256": "6ce50bf24c67d4528436c63981a9475b1ffba177302386942f9dea043717bf6e"
+    },
+    {
+      "path": "gpu_forward_predictions_v2.json",
+      "sha256": "e9ea818bb11ca70cfcf7109c3a2cd695eee78a67d87d4f14a688e934d9d07ddc"
+    },
+    {
+      "path": "gpu_predict_forward.py",
+      "sha256": "ee5e811ab004d81d42cbd826e985bceea05cb3408b7717c7f0c95a74ab0db36a"
+    },
+    {
+      "path": "gpu_pytorch_proof.py",
+      "sha256": "998ccb02aec652846053e5ab55be5f323feb6c806df332bf89831ef0a8b75e13"
+    },
+    {
+      "path": "gpu_train_device_benchmark.py",
+      "sha256": "3b41d01dd91c9acc1da368204d3210778cde765cba4296ac487ca10a73ded519"
+    },
+    {
+      "path": "gpu_train_forecaster.py",
+      "sha256": "1dcc1db72b5374d5be6f9bedd8d6b9eed9267b043cc73d60340f09eea526ddbc"
+    },
+    {
+      "path": "lstm_architecture.py",
+      "sha256": "1d188e3f96bbfde2e16622f72d0707c3cbf15e7583beb3b7471d6031869cf4a3"
+    },
+    {
+      "path": "lstm_model.py",
+      "sha256": "12d70e4b65fbabed5bb02f1761e2d44d41326f07779af2044d40ab252fe79f00"
+    },
+    {
+      "path": "lstm_predictions.json",
+      "sha256": "c6408f98a61623553b788e28c8413061f41f41379b7fb277d1f2aac5c226a956"
+    },
+    {
+      "path": "lstm_release_train.py",
+      "sha256": "7bb5c4d654747b5e6c41f183381f165baabb9925ebb2e8c0071c92af748afed0"
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "d463449ddbae05f8491c43253d297ce7dd297564e531fdc9d168f95abaec89c9"
+    },
+    {
+      "path": "ml_amd_matrix.py",
+      "sha256": "f8afcbf392629c9c36b3671f6cb730525cfd85abcb371e05ef95d199aba12234"
+    },
+    {
+      "path": "model_comparison.json",
+      "sha256": "0e21e43515b4a55ebcf7fe03ed988984fd9e23bce7615ec6732f0e2f67461fc3"
+    },
+    {
+      "path": "model_report.json",
+      "sha256": "49aad33517fe9256b56f201fbb0527c660f64bf861b2c48ae81c8835b37bbac3"
+    },
+    {
+      "path": "model_report.md",
+      "sha256": "0decd405c66d5fd769489a412dd965d4f350a85a6548eea7f1217048b6ae3f5d"
+    },
+    {
+      "path": "model_report.py",
+      "sha256": "a518edc7ecb44fdb351c30460e94c4371dc0c35d1d546d1a33738b1ce5843f76"
+    },
+    {
+      "path": "per_commodity_eligibility.py",
+      "sha256": "47b6f97b3c62d9854667c6baa71a91202158cb89158609b7eea60ec6b3a72fb9"
+    },
+    {
+      "path": "render_amd_ml_charts.py",
+      "sha256": "2e506a627d0d75768a42109c75f78a804516d4ed4e522c2559d31712825f46c0"
+    },
+    {
+      "path": "render_gpu_benchmark_chart.py",
+      "sha256": "6535ec309d4689216f66a7f2e069fc7a07448b4eea1726c2029d6af0dbc8edcf"
+    },
+    {
+      "path": "requirements-amd-ml.txt",
+      "sha256": "09817e73d6d7b1a362d1c5af776f041b0c19409bcfc5ffe7939d159e788fecf0"
+    },
+    {
+      "path": "requirements-gpu.txt",
+      "sha256": "cee8ebeccd027a1681316dc6638674db20f278c7e0c336e0b5b1f29c7dfbf71c"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "2b35f2689da67ea77e6990f2faf8b4a0b26ef72fa57220432acb8351785b2d8f"
+    },
+    {
+      "path": "retrain_model.py",
+      "sha256": "d956005dbf4249e364a12538c00d32d73dbfc68c55df45dfe60ff51efebda99c"
+    },
+    {
+      "path": "rolling_origin_backtest.py",
+      "sha256": "65b10032f680db460764a32f206ddad24f810ab7f13213069fd8e0444cf88a26"
+    },
+    {
+      "path": "test_enhancements.html",
+      "sha256": "3dbe76c739f58c68cc78857051e1183a03d963f7fd2faa1623dd3898076fc0a4"
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/test_daily_update.py",
+      "sha256": "6b80fc2d7a21c59140d9b5864371e335c5b71f6a4da8dd9c16a380a59f1e89b7"
+    },
+    {
+      "path": "tests/test_data_quality.py",
+      "sha256": "b364d7b51244788d5eca44d64f1a630034356b0f4c4bb7cf972ecd37a7a585e8"
+    },
+    {
+      "path": "tests/test_ensemble.py",
+      "sha256": "127ec566bda65562c51b8c9fc4c55ea47068fe5ecfad2731827fa2a0b2cbab51"
+    },
+    {
+      "path": "tests/test_gpu_forecast_driver.py",
+      "sha256": "2bb79aaca97f1ed8364c30e7ed7f66a542fd92af6a5beb2872813877202a9bc6"
+    },
+    {
+      "path": "tests/test_gpu_forecaster_v2_leakage.py",
+      "sha256": "f31e245ade2a5f92a4300f22cd1feaa010f36cfb8ee6a0b3ffcdbbb837ab5b45"
+    },
+    {
+      "path": "tests/test_gpu_gate_paired_significance.py",
+      "sha256": "b1d28e226a5967906a78500cca822c819ad145c3e49a664383386afc06baecd4"
+    },
+    {
+      "path": "tests/test_gpu_validation_gate.py",
+      "sha256": "276080977807ab325e9c017e56b38ccaf05e0ae6a20de46b80834f6a618b23bd"
+    },
+    {
+      "path": "tests/test_gpu_window_alignment.py",
+      "sha256": "705a4569c4cb8aebd2c1e7d564f2a01ce7ac744dfcd5465fb78edc469194b048"
+    },
+    {
+      "path": "tests/test_lstm_release_train.py",
+      "sha256": "f30950f270860530a0adb594e205dec94c7a52367faa7440d66077baba45faee"
+    },
+    {
+      "path": "tests/test_per_commodity_eligibility.py",
+      "sha256": "7c0f52c0e121509ff3af9f0d6301dd8fc82322fa282b91eaa2e74316f37812c8"
+    },
+    {
+      "path": "tests/test_per_commodity_fallback_selector.py",
+      "sha256": "bdffff3918ad7139953df42b0d9d47b9a28febb71f4298bd555d19c0bfc8ccc3"
+    },
+    {
+      "path": "tests/test_regional_aggregation_raises_snr.py",
+      "sha256": "79e7460d9eea8f2392c47c6255d07410f6ea502a78e4f1e4e0c615ee5090017b"
+    },
+    {
+      "path": "tests/test_retrain_model.py",
+      "sha256": "ddfd34d915d2af8e3d5fd5acc9d001c0612b792fa40995b8d3095e88ae10323b"
+    },
+    {
+      "path": "tests/test_rolling_origin_backtest.py",
+      "sha256": "5bd8c36694094dea644428982af73ab06add55e29fdccf797a6f32657d11be8d"
+    },
+    {
+      "path": "validate_dashboard_outputs.py",
+      "sha256": "3101e4893bfcc566713359543f9d370a2b266b60b941433d01e721b595eadb2c"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "scope": "Legacy GPU/LSTM forecast sections at the current branch tip; existing Git history and unrelated classical dashboard forecasts are not rewritten.",
+  "files": [
+    {
+      "path": "gpu_forward_predictions.json",
+      "previous_sha256": "6ce50bf24c67d4528436c63981a9475b1ffba177302386942f9dea043717bf6e",
+      "removed_models": 65,
+      "removed_points": 1170,
+      "sanitized_sha256": "29ee4edcf603e16ba8099a1bf790c5a1f8dbbd0896e337c23d120764890ed1f8"
+    },
+    {
+      "path": "gpu_forward_predictions_v2.json",
+      "previous_sha256": "e9ea818bb11ca70cfcf7109c3a2cd695eee78a67d87d4f14a688e934d9d07ddc",
+      "removed_models": 59,
+      "removed_points": 1062,
+      "sanitized_sha256": "9a9f0b369f88f1f26a434c573fd87982c3335d90b393207f087bb3461aedb65e"
+    },
+    {
+      "path": "lstm_predictions.json",
+      "previous_sha256": "c6408f98a61623553b788e28c8413061f41f41379b7fb277d1f2aac5c226a956",
+      "removed_models": 65,
+      "removed_points": 1495,
+      "sanitized_sha256": "14a9f93ce4a0c903be540fa94728d971d99e4841e48ed527455e62850ee7131c"
+    }
+  ]
+}

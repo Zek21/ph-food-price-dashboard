@@ -403,10 +403,10 @@ class TestConfiguration:
         du = _import_daily_update()
         assert du.LOG_FILE.parent == du.BASE_DIR
 
-    def test_base_dir_is_website(self):
-        """BASE_DIR should point to the Website directory."""
+    def test_base_dir_is_script_directory(self):
+        """Each checkout must resolve paths beside its own updater script."""
         du = _import_daily_update()
-        assert du.BASE_DIR.name == "Website"
+        assert du.BASE_DIR.resolve() == DAILY_UPDATE_PATH.resolve().parent
 
 
 # ===================================================================

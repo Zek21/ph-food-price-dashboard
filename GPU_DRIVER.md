@@ -1,18 +1,20 @@
 # AMD DirectML food-price inference driver
 
-## Verification update ? 2026-09-28 (rc6)
 
-Fresh ZEKE execution closes a regression in the proof gate itself. The current driver now requires at least one profiled `LSTM` node and requires **every profiled LSTM node** to be placed on `DmlExecutionProvider`; merely seeing any DirectML node is no longer enough. The focused GPU/validation suite passes (`46 passed, 24 skipped`), and the strict live benchmark proves 2/2 profiled LSTM nodes on DirectML, 15/18 total node events on DirectML, and `native_gpu_verified: true`. Benchmark receipt SHA-256: `47d82e96c15c8c6c988d2ea668de1c4b9d310db81283571c925ed40740a20e76`.
+Ticket: AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS. Fresh run: 2026-09-28 Asia/Manila.
 
-This is native GPU placement for the tested ONNX inference graph on ZEKE's AMD Radeon RX 6600. It is **not** a GPU-only or speedup claim: batch-1 median latency was 1.0109 ms on DirectML versus 0.1671 ms on CPU, and CPU was faster at every measured batch size.
+- Per-node proof: both LSTM operators on `DmlExecutionProvider`; 15/18 node events on DirectML, 3 on CPU.
+- The tested compact graph was slower on DirectML at all measured batch sizes. Batch-1 medians: 1.0352 ms DirectML versus 0.1740 ms CPU.
+- Authoritative April-June 2026 validation: 59 models, 177 points; MAPE 3.9927% versus persistence 4.3018%, MAE 5.1355 versus 5.1679. Both paired 95% intervals cross zero; one commodity breaches the unchanged 3x MAE guard.
+- Current forward set: 59 models / 1,062 points, regenerated only in the private directory and **WITHHELD**.
+- Supportive six-origin diagnostic: pooled MAE persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. All 354 point counts match; all naive-MAE pairs agree within 1%. This is not the publication gate.
+- Focused tests: 85 passed, 24 skipped, 1 warning in 10.25s. Full repo suite: 228 passed, 24 skipped, 1 warning in 153.56s (0:02:33). Skips identify absent historical receipts, not passing checks. Initial failures are preserved.
 
-The current 59-model release set was also rerun against April?June 2026. Point estimates are slightly lower than persistence (MAPE 3.9927% vs 4.3018%; MAE 5.1355 vs 5.1679), but both paired 95% confidence intervals include zero and Fish (threadfin bream) exceeds the 3x per-commodity guard at 16.174x. The publication gate therefore remains `withheld_failed_validation`. Validation receipt SHA-256: `2ebe70e2e3a4b47fa5f8b158200bd48a3ad79070b437ba15d859cc98459e89a1`.
+No GPU-only, GPU speedup, PyTorch GPU-training, validated-price, or investor-guidance claim is made.
 
-The DirectML prediction pass regenerated 1,062 local forward points from 59 models. Those values remain **WITHHELD** and are not investor/public prediction claims. Prediction receipt SHA-256 (local proof only): `57f481099962ea8db826fdae259674cd58afca544afca5d98e57fbe8b444c0b9`.
+The already-published rc6 tag remains at `1a5130fb8b127b43ac9e46255947f4b4ddca084d`. Fresh docs and receipts are supplied as release assets and in the `release/gpu-driver-v1.0.0-rc6` branch; the original tag source archive is historical. The current 59-model rerun values are absent from the public payload and Git index. Legacy GPU/LSTM forward sections were removed from the new branch tip. Existing published Git history/tag archives and unrelated classical dashboard forecasts are not rewritten; this is not a claim that the entire historical repository contains no forecasts.
 
-The rolling-origin AR(1) diagnostic is supportive context, not the publication gate. Across 354 commodity-origin rows / 3,717 points, n-weighted MAE was persistence 10.3057, AR(1) 10.6965, and LSTM 10.1478; n-weighted MAPE was 8.1550%, 8.8216%, and 8.1006%, respectively. A fresh alignment receipt reproduces all 354 pair point counts and keeps 100% of naive-MAE pairs within 1% (median absolute difference 0.00002530, which rounds to 0.0000 at four decimals). Alignment receipt SHA-256: `9ed4073c766b23fe86f63282a2c97001238b2d2bad2ccfee0b35d803e7a4fab3`.
-
-
+Use `GPU_DRIVER_RC6_REPRODUCIBILITY.md`, `release_truth_manifest.json`, and `SHA256SUMS-rc6.txt` in the attached audit bundle.
 
 ## Historical verification update ? 2026-09-13 (superseded by rc6 above)
 

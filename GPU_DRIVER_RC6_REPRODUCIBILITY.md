@@ -1,70 +1,49 @@
-# GPU Driver v1.0.0-rc6 reproducibility
+# GPU Driver rc6 reproducibility
 
-rc6 publishes the current leakage-safe driver code and receipts while preserving a strict public-claim boundary: native DirectML placement is verified for the tested ONNX LSTM graph, but the 59-model forward forecast set remains withheld.
+Ticket: AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS. Run date: 2026-09-28 Asia/Manila.
 
-## Machine and runtime
+## Inputs and runtime
 
-- Host: ZEKE
-- GPU: AMD Radeon RX 6600
-- Windows display-driver version: 32.0.21030.2001
-- Python: 3.13.7
-- ONNX Runtime: 1.24.4
-- Available providers: DmlExecutionProvider, CPUExecutionProvider
-- Dataset: `D:\ML\WFP\wfp_food_prices_phl_latest.csv`
-- Dataset SHA-256: `9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124`
-- Dataset maximum date: 2026-06-15
+ZEKE; AMD Radeon RX 6600; display driver 32.0.21030.2001; Python 3.13.7; ONNX Runtime 1.24.4. `hardware.json` and `benchmark_current.json` record the observations. Provider availability alone is not placement proof.
 
-## Strict native-GPU proof
+Registered DirectML Python: `D:\ML\Website\.venv-directml\Scripts\python.exe` (registered in the repository's 2026-07-20 interpreter proposal). Registered test Python: `D:\ML\env\Scripts\python.exe` (carried-forward rc6 test command). Commands run from `D:\ML\Website-rc6`; inputs in the existing Website checkout are read only, with bytecode writes disabled.
 
-The benchmark criterion is code-enforced: at least one `LSTM` node must be present in the ONNX Runtime profile and every profiled `LSTM` node must run on `DmlExecutionProvider`. The fresh run records 18 node events: 15 on DirectML and 3 on CPU; 2/2 LSTM events are on DirectML.
+Dataset: `D:\ML\WFP\wfp_food_prices_phl_latest.csv`; maximum date 2026-06-15; SHA-256 `9623508dfa1e33c6ac6bda2ceeafca1562679b1e49258df977cb3cd40c147124`. Models: `D:\ML\Website\.onnx_models_oot_202603`; 59 model/checkpoint hashes and the explicit 2026-03 training cutoff are in the validation receipt. No retraining or model selection was performed.
 
-The tested graph is not faster on this GPU. Batch-1 median was 1.0109 ms DirectML versus 0.1671 ms CPU. CPU remained faster at every measured batch size. This release does not claim GPU-only execution, PyTorch LSTM training on GPU, or end-to-end Python execution on GPU.
-
-Reproduce the strict benchmark on the same local model/data inputs:
+## Reproduce
 
 ```powershell
-.\.venv-directml\Scripts\python.exe gpu_forecast_driver.py benchmark `
-  --data D:\ML\WFP\wfp_food_prices_phl_latest.csv `
-  --model "D:\ML\Website\.onnx_models_oot_202603\lstm_Rice_(regular,_milled).onnx" `
-  --evidence gpu_driver_evidence\rerun_20260928_rc6 `
-  --iterations 100
+$env:PYTHONDONTWRITEBYTECODE='1'
+& D:\ML\Website\.venv-directml\Scripts\python.exe gpu_forecast_driver.py benchmark --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --model 'D:\ML\Website\.onnx_models_oot_202603\lstm_Rice_(regular,_milled).onnx' --evidence gpu_driver_evidence/rerun_20260928_rc6 --iterations 100
+& D:\ML\Website\.venv-directml\Scripts\python.exe gpu_forecast_driver.py validate --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --models D:\ML\Website\.onnx_models_oot_202603 --evidence gpu_driver_evidence/rerun_20260928_rc6
+& D:\ML\Website\.venv-directml\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py predictions
+& D:\ML\env\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py diagnostic
 ```
 
-## Current prediction gate
+The prediction audit calls the real driver's `generate_predictions` with the freshly validated data/model hashes and writes values only to `D:\ML\AR20260720_private_20260928_rc6\predictions_current.json`. It independently reopens that file, checks 59 models and 18 points each (1,062 total), and publishes only counts, hashes and gate metadata. Its private SHA-256 is `09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58`. Do not run `predict --evidence` against a public repo directory: that CLI writes forward values there.
 
-The 59-model out-of-time gate spans April?June 2026 (177 points). Model MAPE/MAE are 3.9927% / 5.1355 versus persistence 4.3018% / 5.1679. Point estimates favor the model slightly, but the paired MAPE CI is [-0.758292, +0.099301] and the MAE CI is [-0.684032, +0.651491], so neither excludes zero. Fish (threadfin bream) is also a 16.174x persistence-MAE regression. Publication status is therefore **WITHHELD**.
+## Measured truth
 
-Reproduce validation and the local-only prediction artifact:
+The profile lists individual node names, operations and providers: 2/2 LSTM events on DirectML; 15/18 total events on DirectML; 3 CPU fallback events. Batch-1 median: 1.0352 ms DirectML / 0.1740 ms CPU. CPU won at batches 1, 8, 32 and 128 (100 measured iterations each, 10 warmups). This proves native inference placement for the tested graph only; it does not prove GPU-only execution, PyTorch GPU training, or a speedup.
+
+The authoritative validation uses recursive out-of-time April-June 2026 predictions, 59 models / 177 points, and metadata declaring a train-only scaler and 2026-03 cutoff. MAPE: 3.9927% versus 4.3018%; MAE: 5.1355 versus 5.1679. Paired MAPE CI [-0.758292, +0.099301]; MAE CI [-0.684032, +0.651491]. Fish (threadfin bream) is 16.174x persistence MAE. The unchanged gate is `withheld_failed_validation`; forward forecasts remain **WITHHELD**.
+
+The diagnostic audit re-computes the carried-forward six-origin receipts, with source hashes: 354 commodity-origin rows / 3,717 points, 354/354 count matches and naive-MAE pairs within 1%. Pooled MAE: persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. Pooled MAPE: 8.1550%, 8.8216%, 8.1006%, respectively. The LSTM's small pooled advantage is supportive only; horizons overlap and this diagnostic is not the publication gate.
+
+## Verification
+
+Focused suite including release-training, current rc6 gate and updater tests: 85 passed, 24 skipped, 1 warning in 10.25s.
+Full suite: 228 passed, 24 skipped, 1 warning in 153.56s (0:02:33).
 
 ```powershell
-.\.venv-directml\Scripts\python.exe gpu_forecast_driver.py validate --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --models D:\ML\Website\.onnx_models_oot_202603 --evidence gpu_driver_evidence\rerun_20260928_rc6
-.\.venv-directml\Scripts\python.exe gpu_forecast_driver.py predict  --data D:\ML\WFP\wfp_food_prices_phl_latest.csv --models D:\ML\Website\.onnx_models_oot_202603 --evidence gpu_driver_evidence\rerun_20260928_rc6 --horizon 18
+$env:PYTHONIOENCODING='utf-8'
+& D:\ML\env\Scripts\python.exe -m pytest -q -ra -p no:cacheprovider --basetemp D:\ML\Website-rc6\.pytest_rc6_broad_final_20260928_0640 tests
 ```
 
-The second command regenerated 1,062 forward points from 59 models, but the values are not published in rc6 because the gate failed.
+Use a fresh task-local `--basetemp` for each rerun. The first focused run hit an inaccessible shared pytest temporary directory; the first full run found the hard-coded checkout-name assertion. Both failure logs are retained. The assertion now checks the script's actual directory. A new rc6 receipt test recomputes the exact unchanged gate; 24 tests still skip unavailable older receipts. A PyTorch scalar-conversion warning remains in an optimizer unit test and is not GPU-training evidence.
 
-## AR(1) diagnostic and harness alignment
+## Publication and hashes
 
-The six-origin pooled diagnostic contains 354 commodity-origin rows / 3,717 points. N-weighted MAE: persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. N-weighted MAPE: persistence 8.1550%, AR(1) 8.8216%, LSTM 8.1006%. Thus AR(1) is worse than persistence while the LSTM is slightly better on the pooled diagnostic. This is supportive only because the horizons overlap and are not the publication gate.
+The current 59-model rerun values are absent from the public payload and Git index. Legacy GPU/LSTM forward sections were removed from the new branch tip. Existing published Git history/tag archives and unrelated classical dashboard forecasts are not rewritten; this is not a claim that the entire historical repository contains no forecasts.
 
-The fresh alignment audit reproduces 354/354 point counts and 354/354 naive-MAE pairs within 1%; median absolute naive-MAE difference is 0.00002530.
-
-## Tests
-
-Focused release suite after the rc6 gate fix:
-
-```powershell
-D:\ML\env\Scripts\python.exe -m pytest -q tests\test_gpu_forecast_driver.py tests\test_gpu_validation_gate.py tests\test_gpu_gate_paired_significance.py tests\test_gpu_window_alignment.py tests\test_gpu_forecaster_v2_leakage.py tests\test_per_commodity_eligibility.py tests\test_per_commodity_fallback_selector.py tests\test_regional_aggregation_raises_snr.py tests\test_rolling_origin_backtest.py
-```
-
-Result: **46 passed, 24 skipped, 1 warning**. The release-training tests separately pass **4/4**. A broader pre-fix worktree run reached **224 passed, 24 skipped** with one path-name-only failure (`Website-rc6` vs hard-coded `Website`), not a GPU/forecast failure.
-
-## Receipt hashes
-
-- strict benchmark: `47d82e96c15c8c6c988d2ea668de1c4b9d310db81283571c925ed40740a20e76`
-- validation: `2ebe70e2e3a4b47fa5f8b158200bd48a3ad79070b437ba15d859cc98459e89a1`
-- local-only prediction receipt: `57f481099962ea8db826fdae259674cd58afca544afca5d98e57fbe8b444c0b9`
-- harness alignment: `9ed4073c766b23fe86f63282a2c97001238b2d2bad2ccfee0b35d803e7a4fab3`
-- AR(1) baseline: `24abc102b170ca1c9f1ddd9ad8a8b65fefb3b0e5561f6f67ba788fd6fd9f2153`
-
-The prediction receipt hash is provided for audit continuity; the rc6 public release intentionally does not ship the forecast-value file.
+The existing public rc6 tag is preserved at `1a5130fb8b127b43ac9e46255947f4b4ddca084d`; the refreshed audit is attached to that release and committed on its existing branch. `release_payload.json` explicitly lists the public files. `SHA256SUMS-rc6.txt` hashes their local bytes, excluding itself and the allowlist to avoid self-reference. The bundle contains docs, code, tests and audit receipts, never the private prediction artifact. Receipt hashes and claim boundaries are in the fresh `release_truth_manifest.json`.

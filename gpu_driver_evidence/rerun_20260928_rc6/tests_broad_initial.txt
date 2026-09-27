@@ -1,0 +1,36 @@
+..............................F......................................... [ 28%]
+......................................................ssssss......s..... [ 57%]
+................sssssssss............................................... [ 86%]
+...........................ssssssss                                      [100%]
+================================== FAILURES ===================================
+_________________ TestConfiguration.test_base_dir_is_website __________________
+
+self = <tests.test_daily_update.TestConfiguration object at 0x000002041C2A08D0>
+
+    def test_base_dir_is_website(self):
+        """BASE_DIR should point to the Website directory."""
+        du = _import_daily_update()
+>       assert du.BASE_DIR.name == "Website"
+E       AssertionError: assert 'Website-rc6' == 'Website'
+E         
+E         - Website
+E         + Website-rc6
+E         ?        ++++
+
+tests\test_daily_update.py:409: AssertionError
+============================== warnings summary ===============================
+tests/test_gpu_forecaster_v2_leakage.py::test_dml_adam_matches_torch_adam
+  D:\ML\Website-rc6\tests\test_gpu_forecaster_v2_leakage.py:152: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\torch\csrc\autograd\generated\python_variable_methods.cpp:837.)
+    drift = max(float((a - b).abs().max())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_gpu_gate_paired_significance.py:69: receipt not present
+SKIPPED [5] tests\test_gpu_gate_paired_significance.py:41: rerun_20260912 validation receipt not present
+SKIPPED [1] tests\test_gpu_gate_paired_significance.py:119: receipt not present
+SKIPPED [1] tests\test_per_commodity_eligibility.py:144: D:\ML\Website-rc6\gpu_driver_evidence\rolling_origin_20260914_full not present
+SKIPPED [8] tests\test_per_commodity_fallback_selector.py:60: release receipts not present
+SKIPPED [8] tests\test_rolling_origin_backtest.py:53: rolling-origin summary not present; run rolling_origin_backtest.py
+FAILED tests/test_daily_update.py::TestConfiguration::test_base_dir_is_website
+1 failed, 226 passed, 24 skipped, 1 warning in 161.63s (0:02:41)
