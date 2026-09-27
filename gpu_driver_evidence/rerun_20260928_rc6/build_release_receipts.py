@@ -2,10 +2,88 @@
 import json
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 from audit_rc6 import ROOT, EVIDENCE, read, sha, write
+
+
+# Fixed to the existing c3d9d00 release policy. Campaign sources and new local
+# evidence must never become release assets through a directory sweep.
+RELEASE_FILES = [
+    ".gitignore",
+    "GPU_DRIVER.md",
+    "GPU_DRIVER_RC6_REPRODUCIBILITY.md",
+    "INVESTOR_CAMPAIGN_RC6.md",
+    "RELEASE_NOTES_RC6.md",
+    "gpu_driver_evidence/release_summary_rc6.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py",
+    "gpu_driver_evidence/rerun_20260928_rc6/benchmark_current.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/benchmark_stderr.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/benchmark_stdout.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/build_release_receipts.py",
+    "gpu_driver_evidence/rerun_20260928_rc6/github_identity_before.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/hardware.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/harness_alignment.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/legacy_forecast_sanitization.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/payload_audit.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/prediction_audit_stderr.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/prediction_audit_stdout.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/private_prediction_audit.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/release_truth_manifest.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/rollback_identity_20260928T062736583.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/test_worktree_path_before.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_broad_final.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_broad_initial.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_focused.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_focused_final.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/validation_current.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/validation_stderr.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/validation_stdout.txt",
+    "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202412.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202503.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202506.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202509.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202512.json",
+    "gpu_driver_evidence/rolling_origin_20260912/validation_202603.json",
+    "gpu_forecast_driver.py",
+    "tests/test_daily_update.py",
+    "tests/test_gpu_forecast_driver.py",
+    "tests/test_gpu_gate_paired_significance.py",
+    "tests/test_gpu_validation_gate.py",
+    "SHA256SUMS-rc6.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/release_payload.json",
+    "gpu_driver_evidence/rerun_20260928_rc6/codex_doer_report.txt",
+    "gpu_driver_evidence/rerun_20260928_rc6/publication_after.json"
+]
+
+
+def refresh_campaign_checksums():
+    """Keep engineering receipts and payload membership unchanged for copy edits."""
+    manifest = read(EVIDENCE / "release_truth_manifest.json")
+    for name, expected in manifest["receipt_sha256"].items():
+        assert sha(ROOT / name) == expected, f"Receipt changed: {name}"
+    payload = read(EVIDENCE / "release_payload.json")
+    assert payload["files"] == RELEASE_FILES, "Release scope changed; review explicitly"
+    assert manifest["publication_gate"]["status"] == "withheld_failed_validation"
+    assert not manifest["publication_gate"]["passed"]
+    paths = [name for name in RELEASE_FILES if name not in
+             ("SHA256SUMS-rc6.txt", "gpu_driver_evidence/rerun_20260928_rc6/release_payload.json")]
+    for name in paths:
+        if name.endswith(".json"):
+            doc = read(ROOT / name)
+            assert not (isinstance(doc, dict) and doc.get("forecasts")), name
+    (ROOT / "SHA256SUMS-rc6.txt").write_text(
+        "".join(f"{sha(ROOT / name)}  {name}\n" for name in paths), encoding="utf-8")
+    print(json.dumps({"mode": "campaign-only", "payload_files": len(RELEASE_FILES),
+                      "checksum_entries": len(paths), "engineering_receipts_unchanged": True}))
+
+
+if "--campaign-only" in sys.argv:
+    refresh_campaign_checksums()
+    raise SystemExit(0)
 
 
 def test_result(name):
@@ -108,19 +186,7 @@ Use a fresh task-local `--basetemp` for each rerun. The first focused run hit an
 The existing public rc6 tag is preserved at `1a5130fb8b127b43ac9e46255947f4b4ddca084d`; the refreshed audit is attached to that release and committed on its existing branch. `release_payload.json` explicitly lists the public files. `SHA256SUMS-rc6.txt` hashes their local bytes, excluding itself and the allowlist to avoid self-reference. The bundle contains docs, code, tests and audit receipts, never the private prediction artifact. Receipt hashes and claim boundaries are in the fresh `release_truth_manifest.json`.
 """
 (ROOT / "GPU_DRIVER_RC6_REPRODUCIBILITY.md").write_text(repro, encoding="utf-8")
-campaign = f"""# RC6 investor-facing claim sheet
-
-Native DirectML placement is verified on ZEKE's AMD Radeon RX 6600 for the tested ONNX LSTM graph: both LSTM operators and 15/18 node events were on DirectML; three events used CPU fallback. The compact graph was slower on DirectML: batch-1 medians {gpu:.4f} ms versus {cpu:.4f} ms CPU. This is inference placement evidence, not a GPU-only, speedup, or PyTorch GPU-training claim.
-
-The authoritative 59-model validation has MAPE 3.9927% versus persistence 4.3018% and MAE 5.1355 versus 5.1679, but both paired confidence intervals cross zero and one commodity violates the unchanged 3x regression guard. All 1,062 current forward points remain private and **WITHHELD**. Do not present them as validated prices or use them for investor guidance.
-
-The six-origin diagnostic reproduces all 354 commodity-origin count pairs and all naive-MAE pairs within 1%. Pooled MAE is persistence 10.3057, AR(1) 10.6965 and LSTM 10.1478; pooled MAPE is 8.1550%, 8.8216% and 8.1006%. AR(1) is worse and LSTM slightly better here. This supportive diagnostic is not the publication gate.
-
-Suggested copy: "Our rc6 rerun verifies native DirectML placement for the tested ONNX LSTM graph on an RX 6600. CPU remains faster for this compact graph. Forecast validation fails the uncertainty and commodity-regression safeguards, so the 59-model, 1,062-point forward set stays private. The release shares reproducibility evidence, not a price forecast."
-
-The published rc6 tag is historical; use the refreshed release audit assets and branch commit. {scope}
-"""
-(ROOT / "INVESTOR_CAMPAIGN_RC6.md").write_text(campaign, encoding="utf-8")
+# INVESTOR_CAMPAIGN_RC6.md is an editorial source; never overwrite it here.
 old = (ROOT / "GPU_DRIVER.md").read_text(encoding="utf-8")
 marker = "## Historical verification update"
 (ROOT / "GPU_DRIVER.md").write_text("# AMD DirectML food-price inference driver\n\n" + notes.split("\n", 1)[1] + "\n" + marker + old.split(marker, 1)[1], encoding="utf-8")
@@ -139,15 +205,13 @@ manifest = {
 }
 write("release_truth_manifest.json", manifest)
 (ROOT / "gpu_driver_evidence/release_summary_rc6.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-paths = [".gitignore", "RELEASE_NOTES_RC6.md", "GPU_DRIVER_RC6_REPRODUCIBILITY.md", "INVESTOR_CAMPAIGN_RC6.md", "GPU_DRIVER.md", "gpu_forecast_driver.py", "tests/test_daily_update.py", "tests/test_gpu_gate_paired_significance.py", "tests/test_gpu_forecast_driver.py", "tests/test_gpu_validation_gate.py", "gpu_driver_evidence/release_summary_rc6.json"]
-paths += [str(p.relative_to(ROOT)).replace("\\", "/") for p in EVIDENCE.iterdir() if p.is_file() and p.suffix in (".json", ".py", ".txt") and p.name not in ("release_payload.json", "publication_after.json")]
-paths += list(h["source_hashes"])
-paths = sorted(set(paths))
+paths = [name for name in RELEASE_FILES if name not in
+         ("SHA256SUMS-rc6.txt", prefix + "release_payload.json")]
 for name in paths:
     if name.endswith(".json"):
         doc = read(ROOT / name)
         assert not (isinstance(doc, dict) and doc.get("forecasts")), name
 assert not subprocess.check_output(["git", "ls-files", "*predictions_current.json"], cwd=ROOT, text=True).strip()
 (ROOT / "SHA256SUMS-rc6.txt").write_text("".join(f"{sha(ROOT / name)}  {name}\n" for name in paths), encoding="utf-8")
-write("release_payload.json", {"contains_current_forward_values": False, "scope_limit": scope, "files": paths + ["SHA256SUMS-rc6.txt", prefix + "release_payload.json"]})
+write("release_payload.json", {"contains_current_forward_values": False, "scope_limit": scope, "files": RELEASE_FILES})
 print(json.dumps({"focused": focused, "broad": broad, "payload_files": len(paths) + 2, "publication_gate": v["publication_gate"]["status"]}, indent=2))

@@ -1,0 +1,18 @@
+{
+  "ticket": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "private_sha256": "09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58",
+  "private_models": 59,
+  "private_points": 1062,
+  "tracked_worktree_and_index_files_scanned": 137,
+  "staged_files_scanned": 11,
+  "public_evidence_files_scanned": 28,
+  "payload_files_scanned": 45,
+  "zip_members_scanned": 45,
+  "checksums_verified": 43,
+  "bundle_sha256": "e3791e55b82ca5e0ccd2d2fd545629c2b6a57af051bfc195b583b46d23001011",
+  "private_artifact_found": false,
+  "current_forecast_value_set_found": false,
+  "scanner_canary_verified": true,
+  "method": "Exact private artifact hash; date/value series (3 matching pairs); complete numeric vectors; index blobs, working files, evidence, allowlist and every ZIP member.",
+  "scope_limit": "Current artifact/value sets only. Isolated rounded numbers can coincide with historical observations; arbitrary re-encoding is not a provable absence. Historical tags/archives and unrelated classical forecasts are preserved."
+}

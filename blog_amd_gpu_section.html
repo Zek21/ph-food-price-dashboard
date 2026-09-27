@@ -1,131 +1,81 @@
-<!-- ============================================================= -->
-<!-- Blog section to APPEND to:                                     -->
-<!-- exzilcalanza.info/philippine-food-price-prediction-machine-learning-wfp-2026 -->
-<!-- Every number is grounded in gpu_driver_evidence/*.json (this run). -->
-<!-- Charts: pytorch_gpu_speedup.svg, forecast_mape_comparison.svg     -->
-<!-- ============================================================= -->
+<!-- Campaign source repaired against 2026-09-28 rc6 receipts.
+     Intended article section; publication is a separate step.
+     Tracked HTML outside the existing rc6 release asset allowlist.
+     Sources: gpu_driver_evidence/rerun_20260928_rc6/{benchmark_current,
+     validation_current,harness_alignment,private_prediction_audit}.json.
+     No current forward forecast values may be embedded here. -->
 
-<h2>Running the Models on an AMD GPU: DirectML, PyTorch, and a Better Forecast</h2>
+<h2>AMD DirectML Inference Verified; Forecasts Remain Withheld</h2>
 
-<p>The forecasting stack above was built and trained on a consumer
-<strong>AMD Radeon RX 6600</strong> (gfx1032, 8&nbsp;GB) on Windows 11 &mdash;
-not an NVIDIA card and not a cloud instance. AMD GPUs are usually treated as
-second-class citizens for machine learning because most tutorials assume CUDA.
-The goal of this section is the opposite of running a chatbot locally: it is to
-show that <strong>mainstream ML frameworks train and infer</strong> on this AMD
-GPU through Microsoft's <strong>DirectML</strong> backend, and that a model
-<em>trained on the GPU</em> now beats the naive baseline the earlier LSTM could
-not.</p>
+<p>The rc6 rerun on <strong>ZEKE's AMD Radeon RX 6600</strong>, using
+ONNX Runtime <strong>1.24.4</strong> and Python <strong>3.13.7</strong>,
+verifies native DirectML placement for the tested ONNX LSTM graph.
+Per-node profiling establishes where inference ran. It does not establish
+GPU training or forecast reliability.</p>
 
-<h3>Which ML libraries actually use the AMD GPU?</h3>
-
-<p>Each row below is a live probe on the RX 6600, not a marketing claim. For ONNX
-Runtime, GPU placement is confirmed by profiling per-node execution providers,
-not by a provider being merely <em>listed</em>.</p>
-
+<h3>What actually ran on DirectML?</h3>
 <table>
-  <thead>
-    <tr><th>Library</th><th>GPU on RX 6600</th><th>Mode</th><th>How</th></tr>
-  </thead>
+  <caption>Observed inference placement for the tested graph</caption>
+  <thead><tr><th scope="col">Profile measure</th><th scope="col">Observed result</th></tr></thead>
   <tbody>
-    <tr><td><strong>PyTorch</strong> (torch-directml)</td><td>✅ Yes</td><td>Train + infer</td><td>DirectML backend, <code>privateuseone</code> device</td></tr>
-    <tr><td><strong>TensorFlow&nbsp;2.10</strong></td><td>✅ Yes</td><td>Train + infer</td><td>tensorflow-directml-plugin, <code>/GPU:0</code></td></tr>
-    <tr><td><strong>ONNX Runtime</strong></td><td>✅ Yes</td><td>Infer</td><td>DmlExecutionProvider</td></tr>
-    <tr><td>CNNs (Conv2d, torchvision)</td><td>✅ Yes</td><td>Train + infer</td><td>via torch-directml</td></tr>
-    <tr><td>scikit-learn MLP &rarr; ONNX</td><td>✅ Yes</td><td>Infer</td><td>Gemm/MatMul run on DirectML</td></tr>
-    <tr><td>scikit-learn Random&nbsp;Forest &rarr; ONNX</td><td>⚠️ CPU op</td><td>Infer</td><td>TreeEnsemble not implemented on DirectML</td></tr>
-    <tr><td>PyTorch <code>nn.LSTM</code></td><td>❌ No</td><td>&mdash;</td><td>fused LSTM cell unimplemented on DirectML</td></tr>
-    <tr><td>LightGBM</td><td>❌ No</td><td>CPU</td><td>pip wheel has no OpenCL GPU build</td></tr>
-    <tr><td>XGBoost</td><td>❌ No</td><td>CPU</td><td>GPU path is CUDA/NVIDIA only</td></tr>
-    <tr><td>scikit-learn (native)</td><td>❌ No</td><td>CPU</td><td>no GPU backend (export to ONNX for GPU inference)</td></tr>
+    <tr><th scope="row">LSTM operators</th><td>2/2 on <code>DmlExecutionProvider</code></td></tr>
+    <tr><th scope="row">Total node events</th><td>15/18 on DirectML</td></tr>
+    <tr><th scope="row">CPU fallback</th><td>3 node events</td></tr>
   </tbody>
 </table>
+<p>CPU fallback remains, so this is mixed-provider execution. The rc6 evidence
+does not support claims of GPU-only execution, PyTorch or TensorFlow GPU
+training, or a GPU-trained delta-MLP.</p>
 
-<p><strong>Bottom line:</strong> the three big frameworks &mdash; PyTorch,
-TensorFlow, and ONNX Runtime &mdash; plus classic scikit-learn neural nets (once
-exported to ONNX) all accelerate on the AMD card. Only the gradient-boosting
-libraries stay on CPU, because their GPU code targets CUDA or OpenCL rather than
-DirectML.</p>
+<h3>CPU was faster on this compact graph</h3>
+<p>CPU inference was faster at every measured batch. At batch 1, median
+latency was <strong>1.0352 ms on DirectML</strong> versus
+<strong>0.1740 ms on CPU</strong>. These measurements apply to this tested
+compact graph on this host. Native GPU placement does not imply a speedup;
+these results do not establish performance for other graphs or training workloads.</p>
 
-<h3>Is the AMD GPU actually fast? PyTorch vs. CPU</h3>
-
-<p>Warmed FP32 matrix multiplication on the same machine, GPU (DirectML) vs. CPU:</p>
-
-<figure>
-  <img src="pytorch_gpu_speedup.svg"
-       alt="Bar chart: PyTorch matmul speedup on AMD RX 6600 vs CPU, rising to about 8x at 2048x2048.">
-  <figcaption>PyTorch on the AMD RX 6600 via <code>torch-directml</code>: GPU
-  speedup over CPU by matrix size. The RX 6600 reaches ~2710 GFLOPS FP32.</figcaption>
-</figure>
-
+<h3>The authoritative forecast gate is still withheld</h3>
+<p>The current gate evaluates <strong>59 models</strong> across
+<strong>177 April&ndash;June 2026 points</strong>. Persistence carries the last
+observed price forward. Lower error is better, but lower aggregate error alone
+does not satisfy the publication safeguards.</p>
 <table>
-  <thead>
-    <tr><th>Matrix</th><th>GPU (DirectML)</th><th>CPU</th><th>GPU speedup</th></tr>
-  </thead>
+  <caption>Authoritative current validation errors, not forward prices</caption>
+  <thead><tr><th scope="col">Measure</th><th scope="col">LSTM</th><th scope="col">Persistence</th></tr></thead>
   <tbody>
-    <tr><td>512 × 512</td><td>0.53 ms</td><td>0.93 ms</td><td>1.75×</td></tr>
-    <tr><td>1024 × 1024</td><td>1.25 ms</td><td>6.58 ms</td><td>5.26×</td></tr>
-    <tr><td>2048 × 2048</td><td>7.19 ms</td><td>57.86 ms</td><td>8.04×</td></tr>
-    <tr><td>4096 × 4096</td><td>50.72 ms</td><td>388.39 ms</td><td>7.66×</td></tr>
+    <tr><th scope="row">MAPE</th><td>3.9927%</td><td>4.3018%</td></tr>
+    <tr><th scope="row">MAE</th><td>5.1355</td><td>5.1679</td></tr>
   </tbody>
 </table>
+<p>The paired 95% confidence intervals for model-minus-persistence error are
+<strong>[-0.758292, +0.099301]</strong> for MAPE and
+<strong>[-0.684032, +0.651491]</strong> for MAE. Both cross zero, so they do
+not establish an improvement. Fish (threadfin bream) has
+<strong>16.174x</strong> persistence MAE, breaching the unchanged commodity
+regression safeguard. The disposition is
+<code>withheld_failed_validation</code>.</p>
+<p><strong>Forecasts are withheld.</strong> The current forward artifact covers
+59 models and 1,062 points; it remains private. No forward prices are supplied
+in this section. These results do not support validated-price claims or
+investor guidance.</p>
 
-<p>A full MLP training loop ran end-to-end on the GPU: training loss fell from
-0.539 to 0.0003 over 300 steps, <strong>1.84× faster than CPU</strong>, with
-parameters and gradients verified to live on the DirectML device.</p>
-
-<p>One honest caveat: for a <em>tiny</em> graph &mdash; the project's exported
-LSTM is only a 12&times;6 tensor &mdash; DirectML is actually <em>slower</em> than
-CPU, because a fixed ~21&nbsp;ms GPU-dispatch overhead dwarfs a microsecond-scale
-model. The GPU wins once the work is genuinely ML-sized (≥1024² matmuls, real
-training loops). That is exactly the regime <code>torch-directml</code> unlocks
-that ONNX-inference-only did not.</p>
-
-<h3>Doing better: a GPU-trained model that passes the honest gate</h3>
-
-<p>Earlier, the 2-layer LSTM failed an out-of-time validation gate badly: rolled
-forward from a January-2026 cutoff across February–June 2026, it scored
-<strong>85.7% MAPE</strong> with an R² of <strong>−1.26</strong> &mdash; worse
-than a flat line &mdash; while simply carrying the last observed price forward
-("naive persistence") scored 7.4% MAPE. The forecasts were correctly
-<em>withheld</em>.</p>
-
-<p>Because <code>torch-directml</code> can't run the fused LSTM cell, the model
-was rebuilt as a MatMul-based network that <em>does</em> train on the AMD GPU. It
-predicts the monthly price <em>change</em> (in normalized space), so "predict
-nothing" is exactly the naive baseline and any improvement is real learned
-signal. Scalers are fit on training months only, and the roll-forward never peeks
-at future actuals &mdash; the <strong>same methodology and the same 295
-out-of-time points</strong> the LSTM was judged on.</p>
-
-<figure>
-  <img src="forecast_mape_comparison.svg"
-       alt="Bar chart of out-of-time MAPE: old LSTM 85.7 percent, naive 7.4 percent, GPU-trained MLP about 5.8 percent.">
-  <figcaption>Out-of-time forecast error (MAPE, lower is better) on the identical
-  horizon and baseline. The GPU-trained model beats naive persistence and passes
-  the gate the LSTM failed.</figcaption>
-</figure>
-
+<h3>A supportive six-origin diagnostic, separate from the gate</h3>
+<p>The diagnostic verifies <strong>354/354 aligned commodity-origin pairs</strong>.
+Its pooled errors compare persistence, AR(1), and LSTM:</p>
 <table>
-  <thead>
-    <tr><th>Model (295 out-of-time points)</th><th>MAPE</th><th>MAE</th><th>R²</th><th>Gate</th></tr>
-  </thead>
+  <caption>Supportive diagnostic only; not the publication gate</caption>
+  <thead><tr><th scope="col">Model</th><th scope="col">Pooled MAE</th><th scope="col">Pooled MAPE</th></tr></thead>
   <tbody>
-    <tr><td>Old LSTM (ONNX export)</td><td>85.7%</td><td>141.9</td><td>−1.26</td><td>❌ Withheld</td></tr>
-    <tr><td>Naive persistence (baseline)</td><td>7.41%</td><td>8.14</td><td>0.988</td><td>&mdash;</td></tr>
-    <tr><td><strong>GPU-trained delta-MLP</strong></td><td><strong>~5.8%</strong></td><td><strong>~7.0</strong></td><td><strong>+0.992</strong></td><td>✅ <strong>Passed</strong></td></tr>
+    <tr><th scope="row">Persistence</th><td>10.3057</td><td>8.1550%</td></tr>
+    <tr><th scope="row">AR(1)</th><td>10.6965</td><td>8.8216%</td></tr>
+    <tr><th scope="row">LSTM</th><td>10.1478</td><td>8.1006%</td></tr>
   </tbody>
 </table>
-
-<p>The model <strong>trained on the AMD RX 6600 in about three seconds</strong>
-and consistently beats naive persistence on both MAPE and MAE, flipping the
-project's disposition from <em>withheld</em> to <em>passed the out-of-time naive
-baseline</em>. That is the honest definition of "doing better": not a bigger
-number in a press release, but a model that clears a gate it previously failed,
-on the same data, on hardware most people already own.</p>
-
-<p><em>Reproducibility &amp; honesty:</em> every figure here is emitted to a
-hashed JSON receipt (matmul timings, per-node GPU placement, and the out-of-time
-backtest). Results are warmed benchmarks on one host and one dataset; passing the
-2026 out-of-time gate is evidence of skill on that window, not a guarantee of
-future prices. Forecasts remain experimental and are not financial advice.</p>
+<p>AR(1) is worse than persistence on these pooled measures; LSTM is slightly
+better. This supportive comparison does not override the failed authoritative
+gate or authorize publication of current forecasts.</p>
+<p><em>Evidence scope:</em> use the refreshed rc6 branch and audit assets.
+The existing tag and its source archives are historical. Legacy GPU/LSTM
+forward values have been sanitized at the current public branch tip;
+existing history/tag archives and unrelated classical forecasts remain.
+This section reports measured inference behavior and validation limits.</p>

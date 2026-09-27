@@ -42,3 +42,7 @@ gpu_driver_evidence/predictions_current.json
 gpu_driver_evidence/**/predictions_current.json
 .pytest_cache/
 .pytest_rc6_*/
+
+# Final campaign readbacks contain the final commit; keep them local to avoid self-reference.
+gpu_driver_evidence/rerun_20260928_rc6/campaign_doer_report.txt
+gpu_driver_evidence/rerun_20260928_rc6/campaign_publication_after.json
