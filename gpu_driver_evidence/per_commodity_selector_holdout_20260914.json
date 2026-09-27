@@ -1,0 +1,76 @@
+{
+  "schema": "skynet.ar20260720.per_commodity_selector_holdout.v1",
+  "task": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "owner": "claude-opus-5",
+  "machine": "ZEKE",
+  "execution_scope": "ZEKE_ONLY",
+  "recorded_at": "2026-09-14T05:22:55.604356+08:00",
+  "question": "The model is 1-of-6 significant in aggregate, so all 1,062 predictions are WITHHELD. Is the model genuinely skilled on a SUBSET of commodities, or is every commodity a coin flip?",
+  "source": "gpu_driver_evidence/rolling_origin_20260914_full/validation_*.json — 6 genuinely retrained origins, 59 commodities each",
+  "aggregate_first": {
+    "total_commodity_origin_pairs": 354,
+    "model_wins_on_mae": 179,
+    "win_rate": 0.506,
+    "win_count_distribution_mae": {
+      "6/6": 6,
+      "5/6": 6,
+      "4/6": 9,
+      "3/6": 13,
+      "2/6": 15,
+      "1/6": 8,
+      "0/6": 2
+    },
+    "reading": "In aggregate the model is a coin flip (50.6%) and the distribution is centred near 3/6 — which is exactly what NO skill looks like. But 6 commodities at 6/6 against a null expectation of 0.92 is a real upper-tail excess."
+  },
+  "the_selection_bias_trap": "Those 6 were chosen BY their win record, so citing them as evidence would be selection on the outcome. The only honest test is whether the selection RULE transfers to origins it never saw.",
+  "temporal_holdout_test": {
+    "selection_window": [
+      "2024-12",
+      "2025-03",
+      "2025-06",
+      "2025-09"
+    ],
+    "holdout_window": [
+      "2025-12",
+      "2026-03"
+    ],
+    "rule": "select commodities winning 4/4 on BOTH MAE and MAPE in the selection window only",
+    "selected": [
+      "Anchovies",
+      "Cabbage",
+      "Coconut",
+      "Eggs (duck)",
+      "Fish (milkfish)",
+      "Fish (tilapia)",
+      "Meat (beef)",
+      "Pineapples",
+      "Squashes"
+    ],
+    "selected_holdout_mae_wins": "14/18 = 77.8%",
+    "unselected_holdout_mae_wins": "50/100 = 50.0%",
+    "selected_one_sided_binomial_p": 0.0154,
+    "unselected_one_sided_binomial_p": 0.5398,
+    "verdict": "THE SELECTION TRANSFERS. Commodities picked without seeing the holdout won 77.8% of held-out comparisons while the remainder sat at exactly chance.",
+    "won_both_holdout_origins": [
+      "Anchovies",
+      "Cabbage",
+      "Coconut",
+      "Fish (tilapia)",
+      "Meat (beef)"
+    ],
+    "note": "Those five are also the five that win 6/6 across all origins, so the two analyses agree."
+  },
+  "what_this_changes": "Withholding ALL 1,062 predictions treats the model as uniformly unskilled. The evidence says otherwise: skill is concentrated in a minority of commodities and is forward-transferable by a simple, pre-specifiable rule. A per-commodity eligibility filter is therefore empirically defensible, where an aggregate release is not.",
+  "honest_limits": [
+    "The holdout is 18 comparisons across 2 origins. p=0.0154 is suggestive, not overwhelming.",
+    "One selection rule was tested (4/4 on both metrics). It is not shown to be optimal, and tuning the rule on this data would re-introduce the selection bias just avoided.",
+    "This does not contradict the earlier aggregate verdict: the model still fails the gate at 5 of 6 origins overall.",
+    "Publishing anything remains owner-gated. Nothing was released."
+  ],
+  "recommended_next_step": "Pre-specify the eligibility rule, then validate it on the NEXT origin as it becomes available — a genuinely prospective test rather than a retrospective holdout.",
+  "not_claimed": [
+    "No prediction was published or un-withheld.",
+    "No gate threshold or model source was modified.",
+    "No claim that the model beats persistence in aggregate — it does not."
+  ]
+}

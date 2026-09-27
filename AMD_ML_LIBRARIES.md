@@ -82,8 +82,9 @@ per-commodity recursive roll-forward, aggregate metrics, model must beat naive o
 |--------------------------------|-----:|----:|---:|:----:|
 | Old LSTM (ONNX export) | 85.69% | 141.95 | **−1.259** | ❌ withheld |
 | Naive persistence (baseline) | 7.41% | 8.14 | 0.9877 | — |
-| v1 GPU delta-MLP | ≈5.8% | ≈7.0 | +0.9916 | ✅ passed |
-| **v2 GPU multi-horizon** | **≈3.5%** | **≈4.5** | **+0.9970** | ✅ **passed** |
+| v1 GPU delta-MLP | 5.95% | 7.34 | +0.9916 | ✅ passed |
+| **v2 GPU multi-horizon (leak-free)** | **4.54%** | **5.62** | **+0.9954** | ✅ **passed** |
+| ~~v2 as first published~~ | ~~3.55%~~ | ~~4.54~~ | ~~+0.9969~~ | ❌ **retracted — leaked** |
 
 The models **trained on the RX 6600 in ~3–4 seconds** (`trained_on_gpu=true`).
 
@@ -102,10 +103,42 @@ how to improve the driver and **converged** on the same plan (receipt:
 
 Result — receipt `gpu_forecaster_v2.json`:
 
-- Primary gate (cutoff 2026-01, Feb–Jun): **MAPE 3.5%** / MAE 4.5 / R² 0.9970 vs
-  naive 7.41% / 8.14 / 0.9877 — roughly **half** the v1 error.
-- **Multi-origin: 8 / 8 out-of-time origins beat naive** (pooled 4.65% vs 6.70%
+- Primary gate (cutoff 2026-01, Feb–Jun): **MAPE 4.54%** / MAE 5.62 / R² 0.9954 vs
+  naive 7.41% / 8.14 / 0.9877 — about **24% below** the v1 error.
+- **Multi-origin: 8 / 8 out-of-time origins beat naive** (pooled 4.81% vs 6.70%
   MAPE, n=2360) — the win is stable across origins, not a single-cutoff fluke.
+
+### Correction 2026-08-26 — the first v2 numbers were leaked
+
+`make_examples` selected training ANCHORS at or before the cutoff but supervised
+every horizon target that existed, including target months AFTER the cutoff.
+`gpu_driver_evidence/rerun_20260826/v2_leakage_audit.json` measured
+`leak_fraction = 1.0`: **all 295** primary-gate points and **all 2,360**
+multi-origin points had been trained on directly before being scored, so the
+originally published 3.55% was an in-sample figure, not an out-of-time one.
+Targets are now masked to periods at or before the cutoff (`strict=True`, the
+default; `--allow-leak` reproduces the old behaviour for A/B only and can never
+pass the gate). The honest re-measurement is **4.54% MAPE**, and the win over
+naive persistence survives the fix. Locked by
+`tests/test_gpu_forecaster_v2_leakage.py` (5 tests).
+
+### CPU versus GPU, measured both ways
+
+Receipt: `gpu_driver_evidence/rerun_20260826/train_device_benchmark.json`
+(3 repeats each, warm-up excluded, identical examples and seed).
+
+| Workload | CPU | AMD RX 6600 (DirectML) | Winner |
+|----------|----:|-----------------------:|:------:|
+| v2 training, 200 epochs (median of 3) | 4.57 s | **3.21 s** | GPU, 1.42x |
+| v2 scoring, 59 single-row forecasts | **0.024 s** | 0.061 s | CPU, 2.5x |
+| ONNX LSTM warmed inference, batch 1 | **0.168 ms** | 1.00 ms | CPU, 6.0x |
+| ONNX LSTM warmed inference, batch 128 | **7.46 ms** | 23.15 ms | CPU, 3.1x |
+
+The GPU wins the training loop and loses every inference measurement on this
+host: a fixed per-dispatch cost dominates once the graph is small. Accuracy is
+device-independent (CPU gate MAPE 4.588 vs GPU 4.522, same data and seed).
+Each device is timed in its own interpreter because torch-directml trips an
+autograd `device_ready_queues_` assertion when a CPU graph is built first.
 
 Deferred next step (advisor rec #4): fold in the project's ENSO/USD-PHP/FAO
 exogenous features once `exogenous_data.json` is fetched.

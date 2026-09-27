@@ -68,3 +68,64 @@ def test_seed_rejects_series_older_than_dataset_latest():
         assert "current dataset maximum is 2026-06" in str(exc)
     else:
         raise AssertionError("stale commodity histories must not be projected as current")
+
+
+def test_residual_decoder_is_anchored_to_last_observation():
+    meta = {"target_scaled": "true", "target_mode": "scaled_delta_from_last"}
+    prediction = driver._decode_prediction(
+        raw_prediction=0.0, normalized_last=1.5, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert prediction == 16.0
+    moved = driver._decode_prediction(
+        raw_prediction=-0.25, normalized_last=1.5, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert moved == 15.0
+
+
+def test_absolute_scaled_decoder_remains_backward_compatible():
+    meta = {"target_scaled": "true"}
+    assert driver._decode_prediction(0.5, 99.0, 10.0, 4.0, meta) == 12.0
+
+
+def test_residual_decoder_applies_internal_validation_scale():
+    meta = {
+        "target_scaled": "true",
+        "target_mode": "scaled_delta_from_last",
+        "residual_scale": "0.5",
+    }
+    prediction = driver._decode_prediction(
+        raw_prediction=0.5, normalized_last=1.0, scaler_mean=10.0, scaler_scale=4.0, meta=meta
+    )
+    assert prediction == 15.0
+
+
+def test_native_gpu_verification_requires_lstm_operator_placement():
+    placement = {
+        "by_provider": {driver.DML_PROVIDER: 2, driver.CPU_PROVIDER: 1},
+        "nodes": [
+            {"op_name": "LSTM", "provider": driver.DML_PROVIDER},
+            {"op_name": "Relu", "provider": driver.DML_PROVIDER},
+            {"op_name": "Gather", "provider": driver.CPU_PROVIDER},
+        ],
+    }
+    proof = driver._native_gpu_verification(placement)
+    assert proof["verified"] is True
+    assert proof["profiled_lstm_nodes"] == 1
+    assert proof["directml_lstm_nodes"] == 1
+
+
+def test_native_gpu_verification_rejects_lstm_cpu_fallback():
+    placement = {
+        "by_provider": {driver.DML_PROVIDER: 4, driver.CPU_PROVIDER: 1},
+        "nodes": [
+            {"op_name": "Shape", "provider": driver.DML_PROVIDER},
+            {"op_name": "Relu", "provider": driver.DML_PROVIDER},
+            {"op_name": "Gemm", "provider": driver.DML_PROVIDER},
+            {"op_name": "Squeeze", "provider": driver.DML_PROVIDER},
+            {"op_name": "LSTM", "provider": driver.CPU_PROVIDER},
+        ],
+    }
+    proof = driver._native_gpu_verification(placement)
+    assert proof["verified"] is False
+    assert proof["profiled_lstm_nodes"] == 1
+    assert proof["directml_lstm_nodes"] == 0

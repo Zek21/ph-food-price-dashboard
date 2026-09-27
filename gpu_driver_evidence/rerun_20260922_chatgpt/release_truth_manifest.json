@@ -1,0 +1,112 @@
+{
+  "schema": "skynet.ar20260720.release-truth-manifest.v1",
+  "task": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "host": "ZEKE",
+  "date": "2026-09-22",
+  "repository": {
+    "remote": "https://github.com/Zek21/ph-food-price-dashboard.git",
+    "branch": "main",
+    "head": "a3392bf2758792d6a7016badeef473202e0d0732",
+    "public_latest_release": {
+      "tag": "gpu-driver-v1.0.0-rc5",
+      "title": "GPU Driver v1.0.0-rc5 — strict LSTM DirectML placement proof",
+      "commit_short": "5ee1b3f",
+      "url": "https://github.com/Zek21/ph-food-price-dashboard/releases/tag/gpu-driver-v1.0.0-rc5"
+    }
+  },
+  "current_local_evidence": {
+    "summary": {
+      "path": "gpu_driver_evidence/rerun_20260913_resp15/AR-20260720_resp15_summary.json",
+      "sha256": "42c64da16c4a9202be36a5d84f0b7897ff50eb816924320a1a81041146c75a24"
+    },
+    "validation": {
+      "path": "gpu_driver_evidence/rerun_20260913_resp15/validation_current.json",
+      "sha256": "3ee501e11c555a064612e3917fef7a5553467c621e108dfcec6e989dd7afe190",
+      "model_mae": 5.1355,
+      "naive_mae": 5.1679,
+      "model_mape": 3.9927,
+      "naive_mape": 4.3018,
+      "mae_ci95": [-0.684032, 0.651491],
+      "mape_ci95": [-0.758292, 0.099301],
+      "commodity_regression_blowups": 1,
+      "gate_status": "withheld_failed_validation",
+      "gate_passed": false
+    },
+    "native_directml_benchmark": {
+      "path": "gpu_driver_evidence/rerun_20260913_resp15/benchmark_current.json",
+      "sha256": "aa56588eabc2ab31b1e5661f8c1a58712559183eec615822816eae79c242aa8e",
+      "model": "Rice (regular, milled)",
+      "model_sha256": "757a371c5417ac4c0b640ba4c88358e87ad954a7884dfef79bce503cbf618da9",
+      "native_gpu_verified": true,
+      "directml_node_events": 15,
+      "cpu_node_events": 3,
+      "lstm_node_events": 2,
+      "max_abs_gpu_cpu_output_difference": 0,
+      "batch1_gpu_median_ms": 0.8931,
+      "batch1_cpu_median_ms": 0.1615
+    },
+    "prediction_receipt": {
+      "path": "gpu_driver_evidence/rerun_20260913_resp15/predictions_current.json",
+      "sha256": "c0608a28695fcb7d7b98a5051a9f494ea2065d3823b797fce0380d069f2c3ab9",
+      "models": 59,
+      "forecast_points": 1062,
+      "requested_execution": "directml",
+      "publication": "WITHHELD"
+    },
+    "identity_chain": {
+      "path": "gpu_driver_evidence/rerun_20260913_resp15/model_identity_chain.json",
+      "sha256": "f51710e662b5ab74725dd6d0c4069bd7534725e677d5488cd721fbc90964e81d",
+      "validation_models": 59,
+      "onnx_files": 59,
+      "validation_to_file_sha_matches": 59,
+      "validation_to_prediction_sha_matches": 59,
+      "benchmark_matches_validation": true,
+      "mismatches": []
+    },
+    "ar1_baseline": {
+      "path": "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json",
+      "sha256": "24abc102b170ca1c9f1ddd9ad8a8b65fefb3b0e5561f6f67ba788fd6fd9f2153",
+      "commodity_origin_rows": 354,
+      "points": 3717,
+      "weighted_naive_mae": 10.305705946217916,
+      "weighted_ar1_mae": 10.696542033030346,
+      "weighted_lstm_mae": 10.147793704600483,
+      "weighted_naive_mape": 8.154967186953188,
+      "weighted_ar1_mape": 8.821579150579662,
+      "weighted_lstm_mape": 8.100557869249396,
+      "publication_use": "supportive_only_unequal_overlapping_horizons"
+    },
+    "per_commodity_holdout": {
+      "path": "gpu_driver_evidence/per_commodity_selector_holdout_20260914.json",
+      "sha256": "ecab490cf499593dc2f5351d7c672a2edf508616846a3adccb98c7e01e015899",
+      "selected_holdout_mae_wins": 14,
+      "selected_holdout_trials": 18,
+      "selected_holdout_win_rate": 0.7778,
+      "one_sided_binomial_p": 0.0154,
+      "status": "prospective_rule_frozen_not_publication_permission"
+    }
+  },
+  "public_claim_policy": {
+    "allowed": [
+      "The tested ONNX LSTM graph has native DirectML placement evidence on ZEKE's AMD Radeon RX 6600.",
+      "Both profiled LSTM node events were placed on DmlExecutionProvider.",
+      "The tested compact LSTM graph was slower on DirectML than CPU in the measured benchmark.",
+      "AR(1) was worse than persistence in the pooled rolling-origin diagnostic while the LSTM was slightly better than both on pooled MAE/MAPE.",
+      "The current LSTM forward forecast set remains withheld."
+    ],
+    "prohibited": [
+      "GPU-only execution",
+      "GPU speedup for the tested LSTM graph",
+      "PyTorch LSTM training on GPU",
+      "validated forward price predictions",
+      "investor guidance based on the 1062 withheld forecast points",
+      "claiming pooled rolling-origin statistics are the publication gate"
+    ]
+  },
+  "release_state": {
+    "github_rc5": "PUBLISHED",
+    "newer_leakage_safe_release": "NOT_PUBLISHED",
+    "prediction_values": "WITHHELD",
+    "campaign_rule": "Do not expose forecast values until a predeclared untouched gate passes and per-commodity regression guards pass."
+  }
+}

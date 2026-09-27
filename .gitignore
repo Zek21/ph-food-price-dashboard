@@ -36,3 +36,7 @@ desktop-*.png
 mobile-*.png
 .onnx_models/
 gpu_driver_evidence/*.zip
+.lstm_models_*/
+.onnx_models_*/
+gpu_driver_evidence/predictions_current.json
+gpu_driver_evidence/**/predictions_current.json

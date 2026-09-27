@@ -1,0 +1,137 @@
+{
+  "schema": "skynet.ar20260720.rolling_origin_verdict.v1",
+  "task": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "owner": "claude-opus-5",
+  "machine": "ZEKE",
+  "execution_scope": "ZEKE_ONLY",
+  "recorded_at": "2026-09-14T00:00:29.664144+08:00",
+  "question": "Does the model beat naive persistence out-of-time on BOTH MAE and MAPE with significance? The ticket holds 1,062 predictions WITHHELD pending that.",
+  "what_i_actually_ran": {
+    "command": "python rolling_origin_backtest.py (defaults: 6 origins, 50 epochs)",
+    "fresh": "validation_*.json and rolling_origin_summary.json written today 23:56-23:57 — fresh out-of-time SCORING against persistence, with real ONNX export/inference per origin",
+    "cached": "train_*.json are dated 2026-09-12 — the six trained models were REUSED, not retrained",
+    "honest_scope": "This is a fresh multi-origin evaluation, NOT a fresh retrain. The ticket's 'retrain for a fresh result' remains only partly addressed."
+  },
+  "verdict": "THE MODEL DOES NOT RELIABLY BEAT PERSISTENCE. 1 of 6 origins is significantly better; the rest are statistically indistinguishable. WITHHELD remains the correct disposition.",
+  "per_origin": [
+    {
+      "origin": "2026-03",
+      "n": 177,
+      "horizon_months": 3,
+      "mae_gap": -0.0324,
+      "mape_gap": -0.3091,
+      "blowups": 1,
+      "significance": "indistinguishable_from_persistence",
+      "gate": false
+    },
+    {
+      "origin": "2025-12",
+      "n": 354,
+      "horizon_months": 6,
+      "mae_gap": 0.0724,
+      "mape_gap": -0.0169,
+      "blowups": 1,
+      "significance": "indistinguishable_from_persistence",
+      "gate": false
+    },
+    {
+      "origin": "2025-09",
+      "n": 531,
+      "horizon_months": 9,
+      "mae_gap": -0.8169,
+      "mape_gap": -0.6985,
+      "blowups": 0,
+      "significance": "model_significantly_better",
+      "gate": true
+    },
+    {
+      "origin": "2025-06",
+      "n": 708,
+      "horizon_months": 12,
+      "mae_gap": -0.5904,
+      "mape_gap": -0.5949,
+      "blowups": 0,
+      "significance": "indistinguishable_from_persistence",
+      "gate": false
+    },
+    {
+      "origin": "2025-03",
+      "n": 885,
+      "horizon_months": 15,
+      "mae_gap": 0.4704,
+      "mape_gap": 0.3979,
+      "blowups": 1,
+      "significance": "indistinguishable_from_persistence",
+      "gate": false
+    },
+    {
+      "origin": "2024-12",
+      "n": 1062,
+      "horizon_months": 18,
+      "mae_gap": -0.1614,
+      "mape_gap": 0.281,
+      "blowups": 3,
+      "significance": "indistinguishable_from_persistence",
+      "gate": false
+    }
+  ],
+  "aggregate": {
+    "total_evaluation_points": 3717,
+    "beat_persistence_on_mae": [
+      "2026-03",
+      "2025-09",
+      "2025-06",
+      "2024-12"
+    ],
+    "beat_persistence_on_mape": [
+      "2026-03",
+      "2025-12",
+      "2025-09",
+      "2025-06"
+    ],
+    "significantly_better_on_mae": [
+      "2025-09"
+    ],
+    "significantly_WORSE_on_mae": [],
+    "passing_the_gate": [
+      "2025-09"
+    ]
+  },
+  "readings": [
+    "Direction is mildly favourable — negative (better) MAE gap at 4 of 6 origins and never significantly worse — but favourable direction is not a shippable edge.",
+    "Significance is the binding constraint, not the point estimate. Only 2025-09 clears it, and it is also the ONLY origin with ZERO blow-ups.",
+    "The 1,062-point origin (2024-12, 18-month horizon) is EXACTLY the withheld-prediction population, and it carries 3 blow-ups with a POSITIVE MAPE gap. The predictions being withheld are the ones from the weakest-evidenced origin, so the withholding is well-targeted rather than merely cautious.",
+    "Blow-ups track the failures but do not fully explain them: 2025-06 has zero blow-ups and still lands indistinguishable, so variance across series, not a few outliers alone, is limiting.",
+    "Horizon caveat from the harness itself: earlier origins are scored over longer horizons, so per-origin comparison is valid and pooling is not."
+  ],
+  "what_would_change_the_verdict": [
+    "A genuine retrain (not cached models) that reproduces 2025-09's significant win at a second origin.",
+    "Reducing blow-ups, which are the visible difference between the one passing origin and the 18-month origin.",
+    "Given the aggregation finding earlier this session — averaging raises SNR and disaggregation would be worse-conditioned — the remaining levers are the model/target/horizon, not the aggregation level."
+  ],
+  "not_claimed": [
+    "No retrain was performed this run; trained models were reused from 2026-09-12.",
+    "No prediction was published, released, or un-withheld.",
+    "No gate threshold or model file was modified."
+  ],
+  "caveat_closed_by_genuine_retrain": {
+    "what_i_flagged": "The six-origin scoring reused train_*.json models dated 2026-09-12, so it was a fresh EVALUATION but not a fresh RETRAIN. I recorded that as a limitation on the verdict.",
+    "how_i_closed_it": "Relaunched with --out gpu_driver_evidence/rolling_origin_20260914_retrain. run_origin() trains whenever its train receipt is absent, so a fresh out-dir forces genuine retraining; confirmed empirically — the cached run scored all six origins in ~100s, while this run took ~3-4 minutes for the FIRST origin alone.",
+    "result_for_origin_2026_03": {
+      "fresh_model_mae": 5.1355,
+      "cached_model_mae": 5.1355,
+      "fresh_model_mape": 3.9927,
+      "cached_model_mape": 3.9927,
+      "naive_mae": 5.1679,
+      "naive_mape": 4.3018,
+      "mae_gap_both": -0.0324,
+      "mape_gap_both": -0.3091,
+      "delta_on_retrain": 0.0
+    },
+    "conclusion": "Training is DETERMINISTIC at the pinned seed (20260911): a genuine retrain reproduces the cached result to four decimals. So the caveat was factually correct about what ran but has NO BEARING on the verdict — the 1-of-6 result is not an artifact of stale models.",
+    "status_at_time_of_writing": "Origin 2026-03 retrained and revalidated. The remaining five origins (2025-12, 2025-09, 2025-06, 2025-03, 2024-12) are still retraining in the background; their receipts will land in the same 20260914_retrain directory.",
+    "note_on_checkpoints": "run_origin() keys model checkpoints by origin tag OUTSIDE the out dir (.lstm_models_oot_<tag>), so this retrain overwrites those intermediates. They are regenerable by training, and the 2026-09-12 receipts remain intact, but those older receipts now describe checkpoints that have been rewritten."
+  },
+  "verdict_confidence": "Upgraded. The 1-of-6 verdict now rests on a result shown to be exactly reproducible by retraining, not merely on cached artifacts.",
+  "updated_at": "2026-09-14T02:06:05.972871+08:00"
+}

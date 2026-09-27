@@ -1,0 +1,108 @@
+{
+  "schema": "skynet.ar20260720.release-summary.rc6.v1",
+  "task": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
+  "host": "ZEKE",
+  "date": "2026-09-28",
+  "native_gpu": {
+    "verified": true,
+    "criterion": "At least one LSTM node must be profiled and every profiled LSTM node must be placed on DmlExecutionProvider.",
+    "profiled_lstm_nodes": 2,
+    "directml_lstm_nodes": 2,
+    "directml_node_events": 15,
+    "total_node_events": 18,
+    "benchmark_sha256": "47d82e96c15c8c6c988d2ea668de1c4b9d310db81283571c925ed40740a20e76",
+    "batch1_directml_median_ms": 1.0109,
+    "batch1_cpu_median_ms": 0.1671
+  },
+  "validation": {
+    "model": {
+      "mape": 3.9927,
+      "mae": 5.1355,
+      "rmse": 8.3674,
+      "r2": 0.995629,
+      "n": 177
+    },
+    "naive": {
+      "mape": 4.3018,
+      "mae": 5.1679,
+      "rmse": 8.0748,
+      "r2": 0.99593,
+      "n": 177
+    },
+    "gate_status": "withheld_failed_validation",
+    "gate_passed": false,
+    "mape_ci95": [
+      -0.758292,
+      0.099301
+    ],
+    "mae_ci95": [
+      -0.684032,
+      0.651491
+    ],
+    "worst_guard": {
+      "commodity": "Fish (threadfin bream)",
+      "model_mae": 5.8096,
+      "naive_mae": 0.3592,
+      "ratio": 16.174
+    },
+    "sha256": "2ebe70e2e3a4b47fa5f8b158200bd48a3ad79070b437ba15d859cc98459e89a1"
+  },
+  "predictions": {
+    "models": 59,
+    "forecast_points": 1062,
+    "publication": "WITHHELD",
+    "local_receipt_sha256": "57f481099962ea8db826fdae259674cd58afca544afca5d98e57fbe8b444c0b9",
+    "public_release_includes_values": false
+  },
+  "ar1_diagnostic": {
+    "commodity_origin_rows": 354,
+    "points": 3717,
+    "weighted_naive_mae": 10.305705946217916,
+    "weighted_ar1_mae": 10.696542033030346,
+    "weighted_lstm_mae": 10.147793704600483,
+    "weighted_naive_mape": 8.154967186953188,
+    "weighted_ar1_mape": 8.821579150579662,
+    "weighted_lstm_mape": 8.100557869249396
+  },
+  "harness_alignment": {
+    "schema": "skynet.ar20260720.harness-alignment.v1",
+    "pairs": 354,
+    "origins": [
+      "2024-12",
+      "2025-03",
+      "2025-06",
+      "2025-09",
+      "2025-12",
+      "2026-03"
+    ],
+    "point_count_matches": 354,
+    "point_count_match_fraction": 1.0,
+    "median_abs_naive_mae_diff": 2.5303449999292127e-05,
+    "within_1pct_naive_mae": 354,
+    "within_1pct_fraction": 1.0,
+    "max_abs_naive_mae_diff": 5.000000000165983e-05,
+    "source_ar1": "gpu_driver_evidence/rolling_origin_20260912/ar1_baseline.json",
+    "source_validation_dir": "gpu_driver_evidence/rolling_origin_20260912",
+    "verdict": "aligned",
+    "sha256": "9ed4073c766b23fe86f63282a2c97001238b2d2bad2ccfee0b35d803e7a4fab3"
+  },
+  "tests": {
+    "focused": "46 passed, 24 skipped, 1 warning",
+    "broad_pre_fix": "224 passed, 24 skipped, 1 path-name-only failure",
+    "release_training": "4 passed"
+  },
+  "allowed_claims": [
+    "Native DirectML placement for the tested ONNX LSTM graph on ZEKE AMD Radeon RX 6600.",
+    "2/2 profiled LSTM nodes and 15/18 total node events on DirectML.",
+    "CPU was faster than DirectML for the tested compact LSTM graph at every measured batch size.",
+    "The 59-model 1,062-point forward artifact was regenerated but remains withheld because the publication gate failed.",
+    "AR(1) was worse than persistence in the pooled rolling-origin diagnostic while the LSTM was slightly better; this diagnostic is supportive only."
+  ],
+  "prohibited_claims": [
+    "GPU-only execution",
+    "GPU speedup for the tested compact LSTM graph",
+    "validated forward prices",
+    "investor guidance from withheld forecast values",
+    "treating the pooled rolling-origin diagnostic as the publication gate"
+  ]
+}

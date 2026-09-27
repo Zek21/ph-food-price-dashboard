@@ -223,6 +223,40 @@ def create_sequences(series_df, scaler, seq_len=SEQ_LEN):
 
 
 # ─── Training ───────────────────────────────────────────────
+def create_grouped_sequences(frame, scaler, *, target_start=None, seq_len=SEQ_LEN):
+    """Build windows independently for each true price series.
+
+    This prevents a window from crossing (commodity, region, pricetype)
+    boundaries while still allowing one commodity-level model to learn from
+    multiple independent series.
+    """
+    if frame.empty:
+        return np.empty((0, seq_len, N_FEATURES), dtype=np.float32), np.empty((0,)), []
+
+    group_cols = [c for c in ("commodity", "region", "pricetype") if c in frame.columns]
+    X_parts, y_parts, date_parts = [], [], []
+    target_start_str = None if target_start is None else pd.Timestamp(target_start).strftime("%Y-%m")
+
+    for _, series_df in frame.groupby(group_cols, sort=False):
+        series_df = series_df.sort_values("date").reset_index(drop=True)
+        X, y, dates = create_sequences(series_df, scaler, seq_len=seq_len)
+        if len(X) == 0:
+            continue
+        if target_start_str is not None:
+            mask = np.asarray([d >= target_start_str for d in dates], dtype=bool)
+            X = X[mask]
+            y = y[mask]
+            dates = [d for d, keep in zip(dates, mask) if keep]
+        if len(X):
+            X_parts.append(X)
+            y_parts.append(y)
+            date_parts.extend(dates)
+
+    if not X_parts:
+        return np.empty((0, seq_len, N_FEATURES), dtype=np.float32), np.empty((0,)), []
+    return np.concatenate(X_parts), np.concatenate(y_parts), date_parts
+
+
 def train_lstm(
     df, epochs=DEFAULT_EPOCHS, lr=DEFAULT_LR, val_months=24, verbose=True,
 ):
@@ -261,7 +295,8 @@ def train_lstm(
     all_commodities = monthly["commodity"].unique()
     print(f"  Series: {len(series_groups):,} | Commodities: {len(all_commodities)}")
 
-    # 3. Train per commodity (aggregate all regions/pricetypes)
+    # 3. Train one model per commodity from independent region/pricetype series.
+    # Windows must never cross true series boundaries.
     print(f"\n[2/4] Training LSTM models ({epochs} epochs each)...")
     commodity_groups = monthly.groupby("commodity")
 
@@ -270,29 +305,27 @@ def train_lstm(
     trained_count = 0
 
     for ci, (comm, comm_df) in enumerate(commodity_groups):
-        comm_df = comm_df.sort_values("date").reset_index(drop=True)
+        comm_df = comm_df.sort_values(["region", "pricetype", "date"]).reset_index(drop=True)
         if len(comm_df) < MIN_SERIES_LEN + SEQ_LEN:
             continue
 
-        # Price scaler per commodity
+        # Split before fitting price normalization. Validation prices must not
+        # influence the scaler used by training inputs.
+        train_part = comm_df[comm_df["date"] < val_start].copy()
+        if len(train_part) < MIN_SERIES_LEN + SEQ_LEN:
+            continue
+
+        # Price scaler per commodity, fit on training rows only.
         scaler = StandardScaler()
-        scaler.fit(comm_df["price"].values.reshape(-1, 1))
+        scaler.fit(train_part["price"].values.reshape(-1, 1))
 
-        # Split into train/val
-        train_part = comm_df[comm_df["date"] < val_start]
-        val_part = comm_df[comm_df["date"] >= val_start]
-
-        # Create sequences
-        X_train, y_train, _ = create_sequences(train_part, scaler)
-        X_val, y_val, val_dates = create_sequences(comm_df, scaler)
-
-        # Filter val sequences: only those whose target date >= val_start
-        if len(X_val) > 0 and len(val_dates) > 0:
-            val_start_str = val_start.strftime("%Y-%m")
-            val_mask = [d >= val_start_str for d in val_dates]
-            X_val = X_val[val_mask]
-            y_val = y_val[val_mask]
-            val_dates = [d for d, m in zip(val_dates, val_mask) if m]
+        # Build windows independently for each true (commodity, region,
+        # pricetype) series. Validation windows may use pre-validation context,
+        # but their targets must fall in the validation interval.
+        X_train, y_train, _ = create_grouped_sequences(train_part, scaler)
+        X_val, y_val, val_dates = create_grouped_sequences(
+            comm_df, scaler, target_start=val_start
+        )
 
         if len(X_train) < BATCH_SIZE // 2:
             continue
