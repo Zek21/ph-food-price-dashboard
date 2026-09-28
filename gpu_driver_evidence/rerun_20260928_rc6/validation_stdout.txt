@@ -1,6 +1,6 @@
 {
   "schema": "ph-food-price-out-of-time-naive-baseline-v1",
-  "generated_at": "2026-09-27T22:29:53.554212+00:00",
+  "generated_at": "2026-09-28T01:57:09.548358+00:00",
   "data": {
     "rows": 236252,
     "commodities": 73,
@@ -50,6 +50,8 @@
   "publication_gate": {
     "status": "withheld_failed_validation",
     "passed": false,
+    "statistical_gate_passed": false,
+    "prospective_validation": false,
     "requirements": {
       "minimum_models": 10,
       "minimum_points": 30,
@@ -57,7 +59,8 @@
       "model_mae_lt_naive": true,
       "paired_difference_ci95_excludes_zero": true,
       "maximum_commodity_mae_ratio": 3.0,
-      "maximum_loss_fraction": 0.5
+      "maximum_loss_fraction": 0.5,
+      "untouched_prospective_holdout": true
     },
     "paired_significance": {
       "mape": {
@@ -114,7 +117,8 @@
     "reasons": [
       "paired MAPE difference -0.309078 has 95% CI [-0.758292, +0.099301] which does not exclude zero, so the result is indistinguishable_from_persistence",
       "paired MAE difference -0.032431 has 95% CI [-0.684032, +0.651491] which does not exclude zero, so the result is indistinguishable_from_persistence",
-      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)"
+      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)",
+      "validation window is not an untouched prospective holdout; repeated inspection cannot be converted into publication permission by later adaptive tuning"
     ]
   },
   "models": [
@@ -1595,5 +1599,5 @@
     }
   ],
   "skipped_models": [],
-  "claim_boundary": "This is a recursive out-of-time backtest from the historical forecast origin. It compares the exported graphs with a last-observation persistence forecast; it does not prove future accuracy or suitability for financial decisions."
+  "claim_boundary": "This is a recursive out-of-time backtest from the historical forecast origin. It compares the exported graphs with a last-observation persistence forecast. A statistical win is not publication permission unless the validation window was predeclared and untouched; repeated inspection is nonprospective. This does not prove future accuracy or suitability for financial decisions."
 }

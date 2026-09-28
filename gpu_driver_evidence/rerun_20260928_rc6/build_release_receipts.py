@@ -107,12 +107,13 @@ gpu, cpu = latency["gpu_directml"]["median_ms"], latency["cpu"]["median_ms"]
 prefix = "gpu_driver_evidence/rerun_20260928_rc6/"
 allowed = [
     "Native DirectML placement for the tested ONNX LSTM graph on ZEKE AMD Radeon RX 6600.",
+    "Publication requires a predeclared untouched holdout; the current April-June 2026 window is already inspected.",
     "Both profiled LSTM operators on DmlExecutionProvider; 15/18 node events on DirectML and 3 on CPU.",
     "The tested compact graph is slower on DirectML than CPU at all four measured batch sizes.",
     "The 59-model / 1,062-point current forward set is WITHHELD and private.",
     "AR(1) is worse than persistence; LSTM slightly better on pooled MAE/MAPE in the supportive six-origin diagnostic only.",
 ]
-prohibited = ["GPU-only execution", "GPU speedup for this tested graph", "PyTorch GPU training from this proof", "validated forward prices", "investor guidance from withheld values", "calling the pooled diagnostic the publication gate"]
+prohibited = ["GPU-only execution", "GPU speedup for this tested graph", "PyTorch GPU training from this proof", "validated forward prices", "investor guidance from withheld values", "calling the pooled diagnostic the publication gate", "treating the inspected April-June 2026 window as untouched publication evidence"]
 scope = ("The current 59-model rerun values are absent from the public payload and Git index. "
          "Legacy GPU/LSTM forward sections were removed from the new branch tip. "
          "Existing published Git history/tag archives and unrelated classical dashboard forecasts are not rewritten; "
@@ -125,6 +126,7 @@ Ticket: AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS. Fresh run: 2026-09
 - The tested compact graph was slower on DirectML at all measured batch sizes. Batch-1 medians: {gpu:.4f} ms DirectML versus {cpu:.4f} ms CPU.
 - Authoritative April-June 2026 validation: 59 models, 177 points; MAPE 3.9927% versus persistence 4.3018%, MAE 5.1355 versus 5.1679. Both paired 95% intervals cross zero; one commodity breaches the unchanged 3x MAE guard.
 - Current forward set: 59 models / 1,062 points, regenerated only in the private directory and **WITHHELD**.
+- Publication provenance guard: the April-June 2026 window is already inspected. It cannot become publication permission after adaptive tuning; a future pass requires a predeclared untouched holdout.
 - Supportive six-origin diagnostic: pooled MAE persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. All 354 point counts match; all naive-MAE pairs agree within 1%. This is not the publication gate.
 - Focused tests: {focused}. Full repo suite: {broad}. Skips identify absent historical receipts, not passing checks. Initial failures are preserved.
 
@@ -163,7 +165,9 @@ The prediction audit calls the real driver's `generate_predictions` with the fre
 
 The profile lists individual node names, operations and providers: 2/2 LSTM events on DirectML; 15/18 total events on DirectML; 3 CPU fallback events. Batch-1 median: {gpu:.4f} ms DirectML / {cpu:.4f} ms CPU. CPU won at batches 1, 8, 32 and 128 (100 measured iterations each, 10 warmups). This proves native inference placement for the tested graph only; it does not prove GPU-only execution, PyTorch GPU training, or a speedup.
 
-The authoritative validation uses recursive out-of-time April-June 2026 predictions, 59 models / 177 points, and metadata declaring a train-only scaler and 2026-03 cutoff. MAPE: 3.9927% versus 4.3018%; MAE: 5.1355 versus 5.1679. Paired MAPE CI [-0.758292, +0.099301]; MAE CI [-0.684032, +0.651491]. Fish (threadfin bream) is 16.174x persistence MAE. The unchanged gate is `withheld_failed_validation`; forward forecasts remain **WITHHELD**.
+The authoritative validation uses recursive out-of-time April-June 2026 predictions, 59 models / 177 points, and metadata declaring a train-only scaler and 2026-03 cutoff. MAPE: 3.9927% versus 4.3018%; MAE: 5.1355 versus 5.1679. Paired MAPE CI [-0.758292, +0.099301]; MAE CI [-0.684032, +0.651491]. Fish (threadfin bream) is 16.174x persistence MAE. The metric gate remains withheld_failed_validation; forward forecasts remain **WITHHELD**.
+
+The April-June 2026 window has already been inspected during repeated hardening. The executable publication path now records prospective_validation=false and can never grant publication from that reused window even if later adaptive tuning makes the metrics look better. A future publication pass requires a predeclared untouched validation window; the CLI exposes no bypass flag.
 
 The diagnostic audit re-computes the carried-forward six-origin receipts, with source hashes: 354 commodity-origin rows / 3,717 points, 354/354 count matches and naive-MAE pairs within 1%. Pooled MAE: persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. Pooled MAPE: 8.1550%, 8.8216%, 8.1006%, respectively. The LSTM's small pooled advantage is supportive only; horizons overlap and this diagnostic is not the publication gate.
 

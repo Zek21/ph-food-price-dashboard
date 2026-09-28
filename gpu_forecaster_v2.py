@@ -219,10 +219,13 @@ def score_origin(model, dev, pmaps, cid, origin: pd.Period, hmax: int):
     return a, mo, na
 
 
-def decide_publication_gate(strict: bool, beats: bool, wins: int, origins: int) -> str:
-    """Typed publication disposition. A leaked run can never pass."""
+def decide_publication_gate(strict: bool, beats: bool, wins: int, origins: int,
+                            *, prospective: bool = False) -> str:
+    """Typed disposition: leaked or already-inspected windows can never publish."""
     if not strict:
         return "withheld_leaked_training_targets"
+    if not prospective:
+        return "withheld_nonprospective_validation"
     if beats and origins > 0 and wins == origins:
         return "passed_out_of_time_naive_baseline"
     return "withheld_failed_validation"
@@ -301,8 +304,10 @@ def main() -> None:
                 continue
             forward[c] = {str(data_max + (h + 1)): round(preds[h], 4) for h in range(H)}
 
-    # Publication gate. A leaked receipt can never pass; a losing gate withholds.
-    gate_status = decide_publication_gate(strict, bool(beats), wins, len(per_origin))
+    # This historical Feb-Jun 2026 window is already inspected and cannot
+    # become publication permission after adaptive work.
+    gate_status = decide_publication_gate(
+        strict, bool(beats), wins, len(per_origin), prospective=False)
     publishable = gate_status == "passed_out_of_time_naive_baseline"
 
     receipt = {
@@ -330,8 +335,10 @@ def main() -> None:
                                    "per_origin": per_origin},
         "publication_gate": {
             "status": gate_status, "passed": publishable,
+            "prospective_validation": False,
             "requirements": ("leakage_masked AND model<naive on MAPE and MAE at the gate "
-                             "AND every stability origin beats naive"),
+                             "AND every stability origin beats naive AND an untouched "
+                             "prospective validation window"),
         },
         "forward": {"anchor": str(data_max), "horizon": [str(data_max + 1), str(data_max + H)],
                     "commodities": len(forward)},

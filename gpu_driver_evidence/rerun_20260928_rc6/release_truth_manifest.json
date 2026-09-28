@@ -1,7 +1,7 @@
 {
   "schema": "ar20260720.rc6.truth.v2",
   "ticket": "AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS",
-  "generated_at": "2026-09-27T22:39:51.009417+00:00",
+  "generated_at": "2026-09-28T02:12:26.455872+00:00",
   "host": "ZEKE",
   "gpu": "AMD Radeon RX 6600",
   "base_commit": "1a5130fb8b127b43ac9e46255947f4b4ddca084d",
@@ -97,6 +97,8 @@
   "publication_gate": {
     "status": "withheld_failed_validation",
     "passed": false,
+    "statistical_gate_passed": false,
+    "prospective_validation": false,
     "requirements": {
       "minimum_models": 10,
       "minimum_points": 30,
@@ -104,7 +106,8 @@
       "model_mae_lt_naive": true,
       "paired_difference_ci95_excludes_zero": true,
       "maximum_commodity_mae_ratio": 3.0,
-      "maximum_loss_fraction": 0.5
+      "maximum_loss_fraction": 0.5,
+      "untouched_prospective_holdout": true
     },
     "paired_significance": {
       "mape": {
@@ -161,15 +164,16 @@
     "reasons": [
       "paired MAPE difference -0.309078 has 95% CI [-0.758292, +0.099301] which does not exclude zero, so the result is indistinguishable_from_persistence",
       "paired MAE difference -0.032431 has 95% CI [-0.684032, +0.651491] which does not exclude zero, so the result is indistinguishable_from_persistence",
-      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)"
+      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)",
+      "validation window is not an untouched prospective holdout; repeated inspection cannot be converted into publication permission by later adaptive tuning"
     ]
   },
   "predictions": {
-    "generated_at": "2026-09-27T22:31:57.950407+00:00",
+    "generated_at": "2026-09-28T01:59:03.517921+00:00",
     "private_path": "D:\\ML\\AR20260720_private_20260928_rc6\\predictions_current.json",
-    "previous_private_sha256": "57f481099962ea8db826fdae259674cd58afca544afca5d98e57fbe8b444c0b9",
-    "private_sha256": "09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58",
-    "validation_sha256": "c943e0b3dec86a4a5d887b2f98e54a2c1f70e020ebfef8d5b465b43851e65895",
+    "previous_private_sha256": "09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58",
+    "private_sha256": "f35a630ecd53b35f3f0dd524321d4865d0f7adaba35fd834fa61e458f6b6f765",
+    "validation_sha256": "c59bd7fad6f58582fb279a6706515a457cecd5a58b45ffb0ee88d0071a7a5850",
     "model_count": 59,
     "forecast_point_count": 1062,
     "points_per_model": [
@@ -181,6 +185,8 @@
     "publication_gate": {
       "status": "withheld_failed_validation",
       "passed": false,
+      "statistical_gate_passed": false,
+      "prospective_validation": false,
       "requirements": {
         "minimum_models": 10,
         "minimum_points": 30,
@@ -188,7 +194,8 @@
         "model_mae_lt_naive": true,
         "paired_difference_ci95_excludes_zero": true,
         "maximum_commodity_mae_ratio": 3.0,
-        "maximum_loss_fraction": 0.5
+        "maximum_loss_fraction": 0.5,
+        "untouched_prospective_holdout": true
       },
       "paired_significance": {
         "mape": {
@@ -245,7 +252,8 @@
       "reasons": [
         "paired MAPE difference -0.309078 has 95% CI [-0.758292, +0.099301] which does not exclude zero, so the result is indistinguishable_from_persistence",
         "paired MAE difference -0.032431 has 95% CI [-0.684032, +0.651491] which does not exclude zero, so the result is indistinguishable_from_persistence",
-        "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)"
+        "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)",
+        "validation window is not an untouched prospective holdout; repeated inspection cannot be converted into publication permission by later adaptive tuning"
       ]
     },
     "execution": {
@@ -303,22 +311,23 @@
     "claim_boundary": "Supportive only: overlapping horizons; current validation_current.json remains the publication gate."
   },
   "tests": {
-    "focused": "85 passed, 24 skipped, 1 warning in 10.25s",
-    "broad": "228 passed, 24 skipped, 1 warning in 153.56s (0:02:33)"
+    "focused": "86 passed, 24 skipped, 1 warning in 8.79s",
+    "broad": "232 passed, 24 skipped, 1 warning in 154.75s (0:02:34)"
   },
   "receipt_sha256": {
     "gpu_driver_evidence/rerun_20260928_rc6/benchmark_current.json": "b3a7ac6a7af2db373f93c0c9c1522c207c9513b447cc4b0820e388c0c7837881",
-    "gpu_driver_evidence/rerun_20260928_rc6/validation_current.json": "c943e0b3dec86a4a5d887b2f98e54a2c1f70e020ebfef8d5b465b43851e65895",
+    "gpu_driver_evidence/rerun_20260928_rc6/validation_current.json": "c59bd7fad6f58582fb279a6706515a457cecd5a58b45ffb0ee88d0071a7a5850",
     "gpu_driver_evidence/rerun_20260928_rc6/harness_alignment.json": "9d997182abe3a57ac5aaf85fe1e9960958ea2237d857d96868d811ea22a4e213",
-    "gpu_driver_evidence/rerun_20260928_rc6/private_prediction_audit.json": "3c300a33526379f97f9d78f9661d4abdd09be5ae2a34df4f7405a3f271488fc8",
+    "gpu_driver_evidence/rerun_20260928_rc6/private_prediction_audit.json": "bb25728b66fbf3e1df4fdaa14fb23c99740703176eb4ccf9eeb22e044a15e68b",
     "gpu_driver_evidence/rerun_20260928_rc6/hardware.json": "32b3d44025f125a40c2927627153307227ad8c1328fb248d6335d08b568b7cab",
-    "gpu_driver_evidence/rerun_20260928_rc6/tests_focused_final.txt": "8a3e3775c942bc8419244df931db538524aadf27d308121ac83bd40937a7ec7c",
-    "gpu_driver_evidence/rerun_20260928_rc6/tests_broad_final.txt": "fee4add6171e1f62f97ec5e1e0bb5de7c32d5c0b2a5b0f8b8d99a32691416a1a",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_focused_final.txt": "0000355f8abb6d6859c5e9a93880b6be5bf5fd2f9833e52ccc3209de7a7e278e",
+    "gpu_driver_evidence/rerun_20260928_rc6/tests_broad_final.txt": "2c160366041e7e14a585181de91b7a182d3083e1a2e7c66e2446e0aa0666c816",
     "gpu_driver_evidence/rerun_20260928_rc6/legacy_forecast_sanitization.json": "9f325293dc211d64528ef4121837c878d0a1520e9926a0bffdfe3422a1fb67ff"
   },
   "scope_limit": "The current 59-model rerun values are absent from the public payload and Git index. Legacy GPU/LSTM forward sections were removed from the new branch tip. Existing published Git history/tag archives and unrelated classical dashboard forecasts are not rewritten; this is not a claim that the entire historical repository contains no forecasts.",
   "allowed_claims": [
     "Native DirectML placement for the tested ONNX LSTM graph on ZEKE AMD Radeon RX 6600.",
+    "Publication requires a predeclared untouched holdout; the current April-June 2026 window is already inspected.",
     "Both profiled LSTM operators on DmlExecutionProvider; 15/18 node events on DirectML and 3 on CPU.",
     "The tested compact graph is slower on DirectML than CPU at all four measured batch sizes.",
     "The 59-model / 1,062-point current forward set is WITHHELD and private.",
@@ -330,6 +339,7 @@
     "PyTorch GPU training from this proof",
     "validated forward prices",
     "investor guidance from withheld values",
-    "calling the pooled diagnostic the publication gate"
+    "calling the pooled diagnostic the publication gate",
+    "treating the inspected April-June 2026 window as untouched publication evidence"
   ]
 }

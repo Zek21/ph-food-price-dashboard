@@ -2,9 +2,10 @@
 
 The goal here is **general machine learning — training and inference — not LLM /
 ollama inference.** These results prove that mainstream Python ML frameworks run
-on a consumer AMD RX 6600 (gfx1032, 8 GB) on Windows, and that a model *trained
-on that GPU* now passes the same honest out-of-time gate the project's LSTM
-failed.
+on a consumer AMD RX 6600 (gfx1032, 8 GB) on Windows. A model *trained
+on that GPU* historically beat persistence on an out-of-time window, but that
+window has since been inspected repeatedly and is diagnostic only; current
+publication is fail-closed pending a predeclared untouched holdout.
 
 Every number below comes from a reproducible receipt in `gpu_driver_evidence/`,
 produced on this host (Windows 11, AMD Radeon RX 6600, driver 32.0.21030.2001).
@@ -82,8 +83,8 @@ per-commodity recursive roll-forward, aggregate metrics, model must beat naive o
 |--------------------------------|-----:|----:|---:|:----:|
 | Old LSTM (ONNX export) | 85.69% | 141.95 | **−1.259** | ❌ withheld |
 | Naive persistence (baseline) | 7.41% | 8.14 | 0.9877 | — |
-| v1 GPU delta-MLP | 5.95% | 7.34 | +0.9916 | ✅ passed |
-| **v2 GPU multi-horizon (leak-free)** | **4.54%** | **5.62** | **+0.9954** | ✅ **passed** |
+| v1 GPU delta-MLP | 5.95% | 7.34 | +0.9916 | historical metric win; nonprospective |
+| **v2 GPU multi-horizon (leak-free)** | **4.54%** | **5.62** | **+0.9954** | historical metric win; **nonprospective** |
 | ~~v2 as first published~~ | ~~3.55%~~ | ~~4.54~~ | ~~+0.9969~~ | ❌ **retracted — leaked** |
 
 The models **trained on the RX 6600 in ~3–4 seconds** (`trained_on_gpu=true`).
@@ -118,8 +119,11 @@ multi-origin points had been trained on directly before being scored, so the
 originally published 3.55% was an in-sample figure, not an out-of-time one.
 Targets are now masked to periods at or before the cutoff (`strict=True`, the
 default; `--allow-leak` reproduces the old behaviour for A/B only and can never
-pass the gate). The honest re-measurement is **4.54% MAPE**, and the win over
-naive persistence survives the fix. Locked by
+pass the gate). The 2026-08-26 re-measurement is **4.54% MAPE**, and the metric win over
+naive persistence survived the leakage fix. Because the window has since been
+inspected and used in subsequent engineering decisions, it cannot authorize
+publication. The executable gate is fail-closed as
+withheld_nonprospective_validation until a future untouched test. Locked by
 `tests/test_gpu_forecaster_v2_leakage.py` (5 tests).
 
 ### CPU versus GPU, measured both ways
@@ -165,8 +169,9 @@ exogenous features once `exogenous_data.json` is fetched.
 
 - These are warmed benchmarks and one project's data on one host (AMD RX 6600).
   They do not generalize to every workload or GPU.
-- The GPU-trained forecaster passes the out-of-time naive gate on the 2026-02…06
-  horizon; that is evidence of skill on that window, not a guarantee of future
-  accuracy. Forecasts remain experimental and are not financial advice.
+- The GPU-trained forecaster historically beat naive on the 2026-02…06
+  window, but that window is now nonprospective and cannot authorize publication.
+  A future pass requires a predeclared untouched holdout. Forecasts remain
+  experimental and are not financial advice.
 - "Trained on GPU" means model parameters and gradients lived on the DirectML
   device (`privateuseone:0`) during training, verified in the receipt.

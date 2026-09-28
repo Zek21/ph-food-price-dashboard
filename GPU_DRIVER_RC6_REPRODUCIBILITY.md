@@ -20,20 +20,22 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 & D:\ML\env\Scripts\python.exe gpu_driver_evidence/rerun_20260928_rc6/audit_rc6.py diagnostic
 ```
 
-The prediction audit calls the real driver's `generate_predictions` with the freshly validated data/model hashes and writes values only to `D:\ML\AR20260720_private_20260928_rc6\predictions_current.json`. It independently reopens that file, checks 59 models and 18 points each (1,062 total), and publishes only counts, hashes and gate metadata. Its private SHA-256 is `09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58`. Do not run `predict --evidence` against a public repo directory: that CLI writes forward values there.
+The prediction audit calls the real driver's `generate_predictions` with the freshly validated data/model hashes and writes values only to `D:\ML\AR20260720_private_20260928_rc6\predictions_current.json`. It independently reopens that file, checks 59 models and 18 points each (1,062 total), and publishes only counts, hashes and gate metadata. Its private SHA-256 is `f35a630ecd53b35f3f0dd524321d4865d0f7adaba35fd834fa61e458f6b6f765`. Do not run `predict --evidence` against a public repo directory: that CLI writes forward values there.
 
 ## Measured truth
 
 The profile lists individual node names, operations and providers: 2/2 LSTM events on DirectML; 15/18 total events on DirectML; 3 CPU fallback events. Batch-1 median: 1.0352 ms DirectML / 0.1740 ms CPU. CPU won at batches 1, 8, 32 and 128 (100 measured iterations each, 10 warmups). This proves native inference placement for the tested graph only; it does not prove GPU-only execution, PyTorch GPU training, or a speedup.
 
-The authoritative validation uses recursive out-of-time April-June 2026 predictions, 59 models / 177 points, and metadata declaring a train-only scaler and 2026-03 cutoff. MAPE: 3.9927% versus 4.3018%; MAE: 5.1355 versus 5.1679. Paired MAPE CI [-0.758292, +0.099301]; MAE CI [-0.684032, +0.651491]. Fish (threadfin bream) is 16.174x persistence MAE. The unchanged gate is `withheld_failed_validation`; forward forecasts remain **WITHHELD**.
+The authoritative validation uses recursive out-of-time April-June 2026 predictions, 59 models / 177 points, and metadata declaring a train-only scaler and 2026-03 cutoff. MAPE: 3.9927% versus 4.3018%; MAE: 5.1355 versus 5.1679. Paired MAPE CI [-0.758292, +0.099301]; MAE CI [-0.684032, +0.651491]. Fish (threadfin bream) is 16.174x persistence MAE. The metric gate remains withheld_failed_validation; forward forecasts remain **WITHHELD**.
+
+The April-June 2026 window has already been inspected during repeated hardening. The executable publication path now records prospective_validation=false and can never grant publication from that reused window even if later adaptive tuning makes the metrics look better. A future publication pass requires a predeclared untouched validation window; the CLI exposes no bypass flag.
 
 The diagnostic audit re-computes the carried-forward six-origin receipts, with source hashes: 354 commodity-origin rows / 3,717 points, 354/354 count matches and naive-MAE pairs within 1%. Pooled MAE: persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. Pooled MAPE: 8.1550%, 8.8216%, 8.1006%, respectively. The LSTM's small pooled advantage is supportive only; horizons overlap and this diagnostic is not the publication gate.
 
 ## Verification
 
-Focused suite including release-training, current rc6 gate and updater tests: 85 passed, 24 skipped, 1 warning in 10.25s.
-Full suite: 228 passed, 24 skipped, 1 warning in 153.56s (0:02:33).
+Focused suite including release-training, current rc6 gate and updater tests: 86 passed, 24 skipped, 1 warning in 8.79s.
+Full suite: 232 passed, 24 skipped, 1 warning in 154.75s (0:02:34).
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'

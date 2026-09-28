@@ -174,7 +174,7 @@ def test_consistent_improvement_still_passes():
     receipts = _receipts([-1.0] * 15)
     gate = driver._publication_gate(
         {"mape": 8.0, "mae": 3.0, "n": 45}, {"mape": 10.0, "mae": 4.0, "n": 45},
-        model_count=15, per_commodity=receipts)
+        model_count=15, per_commodity=receipts, prospective=True)
     assert gate["passed"] is True, gate["reasons"]
     assert gate["paired_significance"]["mae"]["verdict"] == "model_significantly_better"
 

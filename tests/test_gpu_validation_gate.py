@@ -40,6 +40,7 @@ def test_publication_gate_requires_model_to_beat_naive_on_mape_and_mae():
         model_count=12,
         per_commodity=_uniform_receipts(
             12, model_mape=8.0, model_mae=3.0, naive_mape=10.0, naive_mae=4.0),
+        prospective=True,
     )
     assert passed["passed"] is True
     assert passed["status"] == "passed_out_of_time_naive_baseline"
@@ -53,6 +54,20 @@ def test_publication_gate_requires_model_to_beat_naive_on_mape_and_mae():
     )
     assert failed["passed"] is False
     assert any("did not beat naive MAE" in reason for reason in failed["reasons"])
+
+
+def test_statistical_win_is_withheld_without_prospective_proof():
+    receipts = _uniform_receipts(
+        12, model_mape=8.0, model_mae=3.0, naive_mape=10.0, naive_mae=4.0)
+    gate = driver._publication_gate(
+        {"mape": 8.0, "mae": 3.0, "n": 40},
+        {"mape": 10.0, "mae": 4.0, "n": 40},
+        model_count=12, per_commodity=receipts)
+    assert gate["statistical_gate_passed"] is True
+    assert gate["prospective_validation"] is False
+    assert gate["passed"] is False
+    assert gate["status"] == "withheld_nonprospective_validation"
+    assert any("not an untouched prospective holdout" in reason for reason in gate["reasons"])
 
 
 def test_training_cutoff_is_inferred_from_earliest_forecast(tmp_path: Path):

@@ -6,8 +6,9 @@ Ticket: AR-20260720-ML-NATIVE-GPU-DRIVER-RELEASE-PREDICTIONS. Fresh run: 2026-09
 - The tested compact graph was slower on DirectML at all measured batch sizes. Batch-1 medians: 1.0352 ms DirectML versus 0.1740 ms CPU.
 - Authoritative April-June 2026 validation: 59 models, 177 points; MAPE 3.9927% versus persistence 4.3018%, MAE 5.1355 versus 5.1679. Both paired 95% intervals cross zero; one commodity breaches the unchanged 3x MAE guard.
 - Current forward set: 59 models / 1,062 points, regenerated only in the private directory and **WITHHELD**.
+- Publication provenance guard: the April-June 2026 window is already inspected. It cannot become publication permission after adaptive tuning; a future pass requires a predeclared untouched holdout.
 - Supportive six-origin diagnostic: pooled MAE persistence 10.3057, AR(1) 10.6965, LSTM 10.1478. All 354 point counts match; all naive-MAE pairs agree within 1%. This is not the publication gate.
-- Focused tests: 85 passed, 24 skipped, 1 warning in 10.25s. Full repo suite: 228 passed, 24 skipped, 1 warning in 153.56s (0:02:33). Skips identify absent historical receipts, not passing checks. Initial failures are preserved.
+- Focused tests: 86 passed, 24 skipped, 1 warning in 8.79s. Full repo suite: 232 passed, 24 skipped, 1 warning in 154.75s (0:02:34). Skips identify absent historical receipts, not passing checks. Initial failures are preserved.
 
 No GPU-only, GPU speedup, PyTorch GPU-training, validated-price, or investor-guidance claim is made.
 

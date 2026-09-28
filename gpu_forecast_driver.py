@@ -558,23 +558,27 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
                       minimum_points: int = 30,
                       per_commodity: list[dict] | None = None,
                       maximum_loss_fraction: float = MAX_COMMODITY_LOSS_FRACTION,
-                      maximum_commodity_mae_ratio: float = MAX_COMMODITY_MAE_RATIO) -> dict:
-    reasons = []
+                      maximum_commodity_mae_ratio: float = MAX_COMMODITY_MAE_RATIO,
+                      prospective: bool = False) -> dict:
+    # Statistical skill and publication permission are separate. An already
+    # inspected holdout remains useful diagnostically but cannot become release
+    # evidence merely because later adaptive work makes its metrics look better.
+    statistical_reasons = []
     if model_count < minimum_models:
-        reasons.append(f"eligible_models={model_count} below minimum={minimum_models}")
+        statistical_reasons.append(f"eligible_models={model_count} below minimum={minimum_models}")
     if int(model_metrics.get("n", 0)) < minimum_points:
-        reasons.append(
+        statistical_reasons.append(
             f"validation_points={model_metrics.get('n', 0)} below minimum={minimum_points}"
         )
     if not model_metrics or not baseline_metrics:
-        reasons.append("model or baseline metrics are missing")
+        statistical_reasons.append("model or baseline metrics are missing")
     else:
         if model_metrics["mape"] >= baseline_metrics["mape"]:
-            reasons.append(
+            statistical_reasons.append(
                 f"model MAPE {model_metrics['mape']} did not beat naive MAPE {baseline_metrics['mape']}"
             )
         if model_metrics["mae"] >= baseline_metrics["mae"]:
-            reasons.append(
+            statistical_reasons.append(
                 f"model MAE {model_metrics['mae']} did not beat naive MAE {baseline_metrics['mae']}"
             )
 
@@ -589,27 +593,27 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
         per_commodity, ratio_cap=maximum_commodity_mae_ratio)
 
     if not per_commodity:
-        reasons.append(
+        statistical_reasons.append(
             "per-commodity receipts were not supplied, so paired significance and "
             "per-commodity regressions could not be evaluated"
         )
     else:
         for metric, diagnostics in significance.items():
             if not diagnostics.get("evaluated"):
-                reasons.append(
+                statistical_reasons.append(
                     f"paired {metric.upper()} significance unevaluated: "
                     f"{diagnostics.get('reason')}"
                 )
             elif diagnostics["verdict"] != "model_significantly_better":
                 low, high = diagnostics["ci95"]
-                reasons.append(
+                statistical_reasons.append(
                     f"paired {metric.upper()} difference {diagnostics['weighted_mean_difference']:+} "
                     f"has 95% CI [{low:+}, {high:+}] which does not exclude zero, so the "
                     f"result is {diagnostics['verdict']}"
                 )
         if outliers["flagged"]:
             worst = outliers["flagged"][0]
-            reasons.append(
+            statistical_reasons.append(
                 f"{len(outliers['flagged'])} commodity/commodities exceed the "
                 f"{maximum_commodity_mae_ratio}x persistence MAE cap, worst "
                 f"{worst['commodity']} at {worst['ratio']}x "
@@ -623,15 +627,30 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
             losing = evaluated["model_worse_commodities"] + evaluated["tied_commodities"]
             fraction = losing / comparable if comparable else 1.0
             if fraction > maximum_loss_fraction:
-                reasons.append(
+                statistical_reasons.append(
                     f"model failed to beat persistence on {losing}/{comparable} commodities "
                     f"({fraction:.3f}) above the {maximum_loss_fraction} cap"
                 )
 
-    passed = not reasons
+    statistical_gate_passed = not statistical_reasons
+    reasons = list(statistical_reasons)
+    if not prospective:
+        reasons.append(
+            "validation window is not an untouched prospective holdout; repeated inspection "
+            "cannot be converted into publication permission by later adaptive tuning"
+        )
+    passed = statistical_gate_passed and prospective
+    if passed:
+        status = "passed_out_of_time_naive_baseline"
+    elif statistical_gate_passed:
+        status = "withheld_nonprospective_validation"
+    else:
+        status = "withheld_failed_validation"
     return {
-        "status": "passed_out_of_time_naive_baseline" if passed else "withheld_failed_validation",
+        "status": status,
         "passed": passed,
+        "statistical_gate_passed": statistical_gate_passed,
+        "prospective_validation": prospective,
         "requirements": {
             "minimum_models": minimum_models,
             "minimum_points": minimum_points,
@@ -640,6 +659,7 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
             "paired_difference_ci95_excludes_zero": True,
             "maximum_commodity_mae_ratio": maximum_commodity_mae_ratio,
             "maximum_loss_fraction": maximum_loss_fraction,
+            "untouched_prospective_holdout": True,
         },
         "paired_significance": significance,
         "per_commodity_guard": outliers,
@@ -648,13 +668,16 @@ def _publication_gate(model_metrics: dict, baseline_metrics: dict,
 
 
 def validate_models(data_path: Path, model_dir: Path, output_path: Path,
-                    *, prediction_artifact: Path | None = None) -> dict:
+                    *, prediction_artifact: Path | None = None,
+                    prospective: bool = False) -> dict:
     """Backtest the exported graphs after their historical training cutoff.
 
     Each commodity is seeded only with observations at or before the inferred
-    cutoff.  Model forecasts and a persistence forecast are then rolled forward
-    without peeking at later actuals.  This receipt gates publication; it does
-    not change or delete generated local predictions.
+    cutoff. Model forecasts and a persistence forecast are then rolled forward
+    without peeking at later actuals. Statistical diagnostics are always
+    reported. Publication is fail-closed unless trusted orchestration supplies
+    prospective=True for a predeclared validation window that was untouched
+    during model/rule development. The CLI intentionally exposes no bypass flag.
     """
     prediction_artifact = prediction_artifact or ROOT / "lstm_predictions.json"
     metadata_cutoffs = []
@@ -789,7 +812,8 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
     naive_metrics = _regression_metrics(all_actual, all_naive)
     gate = _publication_gate(model_metrics, naive_metrics,
                              model_count=len(model_receipts),
-                             per_commodity=model_receipts)
+                             per_commodity=model_receipts,
+                             prospective=prospective)
     result = {
         "schema": "ph-food-price-out-of-time-naive-baseline-v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -807,8 +831,10 @@ def validate_models(data_path: Path, model_dir: Path, output_path: Path,
         "skipped_models": skipped,
         "claim_boundary": (
             "This is a recursive out-of-time backtest from the historical forecast origin. "
-            "It compares the exported graphs with a last-observation persistence forecast; "
-            "it does not prove future accuracy or suitability for financial decisions."
+            "It compares the exported graphs with a last-observation persistence forecast. "
+            "A statistical win is not publication permission unless the validation window "
+            "was predeclared and untouched; repeated inspection is nonprospective. "
+            "This does not prove future accuracy or suitability for financial decisions."
         ),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)

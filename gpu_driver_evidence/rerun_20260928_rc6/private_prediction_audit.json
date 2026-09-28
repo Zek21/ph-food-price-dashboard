@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-27T22:31:57.950407+00:00",
+  "generated_at": "2026-09-28T01:59:03.517921+00:00",
   "private_path": "D:\\ML\\AR20260720_private_20260928_rc6\\predictions_current.json",
-  "previous_private_sha256": "57f481099962ea8db826fdae259674cd58afca544afca5d98e57fbe8b444c0b9",
-  "private_sha256": "09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58",
-  "validation_sha256": "c943e0b3dec86a4a5d887b2f98e54a2c1f70e020ebfef8d5b465b43851e65895",
+  "previous_private_sha256": "09444f44624016ad5410a979803a9bf7d332fdec49f92cd95a6967dcf0c26b58",
+  "private_sha256": "f35a630ecd53b35f3f0dd524321d4865d0f7adaba35fd834fa61e458f6b6f765",
+  "validation_sha256": "c59bd7fad6f58582fb279a6706515a457cecd5a58b45ffb0ee88d0071a7a5850",
   "model_count": 59,
   "forecast_point_count": 1062,
   "points_per_model": [
@@ -15,6 +15,8 @@
   "publication_gate": {
     "status": "withheld_failed_validation",
     "passed": false,
+    "statistical_gate_passed": false,
+    "prospective_validation": false,
     "requirements": {
       "minimum_models": 10,
       "minimum_points": 30,
@@ -22,7 +24,8 @@
       "model_mae_lt_naive": true,
       "paired_difference_ci95_excludes_zero": true,
       "maximum_commodity_mae_ratio": 3.0,
-      "maximum_loss_fraction": 0.5
+      "maximum_loss_fraction": 0.5,
+      "untouched_prospective_holdout": true
     },
     "paired_significance": {
       "mape": {
@@ -79,7 +82,8 @@
     "reasons": [
       "paired MAPE difference -0.309078 has 95% CI [-0.758292, +0.099301] which does not exclude zero, so the result is indistinguishable_from_persistence",
       "paired MAE difference -0.032431 has 95% CI [-0.684032, +0.651491] which does not exclude zero, so the result is indistinguishable_from_persistence",
-      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)"
+      "1 commodity/commodities exceed the 3.0x persistence MAE cap, worst Fish (threadfin bream) at 16.174x (5.8096 vs 0.3592)",
+      "validation window is not an untouched prospective holdout; repeated inspection cannot be converted into publication permission by later adaptive tuning"
     ]
   },
   "execution": {

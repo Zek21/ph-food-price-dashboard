@@ -108,10 +108,15 @@ def test_publication_gate_never_passes_a_leaked_run():
     from gpu_forecaster_v2 import decide_publication_gate
 
     assert decide_publication_gate(False, True, 8, 8) == "withheld_leaked_training_targets"
-    assert decide_publication_gate(True, True, 8, 8) == "passed_out_of_time_naive_baseline"
-    assert decide_publication_gate(True, False, 8, 8) == "withheld_failed_validation"
-    assert decide_publication_gate(True, True, 7, 8) == "withheld_failed_validation"
-    assert decide_publication_gate(True, True, 0, 0) == "withheld_failed_validation"
+    assert decide_publication_gate(True, True, 8, 8) == "withheld_nonprospective_validation"
+    assert decide_publication_gate(
+        True, True, 8, 8, prospective=True) == "passed_out_of_time_naive_baseline"
+    assert decide_publication_gate(
+        True, False, 8, 8, prospective=True) == "withheld_failed_validation"
+    assert decide_publication_gate(
+        True, True, 7, 8, prospective=True) == "withheld_failed_validation"
+    assert decide_publication_gate(
+        True, True, 0, 0, prospective=True) == "withheld_failed_validation"
 
 
 # --- DirectML CPU-fallback removal (2026-08-26) -----------------------------
